@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v10 | Mapa del Cielo</title>
+<title>StarView HUD v12 | Mapa del Cielo</title>
 <meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -253,6 +253,42 @@
     box-shadow:0 0 32px rgba(255,242,168,.14);
   }
 
+
+  .radar-spin-ring{
+    position:absolute;
+    inset:12px;
+    border-radius:24px;
+    pointer-events:none;
+    border:1px solid rgba(255,242,168,.12);
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .auto-rotate-active .radar-spin-ring{
+    opacity:1;
+    box-shadow:0 0 28px rgba(255,242,168,.10);
+  }
+  .heading-hud{
+    position:absolute;
+    top:18px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:3;
+    border:1px solid rgba(255,242,168,.30);
+    border-radius:999px;
+    padding:7px 12px;
+    background:rgba(0,0,0,.38);
+    color:#fff2a8;
+    font-family:monospace;
+    font-size:13px;
+    pointer-events:none;
+    opacity:.92;
+  }
+  .smooth-note{
+    color:rgba(234,247,255,.72);
+    font-size:12px;
+    margin-top:8px;
+  }
+
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -269,7 +305,7 @@
 <body>
 <div id="introModal" class="modal-backdrop">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v10</h2>
+    <h2>🌌 Bienvenido a StarView HUD v12</h2>
     <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
     <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
@@ -289,7 +325,7 @@
     <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD v10</h1>
+        <h1>🌌 StarView HUD v12</h1>
         <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
@@ -332,6 +368,7 @@
       <button class="button-secondary" onclick="showInstallHelp()">📲 Agregar a pantalla de inicio</button>
       <button class="button-secondary" onclick="openIntro()">ℹ️ Ver instrucciones</button>
       <button class="button-gold" onclick="enableAutoRadar()">🧭 Activar radar automático</button>
+      <button class="button-secondary" onclick="stopAutoRadar()">⏸️ Detener radar</button>
       <button class="button-gold" onclick="toggleObservation()">🔴 Noche de observación</button>
       <button class="button-secondary" onclick="scrollToSection('starFinder')">❓ ¿Qué estrella veo?</button>
       <button class="button-secondary" onclick="createPoster()">📸 Crear postal</button>
@@ -357,6 +394,8 @@
 
   <div class="card hud">
     <canvas id="sky" width="900" height="900"></canvas>
+    <div class="radar-spin-ring"></div>
+    <div class="heading-hud" id="headingHud">Radar fijo · N arriba</div>
     <div class="guide-overlay">
       <div class="guide-chip">Centro = cielo arriba</div>
       <div class="guide-chip">Borde = horizonte</div>
@@ -386,12 +425,12 @@
     <div class="card">
       <h2>🧭 Radar automático</h2>
       <div class="pill" id="autoRadarStatus">
-        Presiona “Activar radar automático”. El mapa girará usando el sensor del celular para alinear el radar con tu orientación.
+        Presiona “Activar radar automático”. El radar empezará a girar fluido de inmediato y, si el celular permite sensores, se alineará con tu orientación real.
       </div>
       <div class="chips">
         <span class="chip">Top del celular = hacia donde miras</span>
-        <span class="chip">El cielo gira automáticamente</span>
-        <span class="chip">Requiere sensores del navegador</span>
+        <span class="chip">Giro fluido al tocar</span>
+        <span class="chip">Si no hay sensor, usa giro demo</span>
       </div>
     </div>
 
@@ -472,7 +511,7 @@
     <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
   </div>
 
-  <div class="footer">StarView HUD v10 · Guía visual básica, no sustituye software astronómico profesional.</div>
+  <div class="footer">StarView HUD v12 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>
@@ -686,11 +725,11 @@ function updateMoon(){
 
 
 function displayAz(az){
-  return autoRadarEnabled ? (az - mapRotation + 360) % 360 : az;
+  return autoRadarEnabled ? (az - currentRotation + 360) % 360 : az;
 }
 
-function drawSky(){
-  track("update_sky");
+function drawSky(sendTrack = true){
+  if(sendTrack) track("update_sky");
   const canvas = document.getElementById("sky");
   const ctx = canvas.getContext("2d");
   const W = canvas.width, H = canvas.height;
@@ -832,8 +871,12 @@ function drawSky(){
 let lastVisibleStars = [];
 let lastHeading = null;
 let mapRotation = 0;
+let targetRotation = 0;
+let currentRotation = 0;
 let autoRadarEnabled = false;
-let autoRadarRedrawTimer = null;
+let autoRadarAnimationId = null;
+let demoSpin = false;
+let lastFrameTime = 0;
 let observationMode = false;
 
 function scrollToSection(id){
@@ -889,15 +932,84 @@ function suggestStarsByDirection(){
 }
 
 
+function normalizeAngle(a){
+  return ((a % 360) + 360) % 360;
+}
+
+function shortestAngleDelta(from, to){
+  let delta = normalizeAngle(to - from);
+  if(delta > 180) delta -= 360;
+  return delta;
+}
+
+function setRadarHeading(heading){
+  targetRotation = normalizeAngle(heading);
+  mapRotation = targetRotation;
+  lastHeading = targetRotation;
+  autoRadarEnabled = true;
+  const hud = document.querySelector(".hud");
+  if(hud) hud.classList.add("auto-rotate-active");
+}
+
+function startRadarAnimation(){
+  if(autoRadarAnimationId) return;
+
+  function frame(ts){
+    if(!lastFrameTime) lastFrameTime = ts;
+    const dt = Math.min(50, ts - lastFrameTime);
+    lastFrameTime = ts;
+
+    // Si todavía no hay sensor, el radar gira en demo para que se vea fluido al tocar el botón.
+    if(demoSpin){
+      targetRotation = normalizeAngle(targetRotation + dt * 0.040);
+    }
+
+    const delta = shortestAngleDelta(currentRotation, targetRotation);
+    currentRotation = normalizeAngle(currentRotation + delta * 0.20);
+
+    const hudText = document.getElementById("headingHud");
+    if(hudText){
+      if(autoRadarEnabled && demoSpin){
+        hudText.textContent = `Radar fluido · ${currentRotation.toFixed(0)}°`;
+      } else if(autoRadarEnabled){
+        hudText.textContent = `Radar auto · ${currentRotation.toFixed(0)}°`;
+      } else {
+        hudText.textContent = "Radar fijo · N arriba";
+      }
+    }
+
+    if(autoRadarEnabled || Math.abs(delta) > 0.2){
+      drawSky(false);
+    }
+
+    autoRadarAnimationId = requestAnimationFrame(frame);
+  }
+
+  autoRadarAnimationId = requestAnimationFrame(frame);
+}
+
 function enableAutoRadar(){
   track("auto_radar_enable_click");
+
   const status = document.getElementById("autoRadarStatus");
   const hud = document.querySelector(".hud");
+
+  // Desde que el usuario toca el botón, el radar empieza a moverse fluido.
+  autoRadarEnabled = true;
+  demoSpin = true;
+  if(hud) hud.classList.add("auto-rotate-active");
+  startRadarAnimation();
+
+  if(status){
+    status.innerHTML = `<b>Radar fluido iniciado.</b><br>
+    <span class="small">Ya debe verse girar. Si tu celular permite sensores, en unos segundos se alineará con tu orientación real.</span>`;
+  }
+
+  let sensorReceived = false;
 
   function handleOrientation(event){
     let heading = null;
 
-    // iPhone/Safari usa webkitCompassHeading; Android/Chrome suele usar alpha.
     if(typeof event.webkitCompassHeading === "number"){
       heading = event.webkitCompassHeading;
     } else if(typeof event.alpha === "number"){
@@ -905,18 +1017,15 @@ function enableAutoRadar(){
     }
 
     if(heading !== null){
-      autoRadarEnabled = true;
-      lastHeading = (heading + 360) % 360;
-      mapRotation = lastHeading;
+      sensorReceived = true;
+      demoSpin = false;
+      setRadarHeading(heading);
+      startRadarAnimation();
 
-      if(hud) hud.classList.add("auto-rotate-active");
       if(status){
-        status.innerHTML = `<b>Radar automático activo:</b> ${mapRotation.toFixed(0)}°<br>
-        <span class="small">Ahora el mapa gira solo. La parte superior del radar representa hacia dónde apunta la parte superior del celular.</span>`;
+        status.innerHTML = `<b>Radar automático con sensor activo:</b> ${targetRotation.toFixed(0)}°<br>
+        <span class="small">El radar gira suave y se alinea con la orientación del celular.</span>`;
       }
-
-      clearTimeout(autoRadarRedrawTimer);
-      autoRadarRedrawTimer = setTimeout(()=>drawSky(), 120);
     }
   }
 
@@ -924,26 +1033,69 @@ function enableAutoRadar(){
     DeviceOrientationEvent.requestPermission().then(state=>{
       if(state === "granted"){
         window.addEventListener("deviceorientation", handleOrientation, true);
-        if(status) status.textContent = "Radar automático activado. Mueve el celular lentamente para calibrar.";
         track("auto_radar_enabled");
+        if(status){
+          status.innerHTML = `<b>Radar fluido activo.</b><br>
+          <span class="small">Permiso concedido. Mueve el celular lentamente para calibrar el sensor.</span>`;
+        }
       } else {
-        if(status) status.textContent = "Permiso rechazado. El radar seguirá fijo con Norte arriba.";
+        demoSpin = true;
+        if(status){
+          status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
+          <span class="small">El permiso del sensor fue rechazado, pero el radar seguirá girando suave para visualizar el cielo.</span>`;
+        }
         track("auto_radar_permission_denied");
       }
     }).catch(()=>{
-      if(status) status.textContent = "No se pudo activar el radar automático en este navegador.";
+      demoSpin = true;
+      if(status){
+        status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
+        <span class="small">No se pudo activar el sensor. El radar seguirá girando suave.</span>`;
+      }
       track("auto_radar_error");
     });
   } else if(window.DeviceOrientationEvent){
     window.addEventListener("deviceorientation", handleOrientation, true);
-    if(status) status.textContent = "Radar automático activado. Si no gira, el navegador bloqueó sensores.";
     track("auto_radar_enabled");
+    if(status){
+      status.innerHTML = `<b>Radar fluido activo.</b><br>
+      <span class="small">Mueve el celular lentamente. Si el navegador entrega sensor, se alineará solo.</span>`;
+    }
+
+    // Si en 3 segundos no llega ningún dato, se queda en demo fluido.
+    setTimeout(()=>{
+      if(!sensorReceived && status){
+        demoSpin = true;
+        status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
+        <span class="small">No llegaron datos del sensor. El radar seguirá girando suave para que se vea activo.</span>`;
+      }
+    }, 3000);
   } else {
-    if(status) status.textContent = "Este celular/navegador no permite girar el radar con sensores.";
+    demoSpin = true;
+    if(status){
+      status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
+      <span class="small">Este navegador no permite sensores, pero el radar girará suave.</span>`;
+    }
     track("auto_radar_not_supported");
   }
 }
 
+function stopAutoRadar(){
+  autoRadarEnabled = false;
+  demoSpin = false;
+  targetRotation = 0;
+  currentRotation = 0;
+  mapRotation = 0;
+  const hud = document.querySelector(".hud");
+  const status = document.getElementById("autoRadarStatus");
+  if(hud) hud.classList.remove("auto-rotate-active");
+  if(status){
+    status.innerHTML = `<b>Radar detenido.</b><br>
+    <span class="small">El mapa volvió a Norte arriba. Toca “Activar radar automático” para iniciar giro fluido.</span>`;
+  }
+  drawSky(false);
+  track("auto_radar_stopped");
+}
 
 function toggleObservation(){
   observationMode = !observationMode;

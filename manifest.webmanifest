@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v10",
+  "name": "StarView HUD v12",
   "short_name": "StarView",
-  "description": "Radar estelar con rotación automática usando sensores del celular.",
+  "description": "Radar estelar que gira fluido al tocar el botón y se alinea con sensores del celular.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",

@@ -1,13 +1,15 @@
-# StarView HUD v10 - Radar automático
+# StarView HUD v12 - Radar automático fluido al tocar
 
-Esta versión cambia la idea de brújula separada por algo más natural:
+Esta versión ajusta el radar como pediste:
 
-## Nuevo comportamiento
+## Cambio principal
 
-- El radar del cielo gira automáticamente usando sensores del celular.
-- La parte superior del mapa representa hacia dónde apunta la parte superior del teléfono.
-- Ya no necesitas mirar una brújula aparte.
-- Si el navegador bloquea sensores, el mapa sigue funcionando con Norte arriba.
+Al tocar `Activar radar automático`, el radar empieza a girar fluido de inmediato.
+
+- Si el celular permite sensores, el radar se alinea con la orientación real.
+- Si el sensor tarda o el navegador lo bloquea, entra en modo demo fluido.
+- Ya no dependes del botón separado de prueba.
+- Se agregó `Detener radar` para regresar a Norte arriba.
 
 ## Se conserva
 
@@ -33,6 +35,4 @@ Sube y reemplaza:
 
 ## Probar
 
-Abre:
-
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=10`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=12`
