@@ -2,590 +2,257 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v15 | Mapa del Cielo</title>
-<meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
-<meta name="theme-color" content="#030711" />
-<link rel="manifest" href="manifest.webmanifest" />
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>StarView HUD Pro | Industrial Astronomical Telemetry</title>
+<meta name="description" content="StarView HUD Pro: estación de telemetría astronómica industrial con modo exploración y modo operativo." />
+<meta name="theme-color" content="#020814" />
 <style>
-  *{box-sizing:border-box}
   :root{
-    --bg:#030711;
-    --card:rgba(8,18,32,.72);
-    --line:rgba(100,220,255,.25);
+    --bg:#020814;
+    --panel:rgba(8,18,34,.72);
+    --line:rgba(95,205,255,.26);
     --text:#eaf7ff;
-    --muted:rgba(234,247,255,.76);
-    --blue:#00b4ff;
-    --red:#ff3157;
+    --muted:rgba(234,247,255,.68);
+    --cyan:#6de7ff;
+    --blue:#008cff;
     --gold:#fff2a8;
+    --op-green:#00ff88;
+    --op-dim:rgba(0,255,136,.62);
+    --op-panel:rgba(0,10,5,.86);
+    --danger:#ff496c;
   }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:#000;color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
   body{
-    margin:0;
     background:
-      radial-gradient(circle at 18% 18%, rgba(0,180,255,.18), transparent 35%),
-      radial-gradient(circle at 82% 78%, rgba(255,50,80,.14), transparent 35%),
-      linear-gradient(180deg,#030711,#02030a 62%,#050713);
-    color:var(--text);
-    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-    min-height:100vh;
-    padding:14px;
+      radial-gradient(circle at 22% 12%,rgba(0,140,255,.20),transparent 34%),
+      radial-gradient(circle at 82% 78%,rgba(90,40,255,.10),transparent 36%),
+      linear-gradient(180deg,#020814,#06142a 55%,#01040b);
+    transition:background .45s ease,color .45s ease,filter .45s ease;
   }
-  body.night-red{
-    filter:sepia(.15) hue-rotate(310deg) saturate(1.25);
+  body.mode-op{
+    background:
+      radial-gradient(circle at 18% 12%,rgba(0,255,136,.11),transparent 34%),
+      radial-gradient(circle at 80% 82%,rgba(0,110,55,.10),transparent 38%),
+      linear-gradient(180deg,#000604,#00130b 60%,#000000);
+    color:#d8ffe7;
   }
-  .app{max-width:1080px;margin:auto}
-  .card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:24px;
-    padding:16px;
-    box-shadow:0 0 32px rgba(0,180,255,.12);
-    backdrop-filter:blur(13px);
-    -webkit-backdrop-filter:blur(13px);
-    margin-bottom:14px;
-    position:relative;
-    overflow:hidden;
+  .app{max-width:1220px;margin:0 auto;padding:14px;padding-top:66px}
+  .topbar{
+    position:fixed;left:0;right:0;top:0;z-index:60;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px;
+    background:rgba(0,0,0,.42);
+    border-bottom:1px solid rgba(120,220,255,.14);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   }
-  .card:before{
-    content:"";
-    position:absolute;
-    inset:0;
-    border-radius:24px;
-    padding:1px;
-    background:linear-gradient(135deg,rgba(0,180,255,.45),rgba(255,49,87,.32),rgba(255,255,255,.08));
-    mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite:exclude;
-    -webkit-mask-composite:xor;
-    pointer-events:none;
-  }
-  h1{margin:0 0 4px;font-size:30px;letter-spacing:.5px}
-  h2{margin:0 0 8px;font-size:22px}
-  h3{margin:0 0 8px;font-size:17px}
-  p{line-height:1.45}
-  .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
-  .badge{
-    border:1px solid rgba(120,220,255,.25);
+  body.mode-op .topbar{border-bottom-color:rgba(0,255,136,.20);background:rgba(0,8,4,.72)}
+  .brand{display:flex;flex-direction:column;line-height:1.12}
+  .brand strong{font-size:15px;letter-spacing:.4px}
+  .brand span{font-size:11px;color:var(--muted)}
+  body.mode-op .brand span{color:rgba(216,255,231,.66)}
+  .mode-chip{
+    border:1px solid rgba(120,220,255,.24);
     border-radius:999px;
     padding:7px 10px;
     font-size:12px;
-    color:var(--muted);
-    background:rgba(0,0,0,.22);
+    color:#c9f5ff;
+    background:rgba(0,0,0,.28);
+    font-family:monospace;
     white-space:nowrap;
   }
-  .sub{opacity:.78;margin-bottom:12px;line-height:1.4}
-  .intro-panel{
-    border:1px solid rgba(100,220,255,.26);
-    border-radius:20px;
-    padding:15px;
-    margin:12px 0 14px;
-    background:linear-gradient(135deg,rgba(0,180,255,.12),rgba(255,49,87,.10));
-    box-shadow:0 0 22px rgba(0,180,255,.08);
-  }
-  .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
-  .quick-item{
-    border:1px solid rgba(120,220,255,.22);
-    border-radius:16px;
-    padding:10px;
-    background:rgba(0,0,0,.20);
-    font-size:13px;
-    line-height:1.35;
-  }
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-  label{font-size:12px;opacity:.85}
-  input,button{
-    width:100%;
-    border-radius:14px;
-    border:1px solid rgba(120,220,255,.28);
-    background:rgba(0,0,0,.3);
+  body.mode-op .mode-chip{border-color:rgba(0,255,136,.32);color:var(--op-green)}
+  .gear-wrap{position:relative}
+  .gear{
+    border:1px solid rgba(120,220,255,.24);
+    background:rgba(0,0,0,.25);
     color:#fff;
-    padding:12px;
+    width:40px;height:40px;border-radius:50%;
+    display:grid;place-items:center;font-size:20px;cursor:pointer;
+  }
+  .mode-menu{
+    display:none;position:absolute;right:0;top:48px;width:260px;
+    padding:10px;border-radius:18px;
+    border:1px solid rgba(120,220,255,.22);
+    background:rgba(0,10,20,.94);
+    box-shadow:0 0 30px rgba(0,140,255,.14);
+  }
+  .mode-menu.open{display:block}
+  body.mode-op .mode-menu{border-color:rgba(0,255,136,.24);background:rgba(0,8,4,.96)}
+  button{
+    border:1px solid rgba(120,220,255,.26);
+    border-radius:14px;
+    padding:12px 13px;
+    background:linear-gradient(135deg,rgba(0,140,255,.30),rgba(110,60,255,.20));
+    color:#fff;
+    font-weight:800;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+  button:active{transform:scale(.985)}
+  button.secondary{background:rgba(255,255,255,.06)}
+  body.mode-op button{
+    border-color:rgba(0,255,136,.32);
+    background:linear-gradient(135deg,rgba(0,255,136,.18),rgba(0,60,35,.35));
+    color:#d8ffe7;
+    font-family:monospace;
+  }
+  .mode-menu button{width:100%;margin:5px 0}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;align-items:start}
+  .card{
+    position:relative;overflow:hidden;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:24px;
+    box-shadow:0 0 34px rgba(0,140,255,.10);
+    padding:16px;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    margin-bottom:14px;
+  }
+  body.mode-op .card{
+    background:var(--op-panel);
+    border-color:rgba(0,255,136,.24);
+    box-shadow:0 0 34px rgba(0,255,136,.07);
+  }
+  .hero h1{font-size:32px;margin:0 0 6px;letter-spacing:.4px}
+  .hero p{margin:0;color:var(--muted);line-height:1.42}
+  body.mode-op .hero p{color:rgba(216,255,231,.70)}
+  .control-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+  label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+  input{
+    width:100%;
+    border:1px solid rgba(120,220,255,.24);
+    background:rgba(0,0,0,.30);
+    color:#fff;
+    border-radius:14px;
+    padding:11px;
     font-size:15px;
     outline:none;
   }
-  input:focus{border-color:rgba(0,180,255,.85);box-shadow:0 0 0 3px rgba(0,180,255,.12)}
-  button{
-    cursor:pointer;
-    font-weight:800;
-    background:linear-gradient(135deg,rgba(0,170,255,.36),rgba(255,45,80,.30));
-    box-shadow:0 0 18px rgba(0,170,255,.15);
+  body.mode-op input{border-color:rgba(0,255,136,.26);color:#d8ffe7;font-family:monospace}
+  .canvas-card{padding:10px}
+  .canvas-shell{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    border:1px solid rgba(120,220,255,.18);
+    background:#01040b;
   }
-  button:active{transform:scale(.98)}
-  .button-secondary{background:rgba(255,255,255,.06)}
-  .button-gold{background:linear-gradient(135deg,rgba(255,242,168,.25),rgba(0,180,255,.18))}
+  body.mode-op .canvas-shell{border-color:rgba(0,255,136,.22);background:#000}
   canvas#sky{
     width:100%;
-    max-height:78vh;
-    background:radial-gradient(circle,#07172c,#02050b 70%);
-    border-radius:22px;
-    border:1px solid rgba(100,220,255,.22);
+    height:min(72vh,760px);
+    min-height:440px;
     display:block;
-    touch-action:none;
+    background:#01040b;
   }
-  .hud{position:relative;overflow:hidden}
-  .hud:after{
-    content:"";
-    position:absolute;
-    left:0;right:0;top:-30%;
-    height:80px;
-    background:linear-gradient(transparent,rgba(0,220,255,.16),transparent);
-    animation:scan 4s infinite linear;
-    pointer-events:none;
-  }
-  .radar-ring{
-    position:absolute;
-    width:220px;height:220px;border-radius:50%;
-    border:1px solid rgba(0,220,255,.18);
-    right:-90px;top:-90px;
-    box-shadow:0 0 30px rgba(0,220,255,.12);
-    animation:pulse 3s infinite ease-in-out;
-    pointer-events:none;
-  }
-  @keyframes scan{from{top:-20%}to{top:105%}}
-  @keyframes pulse{0%,100%{transform:scale(.9);opacity:.35}50%{transform:scale(1.08);opacity:.8}}
-  .info{display:grid;grid-template-columns:1fr;gap:8px;font-size:14px}
-  .pill{
-    border:1px solid rgba(100,220,255,.22);
-    border-radius:16px;
-    padding:10px;
-    background:rgba(0,0,0,.25);
-    line-height:1.45;
-  }
-  .list{display:grid;gap:6px;font-size:14px}
-  .starrow{
-    display:flex;justify-content:space-between;gap:8px;
-    padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.05);
-  }
-  .small{font-size:12px;opacity:.75}
-  .footer{font-size:12px;opacity:.65;text-align:center;margin:14px}
-  .warning{color:#ffe8a3}
-  .instructions{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;margin-top:12px}
-  .mini-card{
-    border:1px solid rgba(100,220,255,.22);
-    border-radius:18px;
-    padding:13px;
-    background:rgba(0,0,0,.22);
-    line-height:1.45;
-  }
-  .steps{margin:0;padding-left:20px}
-  .steps li{margin:6px 0}
-  .legend{display:grid;gap:7px}
-  .legend-item{display:flex;align-items:center;gap:9px;font-size:14px}
-  .dot{width:12px;height:12px;border-radius:50%;background:#e7fbff;box-shadow:0 0 10px rgba(174,239,255,.9);flex:0 0 auto}
-  .dot.big{width:17px;height:17px;background:#fff7d1}
-  .line-demo{width:25px;height:2px;background:rgba(120,220,255,.6);box-shadow:0 0 8px rgba(120,220,255,.5);flex:0 0 auto}
-  .notice{border-left:3px solid rgba(255,80,110,.8);padding-left:10px;color:rgba(234,247,255,.86)}
-  .modal-backdrop{
-    position:fixed;inset:0;background:rgba(0,0,0,.72);
-    display:flex;align-items:center;justify-content:center;
-    z-index:9999;padding:18px;
-  }
-  .modal{
-    max-width:760px;width:100%;border-radius:24px;
-    border:1px solid rgba(100,220,255,.35);
-    background:
-      radial-gradient(circle at 15% 15%, rgba(0,180,255,.22), transparent 35%),
-      radial-gradient(circle at 85% 80%, rgba(255,49,87,.18), transparent 35%),
-      rgba(5,12,24,.96);
-    box-shadow:0 0 45px rgba(0,180,255,.22);
-    padding:20px;
-  }
-  .modal h2{margin:0 0 8px;font-size:25px}
-  .modal p{color:rgba(234,247,255,.84);line-height:1.45}
-  .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-  .hidden{display:none!important}
-  .qr-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-  .qr-wrap img{width:150px;height:150px;border-radius:16px;background:white;padding:8px}
-  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-  .chip{font-size:12px;border:1px solid rgba(120,220,255,.25);border-radius:999px;padding:6px 9px;background:rgba(0,0,0,.22);color:rgba(234,247,255,.82)}
-  .beginner-on{outline:2px solid rgba(255,242,168,.45)}
-  .install-box{display:none}
-  .install-box.show{display:block}
-  .grid-2-clean{grid-template-columns:repeat(2,1fr)}
-  @media(max-width:760px){
-    .brand{align-items:flex-start;flex-direction:column}
-    .grid,.grid-3,.quick-grid,.instructions{grid-template-columns:1fr}
-    .modal-actions{grid-template-columns:1fr}
-    h1{font-size:25px}
-    body{padding:10px}
-  }
-
-  .guide-overlay{
-    position:absolute;left:18px;bottom:18px;right:18px;
-    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;pointer-events:none;
-  }
-  .guide-chip{
-    border:1px solid rgba(120,220,255,.25);border-radius:14px;padding:8px;
-    background:rgba(0,0,0,.35);font-size:12px;color:rgba(234,247,255,.85);text-align:center;
-  }
-  .observation-mode{filter:brightness(.72) saturate(.85) sepia(.18) hue-rotate(310deg)}
-  .observation-mode .card{box-shadow:none}
-  .compass-box{display:grid;grid-template-columns:1fr;gap:8px}
-  .compass-dial{
-    width:150px;height:150px;border-radius:50%;border:1px solid rgba(120,220,255,.35);
-    margin:auto;position:relative;background:radial-gradient(circle,rgba(0,180,255,.12),rgba(0,0,0,.25));
-    box-shadow:0 0 22px rgba(0,180,255,.13);
-  }
-  .compass-needle{
-    position:absolute;left:50%;top:13px;width:4px;height:62px;margin-left:-2px;border-radius:8px;
-    background:linear-gradient(#ff3157,#fff2a8);transform-origin:50% 62px;box-shadow:0 0 10px rgba(255,49,87,.5);
-  }
-  .compass-label{position:absolute;font-weight:800;color:#9eeaff;font-family:monospace}
-  .compass-label.n{top:8px;left:50%;transform:translateX(-50%)}
-  .compass-label.e{right:10px;top:50%;transform:translateY(-50%)}
-  .compass-label.s{bottom:8px;left:50%;transform:translateX(-50%)}
-  .compass-label.o{left:10px;top:50%;transform:translateY(-50%)}
-  select{
-    width:100%;border-radius:14px;border:1px solid rgba(120,220,255,.28);
-    background:rgba(0,0,0,.3);color:#fff;padding:12px;font-size:15px;outline:none;
-  }
-  .vis-easy{color:#b7ffce}.vis-mid{color:#fff2a8}.vis-hard{color:#ffb0b0}
-  .poster{width:100%;border:1px solid rgba(120,220,255,.25);border-radius:18px;background:rgba(0,0,0,.22);padding:10px}
-  @media(max-width:760px){.guide-overlay{grid-template-columns:1fr 1fr;left:10px;right:10px;bottom:10px}.guide-chip{font-size:11px;padding:6px}}
-
-
-  .auto-rotate-active{
-    outline:2px solid rgba(255,242,168,.32);
-  }
-  .auto-rotate-active canvas#sky{
-    box-shadow:0 0 32px rgba(255,242,168,.14);
-  }
-
-
-  .radar-spin-ring{
-    position:absolute;
-    inset:12px;
-    border-radius:24px;
-    pointer-events:none;
-    border:1px solid rgba(255,242,168,.12);
-    opacity:0;
-    transition:opacity .3s ease;
-  }
-  .auto-rotate-active .radar-spin-ring{
-    opacity:1;
-    box-shadow:0 0 28px rgba(255,242,168,.10);
-  }
-  .heading-hud{
-    position:absolute;
-    top:18px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:3;
-    border:1px solid rgba(255,242,168,.30);
-    border-radius:999px;
-    padding:7px 12px;
-    background:rgba(0,0,0,.38);
-    color:#fff2a8;
-    font-family:monospace;
-    font-size:13px;
-    pointer-events:none;
-    opacity:.92;
-  }
-  .smooth-note{
-    color:rgba(234,247,255,.72);
-    font-size:12px;
-    margin-top:8px;
-  }
-
-
-  .hero-mission{
-    border:1px solid rgba(255,242,168,.22);
-    border-radius:20px;
-    padding:14px;
-    margin:12px 0;
-    background:linear-gradient(135deg,rgba(255,242,168,.11),rgba(0,180,255,.10),rgba(255,49,87,.08));
-  }
-  .hero-mission b{color:#fff2a8}
-  .star-target{
-    border:1px solid rgba(255,242,168,.28);
-    border-radius:18px;
-    padding:12px;
-    background:rgba(0,0,0,.25);
-    box-shadow:0 0 18px rgba(255,242,168,.08);
-  }
-  .arrow-guide{
-    font-size:48px;
-    text-align:center;
-    color:#fff2a8;
-    text-shadow:0 0 16px rgba(255,242,168,.45);
-    margin:8px 0;
-  }
-  .score-ring{
-    width:130px;height:130px;border-radius:50%;margin:auto;
-    display:grid;place-items:center;
-    border:2px solid rgba(255,242,168,.35);
-    background:radial-gradient(circle,rgba(255,242,168,.16),rgba(0,0,0,.28));
-    font-size:34px;font-weight:900;color:#fff2a8;
-    box-shadow:0 0 28px rgba(255,242,168,.10);
-  }
-  .target-lock{
-    animation:lockPulse 1.4s infinite ease-in-out;
-  }
-  @keyframes lockPulse{
-    0%,100%{filter:drop-shadow(0 0 4px rgba(255,242,168,.35))}
-    50%{filter:drop-shadow(0 0 18px rgba(255,242,168,.85))}
-  }
-  .timeline-controls{
-    display:grid;
-    gap:8px;
-  }
-  input[type="range"]{accent-color:#00b4ff}
-  .mission-check{
-    display:flex;align-items:center;justify-content:space-between;gap:8px;
-    padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.05);
-  }
-  .mission-done{color:#b7ffce;font-weight:800}
-  .story-box{
-    min-height:105px;
+  .hud-label{
+    position:absolute;left:14px;top:14px;z-index:2;
     border:1px solid rgba(120,220,255,.22);
-    border-radius:16px;
-    padding:12px;
-    background:rgba(0,0,0,.22);
-    line-height:1.45;
-  }
-  .mode-banner{
-    border-radius:16px;
-    border:1px solid rgba(120,220,255,.22);
-    padding:10px;
-    background:rgba(0,0,0,.22);
-  }
-  .premium-poster-wrap{
-    display:grid;
-    gap:8px;
-  }
-  .lock-pill{
-    position:absolute;
-    right:18px;
-    top:58px;
-    z-index:4;
-    border:1px solid rgba(255,242,168,.35);
-    border-radius:999px;
-    padding:7px 12px;
-    background:rgba(0,0,0,.42);
-    color:#fff2a8;
-    font-family:monospace;
-    font-size:12px;
-    pointer-events:none;
-  }
-
-
-  .field-readout{
-    display:flex;
-    gap:7px;
-    flex-wrap:wrap;
-    margin-top:10px;
-  }
-  .field-pill{
-    border:1px solid rgba(120,220,255,.28);
+    background:rgba(0,0,0,.36);
     border-radius:999px;
     padding:7px 10px;
-    background:rgba(0,0,0,.30);
-    color:#9eeaff;
-    font-family:monospace;
     font-size:12px;
-  }
-  .field-pill.warn{
-    color:#fff2a8;
-    border-color:rgba(255,242,168,.35);
-  }
-  .ecliptic-badge{
-    position:absolute;
-    left:18px;
-    top:58px;
-    z-index:4;
-    border:1px solid rgba(255,242,168,.32);
-    border-radius:999px;
-    padding:7px 12px;
-    background:rgba(0,0,0,.42);
-    color:#fff2a8;
+    color:#c9f5ff;
     font-family:monospace;
-    font-size:12px;
     pointer-events:none;
   }
-
-
-  /* === STARVIEW V15: MODE SYSTEM === */
-  body.mode-normal{
-    background:
-      radial-gradient(circle at 20% 15%, rgba(0,150,255,.22), transparent 34%),
-      radial-gradient(circle at 80% 80%, rgba(20,80,180,.16), transparent 38%),
-      linear-gradient(180deg,#020816,#04142b 65%,#020814);
+  body.mode-op .hud-label{border-color:rgba(0,255,136,.28);color:var(--op-green)}
+  .sensor-badge{
+    position:absolute;right:14px;top:14px;z-index:2;
+    border:1px solid rgba(255,242,168,.22);
+    background:rgba(0,0,0,.36);
+    color:var(--gold);
+    border-radius:999px;
+    padding:7px 10px;
+    font-size:12px;
+    font-family:monospace;
+    pointer-events:none;
   }
-  body.mode-normal .card{
-    background:rgba(7,20,42,.72);
-    border-color:rgba(100,200,255,.24);
-    box-shadow:0 0 26px rgba(0,150,255,.11);
+  body.mode-op .sensor-badge{border-color:rgba(0,255,136,.26);color:var(--op-green)}
+  .readout{
+    display:grid;gap:8px;
+    font-family:monospace;
+    font-size:12px;
   }
-  body.mode-normal .engineering-only{
-    display:none!important;
+  .row{
+    display:flex;justify-content:space-between;gap:10px;
+    padding:8px 10px;border-radius:12px;
+    background:rgba(255,255,255,.045);
   }
-  body.mode-normal .ecliptic-badge,
-  body.mode-normal .heading-hud,
-  body.mode-normal .lock-pill,
-  body.mode-normal .field-readout{
-    display:none!important;
-  }
-
-  body.mode-engineering{
-    background:
-      radial-gradient(circle at 18% 18%, rgba(0,255,120,.10), transparent 35%),
-      linear-gradient(180deg,#000804,#010f08 65%,#000000);
-    color:#ccffdd;
-  }
-  body.mode-engineering .card{
-    background:rgba(0,12,6,.82);
-    border-color:rgba(0,255,120,.28);
-    box-shadow:0 0 24px rgba(0,255,120,.10);
-  }
-  body.mode-engineering .card:before{
-    background:linear-gradient(135deg,rgba(0,255,120,.55),rgba(120,255,180,.18),rgba(0,255,120,.08));
-  }
-  body.mode-engineering button{
-    background:linear-gradient(135deg,rgba(0,255,120,.20),rgba(0,80,40,.34));
-    border-color:rgba(0,255,120,.36);
-    color:#ddffea;
-  }
-  body.mode-engineering input,
-  body.mode-engineering select{
-    background:rgba(0,0,0,.48);
-    border-color:rgba(0,255,120,.28);
-    color:#ddffea;
-  }
-  body.mode-engineering .chip,
-  body.mode-engineering .field-pill,
-  body.mode-engineering .pill,
-  body.mode-engineering .quick-item,
-  body.mode-engineering .mini-card{
-    border-color:rgba(0,255,120,.24);
+  body.mode-op .row{background:rgba(0,255,136,.045);border:1px solid rgba(0,255,136,.10)}
+  .civil-only{}
+  .op-only{display:none}
+  body.mode-op .civil-only{display:none!important}
+  body.mode-op .op-only{display:block}
+  .raw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .raw-cell{
+    padding:10px;border-radius:12px;
+    border:1px solid rgba(0,255,136,.16);
     background:rgba(0,0,0,.34);
-    color:#ccffdd;
+    font-family:monospace;
+    color:#d8ffe7;
   }
-  body.mode-engineering .sub,
-  body.mode-engineering .small{
-    color:rgba(204,255,221,.72);
+  .raw-cell b{display:block;color:var(--op-green);font-size:11px;margin-bottom:5px}
+  .list{display:grid;gap:7px}
+  .item{
+    display:flex;justify-content:space-between;gap:8px;
+    padding:9px 11px;border-radius:14px;
+    background:rgba(255,255,255,.055);
   }
-  body.mode-engineering .normal-only{
-    display:none!important;
-  }
-  body.mode-engineering .ecliptic-badge,
-  body.mode-engineering .heading-hud,
-  body.mode-engineering .lock-pill{
-    border-color:rgba(0,255,120,.32);
-    color:#b8ffd0;
-  }
-
-  .mode-launch{
-    position:fixed;
-    inset:0;
-    z-index:10000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+  body.mode-op .item{background:rgba(0,255,136,.045);border:1px solid rgba(0,255,136,.10)}
+  .item small{color:var(--muted)}
+  body.mode-op .item small{color:rgba(216,255,231,.62)}
+  .boot{
+    position:fixed;inset:0;z-index:200;
+    display:flex;align-items:center;justify-content:center;
     padding:18px;
     background:
-      radial-gradient(circle at 25% 18%, rgba(0,180,255,.22), transparent 35%),
-      radial-gradient(circle at 80% 80%, rgba(0,255,120,.14), transparent 35%),
-      rgba(0,0,0,.82);
-    backdrop-filter:blur(10px);
-    -webkit-backdrop-filter:blur(10px);
+      radial-gradient(circle at 22% 12%,rgba(0,140,255,.24),transparent 32%),
+      radial-gradient(circle at 80% 78%,rgba(0,255,136,.16),transparent 38%),
+      #000;
+    transition:opacity .38s ease,visibility .38s ease;
   }
-  .mode-launch.hidden{
-    display:none!important;
-  }
-  .mode-box{
-    width:min(760px,100%);
-    border:1px solid rgba(120,220,255,.30);
+  .boot.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .boot-box{
+    width:min(820px,100%);
+    border:1px solid rgba(120,220,255,.26);
     border-radius:28px;
-    background:rgba(5,14,28,.94);
-    box-shadow:0 0 45px rgba(0,180,255,.18);
-    padding:24px;
-    text-align:center;
+    padding:22px;
+    background:rgba(0,10,18,.92);
+    box-shadow:0 0 50px rgba(0,140,255,.18);
   }
-  .mode-box h2{
-    font-size:30px;
-    margin:0 0 8px;
+  .boot-log{
+    height:132px;
+    overflow:hidden;
+    font-family:monospace;
+    font-size:12px;
+    color:rgba(0,255,136,.86);
+    background:rgba(0,0,0,.42);
+    border-radius:16px;
+    border:1px solid rgba(0,255,136,.18);
+    padding:12px;
+    margin-bottom:16px;
   }
-  .mode-box p{
-    color:rgba(234,247,255,.78);
-    margin:0 auto 18px;
-    max-width:620px;
+  .boot-title{font-size:30px;margin:0 0 8px}
+  .boot-sub{margin:0 0 16px;color:rgba(234,247,255,.70)}
+  .mode-pick{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .pick{
+    min-height:154px;text-align:left;border-radius:22px;padding:18px;
   }
-  .mode-choice-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:14px;
+  .pick b{display:block;font-size:22px;margin-bottom:8px}
+  .pick span{display:block;color:rgba(234,247,255,.72);font-weight:500;line-height:1.4}
+  .pick.op{border-color:rgba(0,255,136,.32);background:linear-gradient(135deg,rgba(0,255,136,.13),rgba(0,0,0,.26))}
+  .note{font-size:12px;color:var(--muted);line-height:1.38}
+  body.mode-op .note{color:rgba(216,255,231,.62)}
+  @media(max-width:880px){
+    .grid{grid-template-columns:1fr}
+    .control-grid{grid-template-columns:1fr}
+    .raw-grid{grid-template-columns:1fr}
+    .mode-pick{grid-template-columns:1fr}
+    .hero h1{font-size:25px}
+    canvas#sky{height:62vh;min-height:390px}
   }
-  .mode-choice{
-    min-height:145px;
-    border-radius:22px;
-    padding:18px;
-    border:1px solid rgba(120,220,255,.28);
-    background:linear-gradient(135deg,rgba(0,150,255,.20),rgba(255,255,255,.05));
-    color:#fff;
-    cursor:pointer;
-    text-align:left;
-  }
-  .mode-choice.engineering{
-    border-color:rgba(0,255,120,.28);
-    background:linear-gradient(135deg,rgba(0,255,120,.14),rgba(0,0,0,.18));
-  }
-  .mode-choice b{
-    display:block;
-    font-size:22px;
-    margin-bottom:8px;
-  }
-  .mode-choice span{
-    display:block;
-    color:rgba(234,247,255,.72);
-    line-height:1.38;
-    font-size:14px;
-  }
-
-  .mode-settings{
-    position:fixed;
-    top:12px;
-    right:12px;
-    z-index:9998;
-  }
-  .mode-gear{
-    width:42px;
-    height:42px;
-    border-radius:50%;
-    display:grid;
-    place-items:center;
-    padding:0;
-    font-size:20px;
-    background:rgba(0,0,0,.48);
-  }
-  .mode-menu{
-    display:none;
-    position:absolute;
-    right:0;
-    top:50px;
-    width:220px;
-    border:1px solid rgba(120,220,255,.28);
-    border-radius:18px;
-    padding:10px;
-    background:rgba(0,10,18,.94);
-    box-shadow:0 0 26px rgba(0,180,255,.14);
-  }
-  .mode-menu.open{display:block}
-  .mode-menu button{
-    margin:6px 0;
-  }
-
-  .normal-constellation-card{
-    border:1px solid rgba(100,200,255,.22);
-    background:linear-gradient(135deg,rgba(0,150,255,.10),rgba(0,0,0,.20));
-  }
-
-  @media(max-width:760px){
-    .mode-choice-grid{grid-template-columns:1fr}
-    .mode-box h2{font-size:24px}
-  }
-
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -596,381 +263,491 @@
   gtag('js', new Date());
   gtag('config', 'G-Y7W6O4KLRR');
 </script>
-<!-- End Google Analytics 4 -->
 </head>
+<body class="mode-civil">
 
-<body class="mode-normal">
-
-<div id="modeLaunch" class="mode-launch">
-  <div class="mode-box">
-    <h2>🌌 StarView HUD</h2>
-    <p>Selecciona cómo quieres usar la app. Puedes cambiar de modo después desde el engrane.</p>
-    <div class="mode-choice-grid">
-      <button class="mode-choice" onclick="selectAppMode('normal')">
-        <b>Modo Normal</b>
-        <span>Vista limpia, azul y visual. Pensada para disfrutar el cielo, estrellas y constelaciones sin telemetría técnica.</span>
+<div class="boot" id="boot">
+  <div class="boot-box">
+    <h2 class="boot-title">STARVIEW HUD PRO</h2>
+    <p class="boot-sub">Industrial Astronomical Telemetry Station · Aire Acondicionado y Confort · Lab</p>
+    <div class="boot-log" id="bootLog"></div>
+    <div class="mode-pick">
+      <button class="pick" onclick="setMode('civil')">
+        <b>🌌 Modo Exploración</b>
+        <span>Experiencia civil cinematográfica: cielo limpio, estrellas con bloom, constelaciones, planetas y UX visual.</span>
       </button>
-      <button class="mode-choice engineering" onclick="selectAppMode('engineering')">
-        <b>Modo Ingeniería</b>
-        <span>Instrumento de campo: Pitch, Roll, Acimut, Altitud, eclíptica, horizonte artificial y cuadrícula de coordenadas.</span>
+      <button class="pick op" onclick="setMode('op')">
+        <b>🧪 Modo Operativo</b>
+        <span>Telemetría cruda: terminal, rejillas altazimutales, eclíptica, ecuador celeste, errores de sensor y hardware HUD.</span>
       </button>
     </div>
   </div>
 </div>
 
-<div class="mode-settings">
-  <button class="mode-gear" onclick="toggleModeMenu()" title="Configuración">⚙️</button>
-  <div id="modeMenu" class="mode-menu">
-    <button onclick="selectAppMode('normal', true)">🌌 Modo Normal</button>
-    <button onclick="selectAppMode('engineering', true)">🧪 Modo Ingeniería</button>
-    <button class="button-secondary" onclick="showModeLaunch()">Cambiar al inicio</button>
+<div class="topbar">
+  <div class="brand">
+    <strong>Aire Acondicionado y Confort · Lab</strong>
+    <span>High-Precision Telemetry Unit</span>
   </div>
-</div>
-
-<div id="introModal" class="modal-backdrop hidden">
-  <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v15</h2>
-    <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
-    <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
-    <div class="quick-grid">
-      <div class="quick-item"><b>1. Ubicación</b><br>Usa el GPS o deja Tonalá/ZMG.</div>
-      <div class="quick-item"><b>2. Mapa</b><br>N, E, S y O marcan direcciones.</div>
-      <div class="quick-item"><b>3. Estrellas</b><br>Los puntos grandes son las más brillantes.</div>
-    </div>
-    <div class="modal-actions">
-      <button onclick="closeIntro()">Entendido, usar app</button>
-      <button class="button-secondary" onclick="closeIntro(); scrollToSky();">Ir directo al mapa</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="mode-chip" id="modeChip">EXPLORACIÓN</div>
+    <div class="gear-wrap">
+      <button class="gear" onclick="toggleMenu()">⚙️</button>
+      <div class="mode-menu" id="modeMenu">
+        <button onclick="setMode('civil', true)">🌌 Modo Exploración</button>
+        <button onclick="setMode('op', true)">🧪 Modo Operativo</button>
+        <button class="secondary" onclick="showBoot()">Reiniciar selector</button>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="app">
-  <div class="card">
-    <div class="radar-ring"></div>
-    <div class="brand">
-      <div>
-        <h1>🌌 StarView HUD v15</h1>
-        <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
-      </div>
-      <div class="badge">Aire Acondicionado y Confort · Lab</div>
-    </div>
+<main class="app">
+  <section class="card hero">
+    <h1>StarView HUD Pro</h1>
+    <p class="civil-only">Estación visual para explorar el cielo desde tu ubicación. Usa GPS, sensores del celular y cálculos astronómicos para ubicar estrellas, planetas, Sol, eclíptica y constelaciones.</p>
+    <p class="op-only">OPERATIVE TERMINAL ONLINE · RAW DATA · ALTAZ GRID · SENSOR FUSION · LST COMPUTATION · ECLIPTIC FRAME</p>
 
-    <div class="intro-panel">
-      <h2>📌 ¿Qué es y cómo se utiliza?</h2>
-      <p><b>StarView HUD</b> convierte tu celular en una guía visual del cielo. Ahora incluye <b>Star Hunter</b>: elige una estrella y la app te ayuda a encontrarla.</p>
-      <p>El círculo representa el cielo sobre ti: arriba es <b>Norte</b>, derecha <b>Este</b>, abajo <b>Sur</b> e izquierda <b>Oeste</b>.</p>
-      <div class="quick-grid">
-        <div class="quick-item">📍 <b>Ubicación</b><br>Calcula qué estrellas están sobre tu horizonte.</div>
-        <div class="quick-item">🔭 <b>Actualizar cielo</b><br>Refresca el mapa con la hora actual.</div>
-        <div class="quick-item">🌙 <b>Modo nocturno</b><br>Reduce brillo para usarlo de noche.</div>
-      </div>
-    </div>
-
-    <div class="grid">
+    <div class="control-grid">
       <div>
-        <label for="lat">Latitud</label>
-        <input id="lat" type="number" step="0.0001" value="20.624" />
+        <label>Latitud</label>
+        <input id="lat" type="number" step="0.00001" value="20.62400">
       </div>
       <div>
-        <label for="lon">Longitud</label>
-        <input id="lon" type="number" step="0.0001" value="-103.234" />
+        <label>Longitud</label>
+        <input id="lon" type="number" step="0.00001" value="-103.23400">
       </div>
       <div>
-        <label for="time">Fecha y hora</label>
-        <input id="time" type="datetime-local" />
+        <label>Fecha/hora</label>
+        <input id="time" type="datetime-local">
       </div>
-      <div>
-        <label>Acciones</label>
-        <button onclick="useNow()">Usar hora actual</button>
+      <button onclick="useNow()">Usar hora actual</button>
+      <button onclick="useGPS()">📍 Usar GPS</button>
+      <button class="secondary" onclick="useTonala()">📌 Tonalá/ZMG</button>
+      <button onclick="enableSensors()">🧭 Activar sensores</button>
+      <button class="secondary" onclick="zeroHeading()">🎯 Calibrar frente</button>
+    </div>
+    <p class="note" style="margin-top:10px">Tonalá/ZMG queda como ubicación predeterminada. Los sensores requieren HTTPS y activación manual.</p>
+  </section>
+
+  <div class="grid">
+    <section class="card canvas-card">
+      <div class="canvas-shell" id="canvasShell">
+        <div class="hud-label" id="hudLabel">STARVIEW · CIVIL LAYER</div>
+        <div class="sensor-badge" id="sensorBadge">SENSOR OFF</div>
+        <canvas id="sky"></canvas>
       </div>
-      <button onclick="useGPS()">📍 Usar ubicación del celular</button>
-      <button onclick="drawSky()">🔭 Actualizar cielo</button>
-      <button class="button-secondary" onclick="setTonala()">📌 Usar Tonalá/ZMG</button>
-      <button class="button-secondary" onclick="toggleNight()">🌙 Modo rojo nocturno</button>
-      <button class="button-gold" onclick="toggleBeginner()">🧭 Modo principiante</button>
-      <button class="button-secondary" onclick="shareWhatsApp()">🟢 Compartir por WhatsApp</button>
-      <button class="button-secondary" onclick="showInstallHelp()">📲 Agregar a pantalla de inicio</button>
-      <button class="button-secondary" onclick="openIntro()">ℹ️ Ver instrucciones</button>
-      <button class="button-gold" onclick="enableAutoRadar()">🧭 Activar radar automático</button>
-      <button class="button-secondary" onclick="stopAutoRadar()">⏸️ Detener radar</button>
-      <button class="button-gold" onclick="toggleObservation()">🔴 Noche de observación</button>
-      <button class="button-secondary" onclick="scrollToSection('starFinder')">❓ ¿Qué estrella veo?</button>
-      <button class="button-secondary" onclick="createPoster()">📸 Crear postal</button>
-      <button class="button-secondary" onclick="sendFeedback()">💬 Enviar opinión</button>
-      <button class="button-gold" onclick="scrollToSection('starHunter')">🎯 Star Hunter</button>
-      <button class="button-secondary" onclick="scrollToSection('specialSky')">💫 Fecha especial</button>
-      <button class="button-secondary" onclick="scrollToSection('challengeMode')">🏆 Reto nocturno</button>
-    </div>
+    </section>
+
+    <aside>
+      <section class="card civil-only">
+        <h2>✨ Cielo destacado</h2>
+        <div class="list" id="civilList"></div>
+      </section>
+
+      <section class="card civil-only">
+        <h2>🪐 Planetas / Sol</h2>
+        <div class="list" id="civilPlanets"></div>
+      </section>
+
+      <section class="card op-only">
+        <h2>RAW DATA STREAM</h2>
+        <div class="raw-grid">
+          <div class="raw-cell"><b>HDG FILTERED</b><span id="rawHeading">--</span></div>
+          <div class="raw-cell"><b>YAW RAW</b><span id="rawYaw">--</span></div>
+          <div class="raw-cell"><b>PITCH</b><span id="rawPitch">--</span></div>
+          <div class="raw-cell"><b>ROLL</b><span id="rawRoll">--</span></div>
+          <div class="raw-cell"><b>LST</b><span id="rawLST">--</span></div>
+          <div class="raw-cell"><b>JD</b><span id="rawJD">--</span></div>
+          <div class="raw-cell"><b>SENSOR MODE</b><span id="rawSensor">OFF</span></div>
+          <div class="raw-cell"><b>HDG ERROR RMS</b><span id="rawError">--</span></div>
+        </div>
+      </section>
+
+      <section class="card op-only">
+        <h2>OBJECT TELEMETRY</h2>
+        <div class="readout" id="opObjects"></div>
+      </section>
+    </aside>
   </div>
-
-  <div id="beginnerPanel" class="card hidden">
-    <h2>🧭 Modo principiante: cómo mirar el cielo</h2>
-    <ol class="steps">
-      <li>Párate en un lugar seguro y mira hacia el <b>Norte</b>.</li>
-      <li>Gira el celular hasta que la letra <b>N</b> quede hacia donde estás mirando.</li>
-      <li>Las estrellas cerca del <b>centro</b> están más arriba de tu cabeza.</li>
-      <li>Las estrellas cerca del <b>borde</b> están más cerca del horizonte.</li>
-      <li>Empieza por las estrellas con nombre y punto más grande: son más fáciles de ver.</li>
-    </ol>
-    <div class="chips">
-      <span class="chip">Centro = cielo arriba</span>
-      <span class="chip">Borde = horizonte</span>
-      <span class="chip">N/E/S/O = direcciones</span>
-    </div>
-  </div>
-
-  <div class="card hud">
-    <canvas id="sky" width="900" height="900"></canvas>
-    <div class="radar-spin-ring"></div>
-    <div class="heading-hud" id="headingHud">Radar fijo · N arriba</div>
-    <div class="lock-pill" id="lockPill">Sin objetivo</div>
-    <div class="ecliptic-badge">ECLÍPTICA ON</div>
-    <div class="guide-overlay">
-      <div class="guide-chip">Centro = cielo arriba</div>
-      <div class="guide-chip">Borde = horizonte</div>
-      <div class="guide-chip">Radar auto = se alinea solo</div>
-      <div class="guide-chip">Punto grande = brillante</div>
-    </div>
-  </div>
-
-  <div class="grid-3 grid-2-clean">
-    <div class="card">
-      <h2>⭐ Qué puedo ver hoy</h2>
-      <div id="tonightList" class="list"></div>
-      <p class="small">Consejo: busca primero las estrellas más brillantes y altas.</p>
-    </div>
-
-    <div class="card">
-      <h2>🌙 Luna actual</h2>
-      <div id="moonInfo" class="pill">Calculando fase lunar...</div>
-      <p class="small">Si hay mucha luna, algunas estrellas débiles se verán menos.</p>
-    </div>
-
-    
-  </div>
-
-
-  <div class="grid-3">
-    <div class="card">
-      <h2>🧭 Radar automático</h2>
-      <div class="pill" id="autoRadarStatus">
-        Presiona “Activar radar automático”. El radar empezará a girar fluido de inmediato y, si el celular permite sensores, se alineará con tu orientación real.
-      </div>
-      <div class="chips">
-        <span class="chip">Top del celular = hacia donde miras</span>
-        <span class="chip">Giro fluido al tocar</span>
-        <span class="chip">Eclíptica activa</span>
-        <span class="chip">Horizonte artificial</span>
-      </div>
-      <div class="field-readout">
-        <span class="field-pill" id="fieldHeadingPill">HDG --°</span>
-        <span class="field-pill" id="fieldPitchPill">PITCH --°</span>
-        <span class="field-pill" id="fieldRollPill">ROLL --°</span>
-        <span class="field-pill" id="fieldAltitudePill">ALT --°</span>
-        <span class="field-pill warn" id="fieldModePill">SENSOR OFF</span>
-      </div>
-    </div>
-
-    <div class="card" id="starFinder">
-      <h2>❓ ¿Qué estrella estoy viendo?</h2>
-      <p class="small">Elige hacia dónde estás mirando y la app te sugiere estrellas cercanas a esa dirección.</p>
-      <select id="lookDirection" onchange="suggestStarsByDirection()">
-        <option value="0">Estoy mirando al Norte</option>
-        <option value="45">Noreste</option>
-        <option value="90">Este</option>
-        <option value="135">Sureste</option>
-        <option value="180">Sur</option>
-        <option value="225">Suroeste</option>
-        <option value="270">Oeste</option>
-        <option value="315">Noroeste</option>
-      </select>
-      <div id="starGuessList" class="list" style="margin-top:10px;"></div>
-    </div>
-
-    <div class="card">
-      <h2>👁️ Nivel de visibilidad</h2>
-      <p class="small">Clasificación práctica según altura y brillo aparente.</p>
-      <div id="visibilityList" class="list"></div>
-    </div>
-  </div>
-
-  <div class="card normal-only normal-constellation-card">
-    <h2>✨ Constelaciones visibles</h2>
-    <p class="small">Modo Normal: una lectura limpia del cielo con nombres de constelaciones destacadas.</p>
-    <div id="normalConstellations" class="list"></div>
-  </div>
-
-  <div class="grid-3">
-    <div class="card">
-      <h2>🌠 Eventos del cielo</h2>
-      <div id="skyEvents" class="list"></div>
-      <p class="small">Eventos aproximados y de referencia para observación casual.</p>
-    </div>
-
-    <div class="card">
-      <h2>🪐 Planetas visibles</h2>
-      <div id="planetList" class="list"></div>
-      <p class="small">Módulo experimental: orientación aproximada para observación casual, no cálculo astronómico profesional.</p>
-    </div>
-
-    <div class="card">
-      <h2>📸 Postal para compartir</h2>
-      <canvas id="posterCanvas" class="poster" width="900" height="1200"></canvas>
-      <button style="margin-top:10px" onclick="downloadPoster()">Descargar postal</button>
-      <button class="button-secondary" style="margin-top:8px" onclick="shareWhatsApp()">Compartir link por WhatsApp</button>
-    </div>
-  </div>
-
-
-  <div class="card" id="starHunter">
-    <h2>🎯 Star Hunter — Cazador de estrellas</h2>
-    <p class="small">Elige una estrella visible y la app te dará dirección, altura y guía tipo “GPS del cielo”.</p>
-    <div class="grid">
-      <div>
-        <label>Objetivo</label>
-        <select id="targetStar" onchange="lockTargetStar()"></select>
-      </div>
-      <div>
-        <label>Modo de cielo</label>
-        <select id="skyQuality" onchange="updateAllAdvancedModules()">
-          <option value="city">Ciudad / mucha luz</option>
-          <option value="suburb" selected>Zona urbana normal</option>
-          <option value="dark">Rancho / carretera / cielo oscuro</option>
-        </select>
-      </div>
-    </div>
-    <div class="star-target" style="margin-top:10px">
-      <div id="targetStatus"><b>Sin objetivo.</b> Actualiza el cielo y elige una estrella.</div>
-      <div class="arrow-guide" id="targetArrow">⬆️</div>
-      <div id="targetInstructions" class="pill">Aquí aparecerán instrucciones: gira, sube la mirada y busca color/brillo.</div>
-    </div>
-  </div>
-
-  <div class="grid-3">
-    <div class="card">
-      <h2>🌌 Índice StarView</h2>
-      <div class="score-ring" id="nightScore">--</div>
-      <div id="nightScoreText" class="pill" style="margin-top:10px">Calculando calidad de observación...</div>
-    </div>
-
-    <div class="card">
-      <h2>⏱️ Próximos 60 minutos</h2>
-      <div id="nextHourList" class="list"></div>
-      <p class="small">La app calcula una vista rápida del cielo en 15, 30 y 60 minutos.</p>
-    </div>
-
-    <div class="card">
-      <h2>🕒 Cielo en movimiento</h2>
-      <div class="timeline-controls">
-        <label>Simular tiempo: <span id="timeOffsetLabel">Ahora</span></label>
-        <input type="range" id="timeOffset" min="0" max="120" value="0" step="15" oninput="applyTimeOffset()" />
-        <button class="button-secondary" onclick="resetTimeOffset()">Volver a ahora</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="grid-3">
-    <div class="card" id="specialSky">
-      <h2>💫 Cielo de mi fecha especial</h2>
-      <p class="small">Pon una fecha especial y genera un reporte emocional del cielo.</p>
-      <input id="specialDate" type="datetime-local" />
-      <button style="margin-top:10px" onclick="generateSpecialSky()">Generar cielo especial</button>
-      <div id="specialSkyResult" class="pill" style="margin-top:10px">Ejemplo: cumpleaños, aniversario, día de casa nueva o una noche importante.</div>
-    </div>
-
-    <div class="card">
-      <h2>📖 Historias del cielo</h2>
-      <select id="storyStar" onchange="showStarStory()"></select>
-      <div id="starStory" class="story-box" style="margin-top:10px">Elige una estrella para leer una historia corta.</div>
-    </div>
-
-    <div class="card">
-      <h2>👨‍👩‍👧 Modo niños / principiante</h2>
-      <div id="kidModeBox" class="mode-banner">
-        Busca la estrella más brillante. Si está cerca del centro del radar, está arriba de ti. Si está cerca del borde, está bajita.
-      </div>
-      <button style="margin-top:10px" onclick="toggleKidsMode()">Activar modo niños</button>
-    </div>
-  </div>
-
-  <div class="grid-3">
-    <div class="card" id="challengeMode">
-      <h2>🏆 Reto nocturno</h2>
-      <div id="challengeList" class="list"></div>
-      <button style="margin-top:10px" onclick="completeChallenge()">Completar misión</button>
-    </div>
-
-    <div class="card">
-      <h2>💌 Mensaje bajo las estrellas</h2>
-      <div id="romanticMessage" class="pill">Genera un mensaje bonito con la Luna y estrellas de hoy.</div>
-      <button style="margin-top:10px" onclick="generateRomanticMessage()">Generar mensaje</button>
-      <button class="button-secondary" style="margin-top:8px" onclick="shareRomanticMessage()">Compartir mensaje</button>
-    </div>
-
-    <div class="card">
-      <h2>📜 Sky Report Premium</h2>
-      <div class="premium-poster-wrap">
-        <canvas id="premiumPosterCanvas" class="poster" width="900" height="1200"></canvas>
-        <button onclick="createPremiumPoster()">Crear reporte premium</button>
-        <button class="button-secondary" onclick="downloadPremiumPoster()">Descargar reporte</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>⭐ Ranking fácil de encontrar</h2>
-    <div id="easyRanking" class="list"></div>
-  </div>
-
-  <div class="card info">
-    <div class="pill" id="status">Listo.</div>
-    <div>
-      <b>Estrellas visibles destacadas</b>
-      <div class="list" id="visibleList"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>📲 Compartir o imprimir QR</h2>
-    <div class="qr-wrap">
-      <img src='qr-starview.png' alt='QR StarView HUD' />
-      <div>
-        <p>Comparte este QR para que otras personas abran StarView HUD desde su celular.</p>
-        <button onclick="shareWhatsApp()">🟢 Compartir por WhatsApp</button>
-        <p class="small">Link de campaña: <br><span id="shareLink">https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7</span></p>
-      </div>
-    </div>
-  </div>
-
-  <div id="installHelp" class="card install-box">
-    <h2>📲 Cómo agregarla como app</h2>
-    <p><b>Android / Chrome:</b> toca los tres puntos ⋮ y elige <b>Agregar a pantalla principal</b>.</p>
-    <p><b>iPhone / Safari:</b> toca compartir y luego <b>Agregar a pantalla de inicio</b>.</p>
-    <button onclick="hideInstallHelp()">Cerrar</button>
-  </div>
-
-  <div class="card">
-    <h2>🛰️ Sobre el proyecto</h2>
-    <p><b>StarView HUD</b> es un experimento de <b>Aire Acondicionado y Confort Lab</b>, creado para explorar tecnología, orientación y visualización desde el celular.</p>
-    <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
-  </div>
-
-  <div class="footer">StarView HUD v15 · Guía visual básica, no sustituye software astronómico profesional.</div>
-</div>
+</main>
 
 <script>
-const SHARE_URL = "https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7";
-const SHARE_TEXT = "🌌 Mira StarView HUD: una app para ver estrellas brillantes desde tu ubicación. https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7";
+/* ============================================================
+   STARVIEW HUD PRO · INDUSTRIAL ASTRONOMICAL TELEMETRY
+   Single-file front-end station for GitHub Pages.
+   No server, no external libraries.
+   ============================================================ */
 
-function track(eventName, params={}){
-  try {
-    if (typeof gtag === "function") {
-      gtag("event", eventName, Object.assign({app_name:"StarView HUD", app_version:"v7"}, params));
-    }
-  } catch(e) {}
+const App = {
+  mode: "civil",
+  canvas: null,
+  ctx: null,
+  W: 0,
+  H: 0,
+  cx: 0,
+  cy: 0,
+  rmax: 0,
+  lat: 20.624,
+  lon: -103.234,
+  useCurrentTime: true,
+  selectedDate: new Date(),
+  weakStars: [],
+  visibleStars: [],
+  visibleBodies: [],
+  lastDomUpdate: 0,
+  frame: 0
+};
+
+const Sensor = {
+  enabled: false,
+  mode: "OFF",
+  rawYaw: 0,
+  targetYaw: 0,
+  yaw: 0,
+  offset: 0,
+  pitch: 0,
+  roll: 0,
+  alpha: null,
+  beta: null,
+  gamma: null,
+  errorRms: 0,
+  lastInnovation: 0,
+  samples: 0
+};
+
+function track(eventName, params = {}){
+  try{
+    if(typeof gtag === "function") gtag("event", eventName, Object.assign({app_name:"StarView HUD Pro"}, params));
+  }catch(e){}
 }
 
-const stars = [
+function deg(x){return x * Math.PI / 180}
+function rad(x){return x * 180 / Math.PI}
+function clamp(v,a,b){return Math.max(a, Math.min(b, v))}
+function norm360(x){return ((x % 360) + 360) % 360}
+function angleDelta(from, to){
+  let d = norm360(to - from);
+  if(d > 180) d -= 360;
+  return d;
+}
+
+/*
+  Low-pass filter for circular angles:
+  delta = shortest signed angular distance.
+  filtered = filtered + alpha * delta.
+  This avoids vibration and avoids wrap jumps at 0°/360°.
+*/
+function lowPassAngle(current, target, alpha){
+  return norm360(current + angleDelta(current, target) * alpha);
+}
+
+function setMode(mode, fromMenu=false){
+  App.mode = (mode === "op") ? "op" : "civil";
+  document.body.classList.toggle("mode-op", App.mode === "op");
+  document.body.classList.toggle("mode-civil", App.mode === "civil");
+  document.getElementById("modeChip").textContent = App.mode === "op" ? "OPERATIVO" : "EXPLORACIÓN";
+  document.getElementById("hudLabel").textContent = App.mode === "op" ? "AACYCLAB · OPERATIVE ALTAZ GRID" : "STARVIEW · EXPLORATION LAYER";
+  document.getElementById("modeMenu").classList.remove("open");
+  document.getElementById("boot").classList.add("hidden");
+  track("mode_selected", {mode:App.mode, from_menu:fromMenu});
+}
+
+function toggleMenu(){ document.getElementById("modeMenu").classList.toggle("open") }
+function showBoot(){ document.getElementById("boot").classList.remove("hidden"); document.getElementById("modeMenu").classList.remove("open") }
+
+function bootSequence(){
+  const lines = [
+    "BIOS: STARVIEW-HUD-PRO rev.industrial",
+    "INIT: canvas telemetry renderer ........ OK",
+    "INIT: orbital propagation kernel ....... OK",
+    "INIT: LST / GMST timebase .............. OK",
+    "INIT: sensor fusion low-pass filter .... READY",
+    "INIT: altazimuth coordinate grid ....... READY",
+    "STATUS: awaiting operating mode selection"
+  ];
+  const log = document.getElementById("bootLog");
+  log.innerHTML = "";
+  let i = 0;
+  const t = setInterval(()=>{
+    if(i >= lines.length){ clearInterval(t); return; }
+    log.innerHTML += "&gt; " + lines[i] + "<br>";
+    log.scrollTop = log.scrollHeight;
+    i++;
+  }, 170);
+}
+
+function useNow(){
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  document.getElementById("time").value = d.toISOString().slice(0,16);
+  App.useCurrentTime = true;
+  App.selectedDate = new Date();
+  track("use_now");
+}
+
+function getDate(){
+  if(App.useCurrentTime) return new Date();
+  const v = document.getElementById("time").value;
+  return v ? new Date(v) : new Date();
+}
+
+function useTonala(){
+  document.getElementById("lat").value = "20.62400";
+  document.getElementById("lon").value = "-103.23400";
+  App.lat = 20.624;
+  App.lon = -103.234;
+  track("use_tonala");
+}
+
+function useGPS(){
+  if(!navigator.geolocation){
+    alert("Este navegador no permitió geolocalización.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(pos=>{
+    App.lat = pos.coords.latitude;
+    App.lon = pos.coords.longitude;
+    document.getElementById("lat").value = App.lat.toFixed(5);
+    document.getElementById("lon").value = App.lon.toFixed(5);
+    track("gps_success");
+  }, err=>{
+    alert("No se pudo obtener GPS. Se mantiene Tonalá/ZMG.");
+    track("gps_error", {code:err.code});
+  }, {enableHighAccuracy:true, timeout:9000});
+}
+
+async function enableSensors(){
+  try{
+    if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+      const p = await DeviceOrientationEvent.requestPermission();
+      if(p !== "granted"){
+        document.getElementById("sensorBadge").textContent = "SENSOR DENIED";
+        return;
+      }
+    }
+
+    window.addEventListener("deviceorientationabsolute", handleOrientation, true);
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    Sensor.enabled = true;
+    document.getElementById("sensorBadge").textContent = "SENSOR ACTIVE";
+    track("sensor_enabled");
+  }catch(e){
+    document.getElementById("sensorBadge").textContent = "SENSOR ERROR";
+    track("sensor_error");
+  }
+}
+
+function handleOrientation(ev){
+  let heading = null;
+
+  if(typeof ev.webkitCompassHeading === "number"){
+    heading = ev.webkitCompassHeading;
+    Sensor.mode = "WEBKIT_COMPASS";
+  }else if(ev.type === "deviceorientationabsolute" && typeof ev.alpha === "number"){
+    heading = 360 - ev.alpha;
+    Sensor.mode = "ABS_ALPHA";
+  }else if(typeof ev.alpha === "number"){
+    heading = 360 - ev.alpha;
+    Sensor.mode = ev.absolute ? "ABS_FLAG_ALPHA" : "REL_ALPHA";
+  }
+
+  if(typeof ev.alpha === "number") Sensor.alpha = ev.alpha;
+  if(typeof ev.beta === "number") Sensor.beta = ev.beta;
+  if(typeof ev.gamma === "number") Sensor.gamma = ev.gamma;
+
+  // DeviceOrientation beta/gamma approximate attitude angles.
+  if(typeof ev.beta === "number") Sensor.pitch = ev.beta;
+  if(typeof ev.gamma === "number") Sensor.roll = ev.gamma;
+
+  if(heading !== null){
+    Sensor.rawYaw = norm360(heading);
+    Sensor.targetYaw = norm360(Sensor.rawYaw - Sensor.offset);
+
+    const innovation = Math.abs(angleDelta(Sensor.yaw, Sensor.targetYaw));
+    Sensor.lastInnovation = innovation;
+    Sensor.errorRms = Math.sqrt(0.92 * Sensor.errorRms * Sensor.errorRms + 0.08 * innovation * innovation);
+
+    if(!Sensor.samples){
+      Sensor.yaw = Sensor.targetYaw;
+    }else{
+      Sensor.yaw = lowPassAngle(Sensor.yaw, Sensor.targetYaw, 0.14);
+    }
+
+    Sensor.samples++;
+  }
+}
+
+function zeroHeading(){
+  Sensor.offset = Sensor.rawYaw;
+  Sensor.targetYaw = 0;
+  Sensor.yaw = 0;
+  if(navigator.vibrate) navigator.vibrate(70);
+  track("zero_heading");
+}
+
+/* ============================================================
+   ASTRONOMY CORE
+   ============================================================ */
+
+function julianDate(date){
+  return date.getTime() / 86400000 + 2440587.5;
+}
+
+/*
+  Greenwich Mean Sidereal Time:
+  GMST = 280.46061837 + 360.98564736629*(JD-2451545)
+         + 0.000387933*T² - T³/38710000
+  Local Sidereal Time:
+  LST = GMST + observer longitude.
+*/
+function gmstDeg(date){
+  const JD = julianDate(date);
+  const T = (JD - 2451545.0) / 36525;
+  return norm360(280.46061837 + 360.98564736629*(JD-2451545.0) + 0.000387933*T*T - (T*T*T)/38710000);
+}
+function lstDeg(date, lonDeg){ return norm360(gmstDeg(date) + lonDeg) }
+
+/*
+  Mean obliquity of the ecliptic:
+  epsilon ≈ 23.439291° - 0.0130042° * T
+  where T is Julian centuries from J2000.
+*/
+function obliquityDeg(date){
+  const JD = julianDate(date);
+  const T = (JD - 2451545.0) / 36525;
+  return 23.439291 - 0.0130042*T;
+}
+
+/*
+  Equatorial to Horizontal conversion.
+  Input: right ascension RA, declination DEC, observer lat/lon, time.
+  Hour angle:
+    H = LST - RA
+  Altitude:
+    sin(alt)=sin(dec)sin(lat)+cos(dec)cos(lat)cos(H)
+  Azimuth convention:
+    0° = North, 90° = East
+    az = atan2(-sin(H), tan(dec)cos(lat)-sin(lat)cos(H))
+*/
+function equatorialToHorizontal(raHours, decDeg, latDeg, lonDeg, date){
+  const LST = lstDeg(date, lonDeg);
+  const raDeg = raHours * 15;
+  const H = deg(((LST - raDeg + 540) % 360) - 180);
+  const dec = deg(decDeg);
+  const lat = deg(latDeg);
+
+  const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(H);
+  const alt = Math.asin(clamp(sinAlt, -1, 1));
+  const az = Math.atan2(-Math.sin(H), Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H));
+
+  return {alt:rad(alt), az:norm360(rad(az))};
+}
+
+function eclipticToEquatorial(lambdaDeg, betaDeg, date){
+  const eps = deg(obliquityDeg(date));
+  const lam = deg(lambdaDeg);
+  const beta = deg(betaDeg || 0);
+
+  const sinDec = Math.sin(beta)*Math.cos(eps) + Math.cos(beta)*Math.sin(eps)*Math.sin(lam);
+  const dec = Math.asin(clamp(sinDec, -1, 1));
+  const y = Math.sin(lam)*Math.cos(eps) - Math.tan(beta)*Math.sin(eps);
+  const x = Math.cos(lam);
+  let ra = Math.atan2(y, x);
+  if(ra < 0) ra += Math.PI*2;
+
+  return {raHours:rad(ra)/15, decDeg:rad(dec)};
+}
+
+/* Low-precision orbital elements for real-time visual projection.
+   The goal is live physical motion without static planet positions.
+   d is days from 2000 Jan 0.0 epoch used by the element rates.
+*/
+function elements(name, d){
+  const E = {
+    Mercury:{N:48.3313+3.24587e-5*d,i:7.0047+5e-8*d,w:29.1241+1.01444e-5*d,a:.387098,e:.205635+5.59e-10*d,M:168.6562+4.0923344368*d},
+    Venus:{N:76.6799+2.46590e-5*d,i:3.3946+2.75e-8*d,w:54.8910+1.38374e-5*d,a:.723330,e:.006773-1.302e-9*d,M:48.0052+1.6021302244*d},
+    Earth:{N:0,i:0,w:282.9404+4.70935e-5*d,a:1.000000,e:.016709-1.151e-9*d,M:356.0470+0.9856002585*d},
+    Mars:{N:49.5574+2.11081e-5*d,i:1.8497-1.78e-8*d,w:286.5016+2.92961e-5*d,a:1.523688,e:.093405+2.516e-9*d,M:18.6021+0.5240207766*d},
+    Jupiter:{N:100.4542+2.76854e-5*d,i:1.3030-1.557e-7*d,w:273.8777+1.64505e-5*d,a:5.20256,e:.048498+4.469e-9*d,M:19.8950+0.0830853001*d},
+    Saturn:{N:113.6634+2.38980e-5*d,i:2.4886-1.081e-7*d,w:339.3939+2.97661e-5*d,a:9.55475,e:.055546-9.499e-9*d,M:316.9670+0.0334442282*d},
+    Uranus:{N:74.0005+1.3978e-5*d,i:.7733+1.9e-8*d,w:96.6612+3.0565e-5*d,a:19.18171-1.55e-8*d,e:.047318+7.45e-9*d,M:142.5905+0.011725806*d},
+    Neptune:{N:131.7806+3.0173e-5*d,i:1.7700-2.55e-7*d,w:272.8461-6.027e-6*d,a:30.05826+3.313e-8*d,e:.008606+2.15e-9*d,M:260.2471+0.005995147*d}
+  };
+  return E[name];
+}
+
+function heliocentricEcliptic(name, d){
+  const e = elements(name, d);
+  const N = deg(e.N), i = deg(e.i), w = deg(e.w), M = deg(norm360(e.M));
+  let E = M + e.e * Math.sin(M) * (1 + e.e * Math.cos(M));
+
+  // Kepler equation iteration: E - e sin(E) = M.
+  for(let k=0;k<5;k++){
+    E = E - (E - e.e*Math.sin(E) - M) / (1 - e.e*Math.cos(E));
+  }
+
+  const xv = e.a * (Math.cos(E) - e.e);
+  const yv = e.a * (Math.sqrt(1 - e.e*e.e) * Math.sin(E));
+  const v = Math.atan2(yv, xv);
+  const r = Math.sqrt(xv*xv + yv*yv);
+
+  const xh = r * (Math.cos(N)*Math.cos(v+w) - Math.sin(N)*Math.sin(v+w)*Math.cos(i));
+  const yh = r * (Math.sin(N)*Math.cos(v+w) + Math.cos(N)*Math.sin(v+w)*Math.cos(i));
+  const zh = r * (Math.sin(v+w)*Math.sin(i));
+
+  return {x:xh, y:yh, z:zh, r};
+}
+
+function vectorToRaDec(vec, date){
+  const eps = deg(obliquityDeg(date));
+  const x = vec.x;
+  const y = vec.y * Math.cos(eps) - vec.z * Math.sin(eps);
+  const z = vec.y * Math.sin(eps) + vec.z * Math.cos(eps);
+
+  let ra = Math.atan2(y, x);
+  if(ra < 0) ra += Math.PI*2;
+  const dec = Math.atan2(z, Math.sqrt(x*x + y*y));
+  const dist = Math.sqrt(x*x + y*y + z*z);
+  return {raHours:rad(ra)/15, decDeg:rad(dec), dist};
+}
+
+function computeSolarSystem(date, lat, lon){
+  const JD = julianDate(date);
+  const d = JD - 2451543.5;
+  const earth = heliocentricEcliptic("Earth", d);
+
+  const bodies = [];
+
+  // Sun: geocentric vector is opposite Earth's heliocentric vector.
+  const sunVec = {x:-earth.x, y:-earth.y, z:-earth.z};
+  const sunEq = vectorToRaDec(sunVec, date);
+  const sunHz = equatorialToHorizontal(sunEq.raHours, sunEq.decDeg, lat, lon, date);
+  bodies.push({name:"Sol", kind:"star", mag:-26.7, color:"#fff2a8", ra:sunEq.raHours, dec:sunEq.decDeg, alt:sunHz.alt, az:sunHz.az, dist:sunEq.dist});
+
+  ["Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune"].forEach(name=>{
+    const p = heliocentricEcliptic(name, d);
+    const geo = {x:p.x-earth.x, y:p.y-earth.y, z:p.z-earth.z};
+    const eq = vectorToRaDec(geo, date);
+    const hz = equatorialToHorizontal(eq.raHours, eq.decDeg, lat, lon, date);
+    bodies.push({name, kind:"planet", mag:0, color:planetColor(name), ra:eq.raHours, dec:eq.decDeg, alt:hz.alt, az:hz.az, dist:eq.dist});
+  });
+
+  return bodies;
+}
+
+function planetColor(name){
+  return {
+    Mercury:"#c8c8c8", Venus:"#fff2b7", Mars:"#ff8b62", Jupiter:"#ffd9a3",
+    Saturn:"#f7df9b", Uranus:"#94f5ff", Neptune:"#7ba6ff"
+  }[name] || "#fff";
+}
+
+/* ============================================================
+   STAR CATALOG / PROCEDURAL LAYERS
+   ============================================================ */
+
+const Stars = [
   ["Sirius",6.7525,-16.7161,-1.46,"Can Mayor"],["Canopus",6.3992,-52.6957,-0.74,"Carina"],
   ["Arcturus",14.2610,19.1825,-0.05,"Boyero"],["Vega",18.6156,38.7837,0.03,"Lira"],
   ["Capella",5.2782,45.9980,0.08,"Auriga"],["Rigel",5.2423,-8.2016,0.13,"Orión"],
@@ -984,1418 +761,463 @@ const stars = [
   ["Adhara",6.9771,-28.9721,1.50,"Can Mayor"],["Shaula",17.5601,-37.1038,1.62,"Escorpio"],
   ["Castor",7.5767,31.8883,1.58,"Géminis"],["Gacrux",12.5194,-57.1132,1.63,"Cruz del Sur"],
   ["Bellatrix",5.4189,6.3497,1.64,"Orión"],["Elnath",5.4382,28.6075,1.65,"Tauro"],
-  ["Miaplacidus",9.2200,-69.7172,1.67,"Carina"],["Alnilam",5.6036,-1.2019,1.69,"Orión"],
-  ["Alnitak",5.6793,-1.9426,1.74,"Orión"],["Dubhe",11.0621,61.7510,1.79,"Osa Mayor"],
-  ["Alioth",12.9005,55.9598,1.77,"Osa Mayor"],["Alkaid",13.7923,49.3133,1.85,"Osa Mayor"],
-  ["Mirfak",3.4054,49.8612,1.79,"Perseo"],["Wezen",7.1399,-26.3932,1.83,"Can Mayor"],
-  ["Kaus Australis",18.4029,-34.3846,1.85,"Sagitario"],["Sargas",17.6219,-42.9978,1.86,"Escorpio"],
-  ["Avior",8.3752,-59.5095,1.86,"Carina"],["Menkalinan",5.9921,44.9474,1.90,"Auriga"],
-  ["Atria",16.8111,-69.0277,1.91,"Triángulo Austral"],["Alhena",6.6285,16.3993,1.93,"Géminis"],
-  ["Peacock",20.4275,-56.7351,1.94,"Pavo"],["Polaris",2.5303,89.2641,1.98,"Osa Menor"],
-  ["Mirzam",6.3783,-17.9559,1.98,"Can Mayor"],["Alphard",9.4598,-8.6586,2.00,"Hidra"],
-  ["Hamal",2.1195,23.4624,2.00,"Aries"],["Diphda",0.7265,-17.9867,2.04,"Ballena"],
-  ["Nunki",18.9211,-26.2967,2.05,"Sagitario"],["Algol",3.1361,40.9556,2.12,"Perseo"],
-  ["Denebola",11.8177,14.5721,2.14,"Leo"],["Mizar",13.3987,54.9254,2.23,"Osa Mayor"],
+  ["Polaris",2.5303,89.2641,1.98,"Osa Menor"],["Dubhe",11.0621,61.7510,1.79,"Osa Mayor"],
   ["Merak",11.0307,56.3824,2.37,"Osa Mayor"],["Phecda",11.8972,53.6948,2.44,"Osa Mayor"],
-  ["Megrez",12.2571,57.0326,3.30,"Osa Mayor"],["Delta Crucis",12.2524,-58.7489,2.79,"Cruz del Sur"],
-  ["Pléyades",3.7900,24.1167,1.60,"Tauro"]
+  ["Megrez",12.2571,57.0326,3.30,"Osa Mayor"],["Alioth",12.9005,55.9598,1.77,"Osa Mayor"],
+  ["Mizar",13.3987,54.9254,2.23,"Osa Mayor"],["Alkaid",13.7923,49.3133,1.85,"Osa Mayor"]
 ];
 
-const lines = [
-  ["Betelgeuse","Bellatrix"],["Betelgeuse","Alnilam"],["Bellatrix","Alnilam"],["Alnilam","Alnitak"],["Alnilam","Rigel"],
+const Lines = [
+  ["Betelgeuse","Bellatrix"],["Betelgeuse","Alnilam"],["Bellatrix","Alnilam"],["Alnilam","Rigel"],
   ["Dubhe","Merak"],["Merak","Phecda"],["Phecda","Megrez"],["Megrez","Alioth"],["Alioth","Mizar"],["Mizar","Alkaid"],
-  ["Acrux","Mimosa"],["Gacrux","Delta Crucis"],["Mimosa","Delta Crucis"]
+  ["Acrux","Mimosa"],["Gacrux","Acrux"]
 ];
 
-let nightMode = false;
-let beginnerMode = false;
-let starDots = [];
+function seededRandom(seed){
+  let s = seed >>> 0;
+  return () => ((s = (1664525 * s + 1013904223) >>> 0) / 4294967296);
+}
 
-function deg(x){return x*Math.PI/180}
-function rad(x){return x*180/Math.PI}
-function mod(n,m){return ((n%m)+m)%m}
-function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-
-function buildBackgroundStars(){
-  starDots = [];
-  for(let i=0;i<330;i++){
-    const a = Math.random()*Math.PI*2;
-    const r = Math.sqrt(Math.random())*0.43;
-    starDots.push({a,r,alpha:.08+Math.random()*.25,size:Math.random()<.88?1:2});
+function generateWeakStars(){
+  const rnd = seededRandom(20260503);
+  App.weakStars = [];
+  for(let i=0;i<520;i++){
+    App.weakStars.push({
+      x:rnd()*2-1,
+      y:rnd()*2-1,
+      a:.12 + rnd()*.45,
+      size:rnd()<.90 ? 1 : 2,
+      twinkle:rnd()*Math.PI*2
+    });
   }
 }
 
-function julian(date){return date.getTime()/86400000 + 2440587.5}
+/* ============================================================
+   RENDERING
+   ============================================================ */
 
-function gmst(date){
-  const JD = julian(date);
-  const T = (JD - 2451545.0)/36525;
-  let theta = 280.46061837 + 360.98564736629*(JD-2451545) + 0.000387933*T*T - T*T*T/38710000;
-  return mod(theta,360);
-}
-
-function altAz(raHours, decDeg, latDeg, lonDeg, date){
-  const lst = mod(gmst(date) + lonDeg, 360);
-  const raDeg = raHours * 15;
-  const H = deg(mod(lst - raDeg + 180,360)-180);
-  const dec = deg(decDeg);
-  const lat = deg(latDeg);
-  const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(H);
-  const alt = Math.asin(sinAlt);
-  const az = Math.atan2(-Math.sin(H), Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H));
-  return {alt:rad(alt), az:mod(rad(az),360)};
-}
-
-function project(az, alt, cx, cy, rmax){
-  const r = ((90-alt)/90)*rmax;
-  const t = deg(az);
-  return {x: cx + r*Math.sin(t), y: cy - r*Math.cos(t), r};
-}
-
-function getDateFromInput(){
-  const v = document.getElementById("time").value;
-  return v ? new Date(v) : new Date();
-}
-
-function useNow(){
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  document.getElementById("time").value = d.toISOString().slice(0,16);
-  track("use_current_time");
-  drawSky();
-}
-
-function setTonala(){
-  document.getElementById("lat").value = "20.624";
-  document.getElementById("lon").value = "-103.234";
-  track("set_default_location", {location_name:"Tonala_ZMG"});
-  drawSky();
-}
-
-function closeIntro(){
-  document.getElementById("introModal").classList.add("hidden");
-  track("intro_closed");
-}
-
-function openIntro(){
-  document.getElementById("introModal").classList.remove("hidden");
-  track("intro_opened");
-}
-
-function scrollToSky(){
-  document.getElementById("sky").scrollIntoView({behavior:"smooth", block:"center"});
-  track("scroll_to_sky");
-}
-
-function toggleNight(){
-  nightMode = !nightMode;
-  document.body.classList.toggle("night-red", nightMode);
-  track("night_mode_toggle", {enabled:nightMode});
-  drawSky();
-}
-
-function toggleBeginner(){
-  beginnerMode = !beginnerMode;
-  document.getElementById("beginnerPanel").classList.toggle("hidden", !beginnerMode);
-  document.querySelector(".hud").classList.toggle("beginner-on", beginnerMode);
-  track("beginner_mode_toggle", {enabled:beginnerMode});
-  if(beginnerMode) document.getElementById("beginnerPanel").scrollIntoView({behavior:"smooth", block:"center"});
-  drawSky();
-}
-
-function showInstallHelp(){
-  document.getElementById("installHelp").classList.add("show");
-  document.getElementById("installHelp").scrollIntoView({behavior:"smooth", block:"center"});
-  track("install_help_opened");
-}
-
-function hideInstallHelp(){
-  document.getElementById("installHelp").classList.remove("show");
-  track("install_help_closed");
-}
-
-function shareWhatsApp(){
-  track("share_whatsapp");
-  const url = "https://wa.me/?text=" + encodeURIComponent(SHARE_TEXT);
-  window.open(url, "_blank", "noopener,noreferrer");
-}
-
-function useGPS(){
-  const status = document.getElementById("status");
-  track("gps_click");
-  if(!navigator.geolocation){
-    status.textContent = "Tu navegador no dejó usar GPS. Mete latitud y longitud manual.";
-    return;
+function resizeCanvas(){
+  const c = App.canvas;
+  const rect = c.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = Math.max(640, Math.floor(rect.width * dpr));
+  const h = Math.max(640, Math.floor(rect.height * dpr));
+  if(c.width !== w || c.height !== h){
+    c.width = w;
+    c.height = h;
+    App.W = w; App.H = h;
+    App.cx = w/2; App.cy = h/2;
+    App.rmax = Math.min(w,h) * .43;
   }
-  status.textContent = "Buscando GPS...";
-  navigator.geolocation.getCurrentPosition(pos=>{
-    document.getElementById("lat").value = pos.coords.latitude.toFixed(5);
-    document.getElementById("lon").value = pos.coords.longitude.toFixed(5);
-    status.textContent = "Ubicación cargada. Actualizando cielo...";
-    track("gps_success");
-    drawSky();
-  },err=>{
-    status.innerHTML = "<span class='warning'>No se pudo usar GPS.</span> Puedes dejar Tonalá/ZMG: lat 20.624, lon -103.234.";
-    track("gps_error", {code:err.code});
-  },{enableHighAccuracy:true,timeout:8000});
 }
 
-function moonPhase(date){
-  const knownNewMoon = new Date(Date.UTC(2000,0,6,18,14));
-  const synodic = 29.530588853;
-  const days = (date.getTime() - knownNewMoon.getTime()) / 86400000;
-  const age = ((days % synodic) + synodic) % synodic;
-  const pct = Math.round((1 - Math.cos(2*Math.PI*age/synodic))/2 * 100);
-  let name = "Luna nueva", emoji = "🌑";
-  if(age < 1.85) {name="Luna nueva"; emoji="🌑";}
-  else if(age < 5.54) {name="Creciente fina"; emoji="🌒";}
-  else if(age < 9.23) {name="Cuarto creciente"; emoji="🌓";}
-  else if(age < 12.92) {name="Gibosa creciente"; emoji="🌔";}
-  else if(age < 16.61) {name="Luna llena"; emoji="🌕";}
-  else if(age < 20.30) {name="Gibosa menguante"; emoji="🌖";}
-  else if(age < 23.99) {name="Cuarto menguante"; emoji="🌗";}
-  else if(age < 27.68) {name="Menguante fina"; emoji="🌘";}
-  return {age, pct, name, emoji};
+function projectedPoint(az, alt){
+  const displayAz = norm360(az - (Sensor.enabled ? Sensor.yaw : 0));
+  const r = ((90 - alt) / 90) * App.rmax;
+  const t = deg(displayAz);
+  return {x:App.cx + r*Math.sin(t), y:App.cy - r*Math.cos(t), r, displayAz};
 }
 
-function updateMoon(){
-  const m = moonPhase(getDateFromInput());
-  document.getElementById("moonInfo").innerHTML = `
-    <div style="font-size:34px">${m.emoji}</div>
-    <b>${m.name}</b><br>
-    <span class="small">Edad lunar aprox: ${m.age.toFixed(1)} días · Iluminación aprox: ${m.pct}%</span>
-  `;
-}
-
-
-function displayAz(az){
-  return autoRadarEnabled ? (az - currentRotation + 360) % 360 : az;
-}
-
-function drawSky(sendTrack = true){
-  if(sendTrack) track("update_sky");
-  const canvas = document.getElementById("sky");
-  const ctx = canvas.getContext("2d");
-  const W = canvas.width, H = canvas.height;
-  const cx = W/2, cy = H/2, rmax = W*0.43;
-  const lat = parseFloat(document.getElementById("lat").value);
-  const lon = parseFloat(document.getElementById("lon").value);
-  const date = getDateFromInput();
-
-  if(Number.isNaN(lat) || Number.isNaN(lon)){
-    document.getElementById("status").innerHTML = "<span class='warning'>Revisa latitud y longitud.</span>";
-    return;
+function clearAndBackground(ctx, t){
+  const {W,H,cx,cy,rmax} = App;
+  const g = ctx.createRadialGradient(cx,cy,30,cx,cy,Math.max(W,H)*.65);
+  if(App.mode === "op"){
+    g.addColorStop(0,"#00180c");
+    g.addColorStop(.55,"#000904");
+    g.addColorStop(1,"#000000");
+  }else{
+    g.addColorStop(0,"#0b2d5a");
+    g.addColorStop(.55,"#041229");
+    g.addColorStop(1,"#01040b");
   }
-
-  ctx.clearRect(0,0,W,H);
-  const grad = ctx.createRadialGradient(cx,cy,30,cx,cy,rmax);
-  grad.addColorStop(0, nightMode ? "#22090a" : "#0c2d52");
-  grad.addColorStop(.7, nightMode ? "#100406" : "#061121");
-  grad.addColorStop(1, "#01040a");
-  ctx.fillStyle = grad;
+  ctx.fillStyle = g;
   ctx.fillRect(0,0,W,H);
 
   ctx.save();
   ctx.beginPath();
   ctx.arc(cx,cy,rmax,0,Math.PI*2);
   ctx.clip();
-  starDots.forEach(s=>{
-    const x = cx + Math.cos(s.a)*s.r*W;
-    const y = cy + Math.sin(s.a)*s.r*H;
-    ctx.fillStyle = nightMode ? `rgba(255,90,90,${s.alpha})` : `rgba(255,255,255,${s.alpha})`;
-    ctx.fillRect(x,y,s.size,s.size);
+
+  App.weakStars.forEach(s=>{
+    const dist = Math.sqrt(s.x*s.x + s.y*s.y);
+    if(dist > 1) return;
+    const tw = .65 + .35*Math.sin(t*.0015 + s.twinkle);
+    ctx.fillStyle = App.mode === "op" ? `rgba(0,255,136,${s.a*.35})` : `rgba(255,255,255,${s.a*tw})`;
+    ctx.fillRect(cx+s.x*rmax, cy+s.y*rmax, s.size, s.size);
   });
   ctx.restore();
+}
 
-  ctx.strokeStyle = appMode === "engineering" ? "rgba(0,255,120,.30)" : (nightMode ? "rgba(255,80,80,.28)" : "rgba(90,220,255,.25)");
+function drawGrid(ctx){
+  const {cx,cy,rmax} = App;
+  ctx.save();
+
+  ctx.strokeStyle = App.mode === "op" ? "rgba(0,255,136,.32)" : "rgba(120,220,255,.26)";
   ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.arc(cx,cy,rmax,0,Math.PI*2); ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(cx,cy,rmax,0,Math.PI*2);
+  ctx.stroke();
 
-  if(appMode === "engineering") drawEngineeringCoordinateGrid(ctx, cx, cy, rmax);
+  const altStep = App.mode === "op" ? 10 : 30;
+  for(let alt=altStep; alt<90; alt+=altStep){
+    const rr = ((90-alt)/90)*rmax;
+    ctx.strokeStyle = App.mode === "op" ? (alt%30===0?"rgba(0,255,136,.22)":"rgba(0,255,136,.10)") : "rgba(120,220,255,.12)";
+    ctx.lineWidth = alt%30===0 ? 1.4 : 1;
+    ctx.beginPath();
+    ctx.arc(cx,cy,rr,0,Math.PI*2);
+    ctx.stroke();
 
-  [30,60].forEach(a=>{
-    const rr = ((90-a)/90)*rmax;
-    ctx.strokeStyle = nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)";
-    ctx.beginPath(); ctx.arc(cx,cy,rr,0,Math.PI*2); ctx.stroke();
-    ctx.fillStyle = nightMode ? "rgba(255,170,170,.6)" : "rgba(220,250,255,.5)";
-    ctx.font = "18px monospace";
-    ctx.fillText(a+"°",cx+8,cy-rr+22);
-  });
+    if(App.mode === "op"){
+      ctx.fillStyle = "rgba(0,255,136,.62)";
+      ctx.font = "10px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(`ALT ${alt}°`, cx+rr+8, cy-4);
+    }
+  }
 
-  for(let az=0; az<360; az+=30){
-    const p = project(displayAz(az),0,cx,cy,rmax);
-    ctx.strokeStyle = az%90===0 ? (nightMode ? "rgba(255,80,80,.35)" : "rgba(255,80,110,.35)") : (nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)");
-    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p.x,p.y); ctx.stroke();
+  const azStep = App.mode === "op" ? 10 : 30;
+  for(let az=0; az<360; az+=azStep){
+    const p = projectedPoint(az, 0);
+    ctx.strokeStyle = App.mode === "op" ? (az%30===0?"rgba(0,255,136,.24)":"rgba(0,255,136,.09)") : (az%90===0?"rgba(255,242,168,.25)":"rgba(120,220,255,.10)");
+    ctx.lineWidth = az%30===0 ? 1.2 : 1;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+
+    if(App.mode === "op" && az%30===0){
+      const lp = projectedPoint(az, -5);
+      ctx.fillStyle = "rgba(0,255,136,.62)";
+      ctx.font = "10px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(`${az}°`, lp.x, lp.y);
+    }
   }
 
   [["N",0],["E",90],["S",180],["O",270]].forEach(([txt,az])=>{
-    const p = project(displayAz(az),-5,cx,cy,rmax);
-    ctx.fillStyle = nightMode ? "#ff8888" : "#9eeaff";
-    ctx.font = "bold 30px monospace";
+    const p = projectedPoint(az, -6);
+    ctx.fillStyle = App.mode === "op" ? "#00ff88" : "#9eeaff";
+    ctx.font = "bold 26px monospace";
     ctx.textAlign = "center";
     ctx.fillText(txt,p.x,p.y);
   });
 
-  // Capa de eclíptica: ruta aparente del Sol, Luna y planetas
-  if(appMode === "engineering") drawEcliptic(ctx, cx, cy, rmax, lat, lon, date);
-
-  let calculated = {};
-  let visible = [];
-  stars.forEach(s=>{
-    const aa = altAz(s[1],s[2],lat,lon,date);
-    calculated[s[0]] = aa;
-    if(aa.alt > 0) visible.push({name:s[0], mag:s[3], cons:s[4], alt:aa.alt, az:aa.az});
-  });
-
-  ctx.strokeStyle = nightMode ? "rgba(255,120,120,.22)" : "rgba(120,220,255,.22)";
-  ctx.lineWidth = 2;
-  lines.forEach(([a,b])=>{
-    const A = calculated[a], B = calculated[b];
-    if(A && B && A.alt>0 && B.alt>0){
-      const p1 = project(displayAz(A.az),A.alt,cx,cy,rmax);
-      const p2 = project(displayAz(B.az),B.alt,cx,cy,rmax);
-      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
-    }
-  });
-
-  visible.forEach(v=>{
-    const p = project(displayAz(v.az),v.alt,cx,cy,rmax);
-    const size = clamp((6-v.mag)*1.2,2,11);
-    ctx.beginPath();
-    ctx.fillStyle = nightMode ? "#ff9999" : (v.mag < 0.5 ? "#fff7d1" : "#e7fbff");
-    ctx.shadowColor = nightMode ? "#ff5555" : (v.mag < 1 ? "#aeefff" : "#ffffff");
-    ctx.shadowBlur = v.mag < 1 ? 18 : 7;
-    ctx.arc(p.x,p.y,size,0,Math.PI*2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    if(v.mag < 1.9 || v.name==="Polaris" || v.name==="Pléyades"){
-      ctx.fillStyle = nightMode ? "rgba(255,180,180,.9)" : "rgba(235,250,255,.88)";
-      ctx.font = "16px monospace";
-      ctx.textAlign = "left";
-      ctx.fillText(v.name,p.x+10,p.y-8);
-    }
-  });
-
-  ctx.fillStyle = nightMode ? "rgba(255,190,190,.86)" : "rgba(255,255,255,.86)";
-  ctx.font = "18px monospace"; ctx.textAlign = "center";
-  ctx.fillText("Cénit / cielo arriba",cx,cy-8);
-
-  if(beginnerMode){
-    ctx.fillStyle = "rgba(255,242,168,.9)";
-    ctx.font = "bold 22px monospace";
-    ctx.fillText("CENTRO = ARRIBA DE TU CABEZA", cx, cy+28);
-    ctx.font = "16px monospace";
-    ctx.fillText("BORDE = HORIZONTE", cx, cy+54);
-  }
-
-  visible.sort((a,b)=>a.mag-b.mag);
-  const list = document.getElementById("visibleList");
-  list.innerHTML = visible.slice(0,12).map(v=>`
-    <div class="starrow">
-      <div><b>${v.name}</b> <span class="small">${v.cons}</span></div>
-      <div class="small">Alt ${v.alt.toFixed(0)}° / Az ${v.az.toFixed(0)}°</div>
-    </div>
-  `).join("");
-
-  document.getElementById("tonightList").innerHTML = visible.slice(0,5).map(v=>`
-    <div class="starrow">
-      <div><b>⭐ ${v.name}</b><br><span class="small">${v.cons}</span></div>
-      <div class="small">Alt ${v.alt.toFixed(0)}°</div>
-    </div>
-  `).join("") || "<div class='pill'>No hay estrellas destacadas calculadas sobre el horizonte en este momento.</div>";
-
-  // Instrumentos técnicos solo en Modo Ingeniería
-  if(appMode === "engineering"){
-    drawEngineeringTelemetry(ctx, 22, 22, 245, 132);
-    drawArtificialHorizon(ctx, W - 225, 22, 205, 128);
-    updateFieldInstrumentReadout();
-  }
-
-  document.getElementById("status").innerHTML = `
-    <b>Lectura:</b> ${visible.length} objetos brillantes sobre el horizonte. 
-    <br><span class="small">Hora usada: ${date.toLocaleString()} | Lat ${lat.toFixed(3)} Lon ${lon.toFixed(3)}</span>
-  `;
-  updateMoon();
-  lastVisibleStars = visible;
-  updateVisibilityModules();
-  updateSkyEvents();
-  updatePlanets();
-  createPoster();
-  lastVisibleStars = visible;
-  updateAllAdvancedModules();
-  updateNormalConstellations();
-}
-
-
-let lastVisibleStars = [];
-let lastHeading = null;
-let mapRotation = 0;
-let targetRotation = 0;
-let currentRotation = 0;
-let autoRadarEnabled = false;
-let autoRadarAnimationId = null;
-let demoSpin = false;
-let lastFrameTime = 0;
-let sensorPitch = 0;
-let sensorRoll = 0;
-let sensorMode = "OFF";
-let observationMode = false;
-
-function scrollToSection(id){
-  const el = document.getElementById(id);
-  if(el){ el.scrollIntoView({behavior:"smooth", block:"center"}); }
-  track("scroll_to_section", {section:id});
-}
-
-function angularDiff(a,b){
-  let d = Math.abs(a-b) % 360;
-  return d > 180 ? 360 - d : d;
-}
-
-function visibilityLabel(star){
-  if(star.alt >= 35 && star.mag <= 1.7) return {label:"Muy fácil de ver", cls:"vis-easy"};
-  if(star.alt >= 18 && star.mag <= 2.3) return {label:"Fácil", cls:"vis-easy"};
-  if(star.alt >= 8) return {label:"Difícil / baja", cls:"vis-mid"};
-  return {label:"Muy cerca del horizonte", cls:"vis-hard"};
-}
-
-function updateVisibilityModules(){
-  const visibilityList = document.getElementById("visibilityList");
-  if(!visibilityList) return;
-  visibilityList.innerHTML = lastVisibleStars.slice(0,7).map(v=>{
-    const vis = visibilityLabel(v);
-    return `<div class="starrow">
-      <div><b>${v.name}</b><br><span class="small">${v.cons}</span></div>
-      <div class="small ${vis.cls}">${vis.label}<br>Alt ${v.alt.toFixed(0)}°</div>
-    </div>`;
-  }).join("") || "<div class='pill'>Actualiza el cielo para calcular visibilidad.</div>";
-  suggestStarsByDirection();
-}
-
-function suggestStarsByDirection(){
-  const select = document.getElementById("lookDirection");
-  const box = document.getElementById("starGuessList");
-  if(!select || !box) return;
-  const dir = parseFloat(select.value);
-  const candidates = lastVisibleStars
-    .filter(s => s.alt > 4)
-    .map(s => ({...s, diff: angularDiff(s.az, dir)}))
-    .filter(s => s.diff <= 45)
-    .sort((a,b)=> a.diff - b.diff || a.mag - b.mag)
-    .slice(0,5);
-
-  box.innerHTML = candidates.length ? candidates.map(s=>`
-    <div class="starrow">
-      <div><b>⭐ ${s.name}</b><br><span class="small">${s.cons}</span></div>
-      <div class="small">Az ${s.az.toFixed(0)}° · Alt ${s.alt.toFixed(0)}°</div>
-    </div>
-  `).join("") : "<div class='pill'>No encontré estrellas brillantes cerca de esa dirección. Prueba otra zona o actualiza el cielo.</div>";
-  track("star_finder_used", {direction:dir});
-}
-
-
-function normalizeAngle(a){
-  return ((a % 360) + 360) % 360;
-}
-
-function shortestAngleDelta(from, to){
-  let delta = normalizeAngle(to - from);
-  if(delta > 180) delta -= 360;
-  return delta;
-}
-
-function setRadarHeading(heading){
-  targetRotation = normalizeAngle(heading);
-  mapRotation = targetRotation;
-  lastHeading = targetRotation;
-  autoRadarEnabled = true;
-  const hud = document.querySelector(".hud");
-  if(hud) hud.classList.add("auto-rotate-active");
-}
-
-function startRadarAnimation(){
-  if(autoRadarAnimationId) return;
-
-  function frame(ts){
-    if(!lastFrameTime) lastFrameTime = ts;
-    const dt = Math.min(50, ts - lastFrameTime);
-    lastFrameTime = ts;
-
-    // Si todavía no hay sensor, el radar gira en demo para que se vea fluido al tocar el botón.
-    if(demoSpin){
-      targetRotation = normalizeAngle(targetRotation + dt * 0.040);
-    }
-
-    const delta = shortestAngleDelta(currentRotation, targetRotation);
-    currentRotation = normalizeAngle(currentRotation + delta * 0.20);
-
-    const hudText = document.getElementById("headingHud");
-    if(hudText){
-      if(autoRadarEnabled && demoSpin){
-        hudText.textContent = `Radar fluido · ${currentRotation.toFixed(0)}°`;
-      } else if(autoRadarEnabled){
-        hudText.textContent = `Radar auto · ${currentRotation.toFixed(0)}°`;
-      } else {
-        hudText.textContent = "Radar fijo · N arriba";
-      }
-    }
-
-    if(autoRadarEnabled || Math.abs(delta) > 0.2){
-      drawSky(false);
-    }
-
-    autoRadarAnimationId = requestAnimationFrame(frame);
-  }
-
-  autoRadarAnimationId = requestAnimationFrame(frame);
-}
-
-function enableAutoRadar(){
-  track("auto_radar_enable_click");
-
-  const status = document.getElementById("autoRadarStatus");
-  const hud = document.querySelector(".hud");
-
-  // Desde que el usuario toca el botón, el radar empieza a moverse fluido.
-  autoRadarEnabled = true;
-  demoSpin = true;
-  if(hud) hud.classList.add("auto-rotate-active");
-  startRadarAnimation();
-
-  if(status){
-    status.innerHTML = `<b>Radar fluido iniciado.</b><br>
-    <span class="small">Ya debe verse girar. Si tu celular permite sensores, en unos segundos se alineará con tu orientación real.</span>`;
-  }
-
-  let sensorReceived = false;
-
-  function handleOrientation(event){
-    let heading = null;
-
-    if(typeof event.webkitCompassHeading === "number"){
-      heading = event.webkitCompassHeading;
-      sensorMode = "ABS_COMPASS";
-    } else if(typeof event.alpha === "number"){
-      heading = 360 - event.alpha;
-      sensorMode = "DEVICE_ALPHA";
-    }
-
-    if(typeof event.beta === "number") sensorPitch = event.beta;
-    if(typeof event.gamma === "number") sensorRoll = event.gamma;
-    updateFieldInstrumentReadout();
-
-    if(heading !== null){
-      sensorReceived = true;
-      demoSpin = false;
-      setRadarHeading(heading);
-      startRadarAnimation();
-
-      if(status){
-        status.innerHTML = `<b>Radar automático con sensor activo:</b> ${targetRotation.toFixed(0)}°<br>
-        <span class="small">El radar gira suave y se alinea con la orientación del celular.</span>`;
-      }
-    }
-  }
-
-  if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
-    DeviceOrientationEvent.requestPermission().then(state=>{
-      if(state === "granted"){
-        window.addEventListener("deviceorientation", handleOrientation, true);
-        track("auto_radar_enabled");
-        if(status){
-          status.innerHTML = `<b>Radar fluido activo.</b><br>
-          <span class="small">Permiso concedido. Mueve el celular lentamente para calibrar el sensor.</span>`;
-        }
-      } else {
-        demoSpin = true;
-        if(status){
-          status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
-          <span class="small">El permiso del sensor fue rechazado, pero el radar seguirá girando suave para visualizar el cielo.</span>`;
-        }
-        track("auto_radar_permission_denied");
-      }
-    }).catch(()=>{
-      demoSpin = true;
-      if(status){
-        status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
-        <span class="small">No se pudo activar el sensor. El radar seguirá girando suave.</span>`;
-      }
-      track("auto_radar_error");
-    });
-  } else if(window.DeviceOrientationEvent){
-    window.addEventListener("deviceorientation", handleOrientation, true);
-    track("auto_radar_enabled");
-    if(status){
-      status.innerHTML = `<b>Radar fluido activo.</b><br>
-      <span class="small">Mueve el celular lentamente. Si el navegador entrega sensor, se alineará solo.</span>`;
-    }
-
-    // Si en 3 segundos no llega ningún dato, se queda en demo fluido.
-    setTimeout(()=>{
-      if(!sensorReceived && status){
-        demoSpin = true;
-        status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
-        <span class="small">No llegaron datos del sensor. El radar seguirá girando suave para que se vea activo.</span>`;
-      }
-    }, 3000);
-  } else {
-    demoSpin = true;
-    if(status){
-      status.innerHTML = `<b>Radar fluido activo en modo demo.</b><br>
-      <span class="small">Este navegador no permite sensores, pero el radar girará suave.</span>`;
-    }
-    track("auto_radar_not_supported");
-  }
-}
-
-function stopAutoRadar(){
-  autoRadarEnabled = false;
-  demoSpin = false;
-  targetRotation = 0;
-  currentRotation = 0;
-  mapRotation = 0;
-  const hud = document.querySelector(".hud");
-  const status = document.getElementById("autoRadarStatus");
-  if(hud) hud.classList.remove("auto-rotate-active");
-  if(status){
-    status.innerHTML = `<b>Radar detenido.</b><br>
-    <span class="small">El mapa volvió a Norte arriba. Toca “Activar radar automático” para iniciar giro fluido.</span>`;
-  }
-  drawSky(false);
-  track("auto_radar_stopped");
-}
-
-function toggleObservation(){
-  observationMode = !observationMode;
-  document.body.classList.toggle("observation-mode", observationMode);
-  if(!nightMode && observationMode){
-    nightMode = true;
-    document.body.classList.add("night-red");
-  }
-  track("observation_mode_toggle", {enabled:observationMode});
-  drawSky();
-}
-
-function updateSkyEvents(){
-  const box = document.getElementById("skyEvents");
-  if(!box) return;
-  const d = getDateFromInput();
-  const month = d.getMonth() + 1;
-  const m = moonPhase(d);
-  let events = [];
-  if(m.pct > 90) events.push(["🌕 Luna muy brillante", "Buen momento para observar la Luna; estrellas débiles se verán menos."]);
-  if(m.pct < 15) events.push(["🌑 Cielo más oscuro", "Mejor oportunidad para ver estrellas débiles si el clima ayuda."]);
-  const meteorShowers = [
-    {name:"Cuadrántidas", month:1, note:"Principios de enero"},
-    {name:"Líridas", month:4, note:"Finales de abril"},
-    {name:"Eta Acuáridas", month:5, note:"Principios de mayo"},
-    {name:"Perseidas", month:8, note:"Agosto"},
-    {name:"Oriónidas", month:10, note:"Octubre"},
-    {name:"Leónidas", month:11, note:"Noviembre"},
-    {name:"Gemínidas", month:12, note:"Diciembre"}
-  ];
-  meteorShowers.filter(x=>x.month===month).forEach(x=>events.push(["🌠 "+x.name, x.note+" · evento aproximado de referencia."]));
-  events.push(["🧭 Tip de observación", "Apaga luces cercanas y espera 10 minutos para adaptar la vista."]);
-
-  box.innerHTML = events.map(e=>`
-    <div class="starrow">
-      <div><b>${e[0]}</b><br><span class="small">${e[1]}</span></div>
-    </div>
-  `).join("");
-}
-
-function updatePlanets(){
-  const box = document.getElementById("planetList");
-  if(!box) return;
-  const d = getDateFromInput();
-  const hour = d.getHours();
-  let planets = [];
-  if(hour >= 18 || hour <= 5){
-    planets = [
-      ["Venus", "Muy brillante si está cerca del amanecer/atardecer"],
-      ["Júpiter", "Brillante, blanco/crema"],
-      ["Saturno", "Menos brillante, tono amarillento"],
-      ["Marte", "Rojizo cuando está visible"]
-    ];
-  } else {
-    planets = [
-      ["Venus", "A veces visible cerca del Sol al amanecer/atardecer"],
-      ["Júpiter", "Mejor revisar de noche"],
-      ["Saturno", "Mejor revisar de noche"],
-      ["Marte", "Variable según temporada"]
-    ];
-  }
-  box.innerHTML = planets.map(p=>`
-    <div class="starrow">
-      <div><b>🪐 ${p[0]}</b><br><span class="small">${p[1]}</span></div>
-      <div class="small">Experimental</div>
-    </div>
-  `).join("");
-}
-
-function createPoster(){
-  track("poster_created");
-  const canvas = document.getElementById("posterCanvas");
-  if(!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  const grad = ctx.createLinearGradient(0,0,w,h);
-  grad.addColorStop(0,"#030711");
-  grad.addColorStop(.55,"#07172c");
-  grad.addColorStop(1,"#250713");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0,0,w,h);
-
-  for(let i=0;i<160;i++){
-    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.55})`;
-    ctx.fillRect(Math.random()*w, Math.random()*h, Math.random()<.9?2:3, Math.random()<.9?2:3);
-  }
-
-  ctx.fillStyle = "#eaf7ff";
-  ctx.font = "bold 58px system-ui";
-  ctx.fillText("StarView HUD", 55, 110);
-  ctx.font = "30px system-ui";
-  ctx.fillStyle = "rgba(234,247,255,.78)";
-  ctx.fillText("Esta noche desde tu ubicación", 55, 160);
-
-  const m = moonPhase(getDateFromInput());
-  ctx.font = "bold 42px system-ui";
-  ctx.fillStyle = "#fff2a8";
-  ctx.fillText(`${m.emoji} ${m.name}`, 55, 235);
-  ctx.font = "26px system-ui";
-  ctx.fillStyle = "rgba(234,247,255,.78)";
-  ctx.fillText(`Iluminación aprox: ${m.pct}%`, 55, 275);
-
-  ctx.font = "bold 34px system-ui";
-  ctx.fillStyle = "#9eeaff";
-  ctx.fillText("Estrellas destacadas:", 55, 360);
-
-  ctx.font = "32px system-ui";
-  ctx.fillStyle = "#eaf7ff";
-  lastVisibleStars.slice(0,6).forEach((s,i)=>{
-    ctx.fillText(`⭐ ${s.name} · Alt ${s.alt.toFixed(0)}°`, 75, 420 + i*58);
-  });
-
-  ctx.strokeStyle = "rgba(0,180,255,.55)";
-  ctx.lineWidth = 3;
-  ctx.strokeRect(38,38,w-76,h-76);
-
-  ctx.font = "24px system-ui";
-  ctx.fillStyle = "rgba(234,247,255,.75)";
-  ctx.fillText("Creado por Aire Acondicionado y Confort Lab", 55, h-95);
-  ctx.fillText("https://proyectoaireyconfort-lab.github.io/starview-hud/", 55, h-55);
-}
-
-function downloadPoster(){
-  createPoster();
-  const canvas = document.getElementById("posterCanvas");
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL("image/png");
-  a.download = "starview-hud-postal.png";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  track("poster_downloaded");
-}
-
-function sendFeedback(){
-  track("feedback_click");
-  const text = encodeURIComponent("Hola, probé StarView HUD y esta es mi opinión: ");
-  const url = "https://wa.me/?text=" + text;
-  window.open(url, "_blank", "noopener,noreferrer");
-}
-
-
-let lockedTargetName = null;
-let lockedTargetData = null;
-let kidsMode = false;
-let lastRomanticMessage = "";
-
-const starStories = {
-  "Sirius":"Sirius es la estrella más brillante del cielo nocturno. Muchas culturas la usaron como señal de temporada y orientación.",
-  "Betelgeuse":"Betelgeuse es una supergigante roja en Orión. Su tono anaranjado la hace fácil de distinguir cuando Orión está visible.",
-  "Rigel":"Rigel es una estrella azul-blanca muy brillante de Orión. Marca uno de los pies del cazador celeste.",
-  "Polaris":"Polaris es famosa porque ayuda a encontrar el norte. No es la más brillante, pero sí una de las más útiles.",
-  "Vega":"Vega es una estrella blanca-azulada muy brillante. En verano suele ser una de las reinas del cielo del norte.",
-  "Antares":"Antares tiene tono rojizo y es el corazón del Escorpión. Su nombre significa rival de Marte por su color.",
-  "Aldebaran":"Aldebaran es el ojo del Toro. Tiene brillo cálido y se encuentra cerca de las Pléyades.",
-  "Pléyades":"Las Pléyades son un cúmulo de estrellas. A simple vista parecen un pequeño racimo o nubecita brillante."
-};
-
-function getVisibleByName(name){
-  return lastVisibleStars.find(s => s.name === name);
-}
-
-function populateStarSelectors(){
-  const target = document.getElementById("targetStar");
-  const story = document.getElementById("storyStar");
-  if(target){
-    const options = lastVisibleStars.slice(0,14).map(s=>`<option value="${s.name}">${s.name} · ${s.cons}</option>`).join("");
-    target.innerHTML = options || "<option>Actualiza el cielo</option>";
-  }
-  if(story){
-    const names = Object.keys(starStories);
-    story.innerHTML = names.map(n=>`<option value="${n}">${n}</option>`).join("");
-  }
-}
-
-function directionName(az){
-  const dirs = ["Norte","Noreste","Este","Sureste","Sur","Suroeste","Oeste","Noroeste"];
-  return dirs[Math.round(((az % 360) / 45)) % 8];
-}
-
-function altitudeAdvice(alt){
-  if(alt >= 65) return "mira casi arriba de tu cabeza";
-  if(alt >= 40) return "sube bastante la mirada";
-  if(alt >= 20) return "mira a media altura";
-  return "mira bajo, cerca del horizonte";
-}
-
-function starColorHint(name){
-  const warm = ["Betelgeuse","Antares","Aldebaran"];
-  const blue = ["Rigel","Vega","Spica"];
-  if(warm.includes(name)) return "tono rojizo/anaranjado";
-  if(blue.includes(name)) return "tono blanco/azulado";
-  return "brillo blanco o claro";
-}
-
-function arrowForTarget(star){
-  if(!star) return "⬆️";
-  const display = displayAz(star.az);
-  if(display > 330 || display < 30) return "⬆️";
-  if(display >= 30 && display < 80) return "↗️";
-  if(display >= 80 && display < 120) return "➡️";
-  if(display >= 120 && display < 170) return "↘️";
-  if(display >= 170 && display < 210) return "⬇️";
-  if(display >= 210 && display < 260) return "↙️";
-  if(display >= 260 && display < 300) return "⬅️";
-  return "↖️";
-}
-
-function lockTargetStar(){
-  const select = document.getElementById("targetStar");
-  if(!select || !select.value) return;
-  lockedTargetName = select.value;
-  lockedTargetData = getVisibleByName(lockedTargetName);
-  updateTargetGuide();
-  if(navigator.vibrate) navigator.vibrate(60);
-  track("star_hunter_lock", {star:lockedTargetName});
-}
-
-function updateTargetGuide(){
-  const status = document.getElementById("targetStatus");
-  const arrow = document.getElementById("targetArrow");
-  const instructions = document.getElementById("targetInstructions");
-  const lockPill = document.getElementById("lockPill");
-  if(!status || !arrow || !instructions) return;
-
-  if(!lockedTargetName && lastVisibleStars.length){
-    lockedTargetName = lastVisibleStars[0].name;
-    lockedTargetData = lastVisibleStars[0];
-  } else if(lockedTargetName){
-    lockedTargetData = getVisibleByName(lockedTargetName);
-  }
-
-  if(!lockedTargetData){
-    status.innerHTML = "<b>Objetivo no visible.</b> Prueba otra estrella o cambia la hora.";
-    arrow.textContent = "❌";
-    instructions.textContent = "Ese objetivo no está sobre el horizonte en este momento.";
-    if(lockPill) lockPill.textContent = "Sin objetivo visible";
-    return;
-  }
-
-  const s = lockedTargetData;
-  const dir = directionName(s.az);
-  const altText = altitudeAdvice(s.alt);
-  const color = starColorHint(s.name);
-  const vis = visibilityLabel(s);
-
-  status.innerHTML = `<b>Objetivo bloqueado:</b> ${s.name}<br>
-  <span class="small">Dirección: ${dir} · Az ${s.az.toFixed(0)}° · Alt ${s.alt.toFixed(0)}° · ${vis.label}</span>`;
-  arrow.textContent = arrowForTarget(s);
-  instructions.innerHTML = `Gira hacia <b>${dir}</b>, ${altText} y busca una estrella de <b>${color}</b>.`;
-  if(lockPill) lockPill.textContent = `LOCK: ${s.name}`;
-}
-
-function computeNightScore(){
-  const m = moonPhase(getDateFromInput());
-  const visibleScore = Math.min(45, lastVisibleStars.length * 2.6);
-  const moonPenalty = m.pct > 85 ? 22 : m.pct > 60 ? 14 : m.pct > 35 ? 7 : 0;
-  const quality = document.getElementById("skyQuality")?.value || "suburb";
-  const qualityBonus = quality === "dark" ? 18 : quality === "suburb" ? 8 : -5;
-  const easyCount = lastVisibleStars.filter(s => s.alt > 25 && s.mag < 2.1).length;
-  let score = Math.round(Math.max(10, Math.min(99, 45 + visibleScore + qualityBonus + easyCount*2 - moonPenalty)));
-  return {score, m, easyCount, quality};
-}
-
-function updateNightScore(){
-  const ring = document.getElementById("nightScore");
-  const txt = document.getElementById("nightScoreText");
-  if(!ring || !txt) return;
-  const data = computeNightScore();
-  ring.textContent = data.score;
-  let label = data.score >= 80 ? "Noche muy buena" : data.score >= 60 ? "Noche decente" : "Noche difícil";
-  txt.innerHTML = `<b>${label}</b><br><span class="small">Luna: ${data.m.pct}% · Estrellas fáciles: ${data.easyCount} · Ajuste: ${data.quality}</span>`;
-}
-
-function predictVisibleAt(minutes){
-  const lat = parseFloat(document.getElementById("lat").value);
-  const lon = parseFloat(document.getElementById("lon").value);
-  const date = new Date(getDateFromInput().getTime() + minutes*60000);
-  let arr = [];
-  stars.forEach(s=>{
-    const aa = altAz(s[1],s[2],lat,lon,date);
-    if(aa.alt > 0) arr.push({name:s[0], mag:s[3], cons:s[4], alt:aa.alt, az:aa.az});
-  });
-  arr.sort((a,b)=>a.mag-b.mag);
-  return arr;
-}
-
-function updateNextHour(){
-  const box = document.getElementById("nextHourList");
-  if(!box) return;
-  const marks = [15,30,60];
-  box.innerHTML = marks.map(min=>{
-    const v = predictVisibleAt(min)[0];
-    return v ? `<div class="starrow">
-      <div><b>+${min} min: ${v.name}</b><br><span class="small">${v.cons}</span></div>
-      <div class="small">Alt ${v.alt.toFixed(0)}°</div>
-    </div>` : `<div class="starrow"><div>+${min} min</div><div class="small">Sin datos</div></div>`;
-  }).join("");
-}
-
-function applyTimeOffset(){
-  const slider = document.getElementById("timeOffset");
-  const label = document.getElementById("timeOffsetLabel");
-  if(!slider) return;
-  const min = parseInt(slider.value,10);
-  if(label) label.textContent = min === 0 ? "Ahora" : `+${min} min`;
-  const d = new Date();
-  d.setMinutes(d.getMinutes() + min - d.getTimezoneOffset());
-  document.getElementById("time").value = d.toISOString().slice(0,16);
-  drawSky();
-  track("time_slider_used", {minutes:min});
-}
-
-function resetTimeOffset(){
-  const slider = document.getElementById("timeOffset");
-  if(slider) slider.value = 0;
-  useNow();
-  const label = document.getElementById("timeOffsetLabel");
-  if(label) label.textContent = "Ahora";
-}
-
-function generateSpecialSky(){
-  const input = document.getElementById("specialDate");
-  const result = document.getElementById("specialSkyResult");
-  if(!input || !input.value || !result) return;
-  const old = document.getElementById("time").value;
-  document.getElementById("time").value = input.value;
-  drawSky();
-  const m = moonPhase(getDateFromInput());
-  const top = lastVisibleStars.slice(0,4).map(s=>s.name).join(", ");
-  result.innerHTML = `<b>Así se veía tu cielo:</b><br>
-  Luna: ${m.emoji} ${m.name} · Iluminación aprox ${m.pct}%<br>
-  Estrellas dominantes: ${top || "sin datos visibles"}<br>
-  <span class="small">Puedes descargar el Sky Report Premium con esta fecha.</span>`;
-  track("special_sky_generated");
-  // Mantener la fecha elegida; el usuario puede volver con “Usar hora actual”.
-}
-
-function showStarStory(){
-  const select = document.getElementById("storyStar");
-  const box = document.getElementById("starStory");
-  if(!select || !box) return;
-  box.innerHTML = `<b>${select.value}</b><br>${starStories[select.value] || "Historia no disponible todavía."}`;
-  track("star_story_opened", {star:select.value});
-}
-
-function toggleKidsMode(){
-  kidsMode = !kidsMode;
-  const box = document.getElementById("kidModeBox");
-  if(box){
-    box.innerHTML = kidsMode
-      ? "🌟 Modo niños activo: busca primero la estrella más grande del radar. Si está arriba en el mapa, mira hacia esa dirección. Si vibra o aparece LOCK, estás cerca del objetivo."
-      : "Busca la estrella más brillante. Si está cerca del centro del radar, está arriba de ti. Si está cerca del borde, está bajita.";
-  }
-  track("kids_mode_toggle", {enabled:kidsMode});
-}
-
-function updateChallenge(){
-  const box = document.getElementById("challengeList");
-  if(!box) return;
-  const top = lastVisibleStars.slice(0,3);
-  const items = [
-    ["Encontrar una estrella brillante", top[0]?.name || "Sirius"],
-    ["Activar radar automático", autoRadarEnabled ? "Listo" : "Pendiente"],
-    ["Bloquear objetivo Star Hunter", lockedTargetName || "Pendiente"],
-    ["Crear postal del cielo", "Opcional"]
-  ];
-  box.innerHTML = items.map((it,i)=>`<div class="mission-check">
-    <div><b>${i+1}. ${it[0]}</b><br><span class="small">${it[1]}</span></div>
-    <div class="${it[1] !== 'Pendiente' ? 'mission-done' : 'small'}">${it[1] !== 'Pendiente' ? '✓' : '○'}</div>
-  </div>`).join("");
-}
-
-function completeChallenge(){
-  if(navigator.vibrate) navigator.vibrate([80,40,80]);
-  alert("🏆 Misión completada: Explorador del cielo nivel 1");
-  track("challenge_completed");
-}
-
-function generateRomanticMessage(){
-  const m = moonPhase(getDateFromInput());
-  const top = lastVisibleStars[0]?.name || "una estrella brillante";
-  lastRomanticMessage = `Esta noche la ${m.name.toLowerCase()} acompaña el cielo y ${top} domina la vista. A veces solo hace falta mirar arriba para recordar que todavía hay cosas bonitas que no cuestan nada.`;
-  const box = document.getElementById("romanticMessage");
-  if(box) box.textContent = lastRomanticMessage;
-  track("romantic_message_generated");
-}
-
-function shareRomanticMessage(){
-  if(!lastRomanticMessage) generateRomanticMessage();
-  window.open("https://wa.me/?text=" + encodeURIComponent(lastRomanticMessage), "_blank", "noopener,noreferrer");
-  track("romantic_message_shared");
-}
-
-function createPremiumPoster(){
-  const canvas = document.getElementById("premiumPosterCanvas");
-  if(!canvas) return;
-  const ctx = canvas.getContext("2d");
-  const w = canvas.width, h = canvas.height;
-  const grad = ctx.createLinearGradient(0,0,w,h);
-  grad.addColorStop(0,"#02040a");
-  grad.addColorStop(.45,"#071d38");
-  grad.addColorStop(1,"#2b0711");
-  ctx.fillStyle = grad;
-  ctx.fillRect(0,0,w,h);
-
-  for(let i=0;i<220;i++){
-    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.60})`;
-    ctx.fillRect(Math.random()*w, Math.random()*h, Math.random()<.92?2:3, Math.random()<.92?2:3);
-  }
-
-  ctx.strokeStyle = "rgba(0,180,255,.6)";
-  ctx.lineWidth = 4;
-  ctx.strokeRect(42,42,w-84,h-84);
-
-  ctx.fillStyle = "#9eeaff";
-  ctx.font = "bold 34px monospace";
-  ctx.fillText("STARVIEW SKY REPORT", 60, 105);
-
-  ctx.fillStyle = "#eaf7ff";
-  ctx.font = "bold 58px system-ui";
-  ctx.fillText("Reporte del cielo", 60, 175);
-
-  const d = getDateFromInput();
-  const m = moonPhase(d);
-  const score = computeNightScore().score;
-  ctx.font = "28px system-ui";
-  ctx.fillStyle = "rgba(234,247,255,.82)";
-  ctx.fillText(`Fecha: ${d.toLocaleString()}`, 60, 235);
-  ctx.fillText(`Índice StarView: ${score}/100`, 60, 275);
-  ctx.fillText(`Luna: ${m.emoji} ${m.name} · ${m.pct}%`, 60, 315);
-
-  ctx.font = "bold 34px system-ui";
-  ctx.fillStyle = "#fff2a8";
-  ctx.fillText("Top estrellas visibles", 60, 390);
-
-  ctx.font = "30px system-ui";
-  ctx.fillStyle = "#eaf7ff";
-  lastVisibleStars.slice(0,7).forEach((s,i)=>{
-    ctx.fillText(`${i+1}. ${s.name} · ${directionName(s.az)} · Alt ${s.alt.toFixed(0)}°`, 80, 445 + i*52);
-  });
-
-  ctx.font = "26px system-ui";
-  ctx.fillStyle = "rgba(234,247,255,.75)";
-  ctx.fillText("Creado por Aire Acondicionado y Confort Lab", 60, h-135);
-  ctx.fillText("Tecnología, clima y cielo desde Jalisco.", 60, h-95);
-  ctx.fillText("proyectoaireyconfort-lab.github.io/starview-hud", 60, h-55);
-  track("premium_poster_created");
-}
-
-function downloadPremiumPoster(){
-  createPremiumPoster();
-  const canvas = document.getElementById("premiumPosterCanvas");
-  const a = document.createElement("a");
-  a.href = canvas.toDataURL("image/png");
-  a.download = "starview-sky-report-premium.png";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  track("premium_poster_downloaded");
-}
-
-function updateEasyRanking(){
-  const box = document.getElementById("easyRanking");
-  if(!box) return;
-  const quality = document.getElementById("skyQuality")?.value || "suburb";
-  const minAlt = quality === "city" ? 18 : quality === "suburb" ? 10 : 5;
-  const ranking = lastVisibleStars
-    .filter(s => s.alt >= minAlt)
-    .map(s => ({...s, score:(6-s.mag)*12 + s.alt*0.55}))
-    .sort((a,b)=>b.score-a.score)
-    .slice(0,8);
-
-  box.innerHTML = ranking.map((s,i)=>{
-    const vis = visibilityLabel(s);
-    return `<div class="starrow">
-      <div><b>${i+1}. ${s.name}</b><br><span class="small">${s.cons} · ${directionName(s.az)}</span></div>
-      <div class="small ${vis.cls}">${vis.label}<br>Alt ${s.alt.toFixed(0)}°</div>
-    </div>`;
-  }).join("") || "<div class='pill'>No hay suficientes estrellas para ranking en este momento.</div>";
-}
-
-function updateAllAdvancedModules(){
-  populateStarSelectors();
-  updateTargetGuide();
-  updateNightScore();
-  updateNextHour();
-  showStarStory();
-  updateChallenge();
-  updateEasyRanking();
-  createPremiumPoster();
-}
-
-
-
-/* ============================================================
-   STARVIEW V15 MODE SYSTEM
-   Normal: limpio / Ingeniería: terminal técnico
-   ============================================================ */
-
-let appMode = "normal";
-
-function selectAppMode(mode, fromMenu = false){
-  appMode = mode === "engineering" ? "engineering" : "normal";
-  document.body.classList.toggle("mode-engineering", appMode === "engineering");
-  document.body.classList.toggle("mode-normal", appMode === "normal");
-
-  const launch = document.getElementById("modeLaunch");
-  if(launch) launch.classList.add("hidden");
-
-  const menu = document.getElementById("modeMenu");
-  if(menu) menu.classList.remove("open");
-
-  tagModeElements();
-
-  if(appMode === "normal"){
-    nightMode = false;
-    document.body.classList.remove("night-red");
-  }
-
-  if(typeof drawSky === "function"){
-    try{ drawSky(false); }catch(e){ drawSky(); }
-  }
-
-  track("app_mode_selected", {mode:appMode, from_menu:fromMenu});
-}
-
-function showModeLaunch(){
-  const launch = document.getElementById("modeLaunch");
-  if(launch) launch.classList.remove("hidden");
-  const menu = document.getElementById("modeMenu");
-  if(menu) menu.classList.remove("open");
-}
-
-function toggleModeMenu(){
-  const menu = document.getElementById("modeMenu");
-  if(menu) menu.classList.toggle("open");
-}
-
-function tagModeElements(){
-  const engineeringTitles = [
-    "Radar automático",
-    "¿Qué estrella estoy viendo?",
-    "Nivel de visibilidad",
-    "Eventos del cielo",
-    "Planetas visibles",
-    "Postal para compartir",
-    "Star Hunter",
-    "Índice StarView",
-    "Próximos 60 minutos",
-    "Cielo en movimiento",
-    "Cielo de mi fecha especial",
-    "Sky Report Premium",
-    "Reto nocturno",
-    "Mensaje bajo las estrellas",
-    "Ranking fácil de encontrar"
-  ];
-
-  document.querySelectorAll(".card").forEach(card=>{
-    const title = card.querySelector("h2")?.textContent || "";
-    if(engineeringTitles.some(t => title.includes(t))){
-      card.classList.add("engineering-only");
-    }
-  });
-}
-
-function estimateDeviceAltitude(){
-  // Aproximación visual para instrumento de campo:
-  // beta/pitch se usa como elevación estimada del teléfono.
-  return clamp(sensorPitch || 0, -90, 90);
-}
-
-function updateNormalConstellations(){
-  const box = document.getElementById("normalConstellations");
-  if(!box || !lastVisibleStars || !lastVisibleStars.length) return;
-
-  const groups = {};
-  lastVisibleStars.slice(0,18).forEach(s=>{
-    if(!groups[s.cons]) groups[s.cons] = [];
-    groups[s.cons].push(s.name);
-  });
-
-  const rows = Object.entries(groups).slice(0,8).map(([cons,names])=>`
-    <div class="starrow">
-      <div><b>${cons}</b><br><span class="small">${names.slice(0,4).join(", ")}</span></div>
-      <div class="small">visible</div>
-    </div>
-  `).join("");
-
-  box.innerHTML = rows || "<div class='pill'>Actualiza el cielo para ver constelaciones.</div>";
-}
-
-function drawEngineeringCoordinateGrid(ctx, cx, cy, rmax){
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx, cy, rmax, 0, Math.PI * 2);
-  ctx.clip();
-
-  ctx.strokeStyle = "rgba(0,255,120,.18)";
-  ctx.fillStyle = "rgba(0,255,120,.55)";
-  ctx.lineWidth = 1;
-  ctx.font = "10px monospace";
-  ctx.textAlign = "center";
-
-  // Radios de acimut cada 10°
-  for(let az=0; az<360; az+=10){
-    const p = project(displayAz(az), 0, cx, cy, rmax);
-    ctx.strokeStyle = az % 30 === 0 ? "rgba(0,255,120,.25)" : "rgba(0,255,120,.10)";
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(p.x, p.y);
-    ctx.stroke();
-
-    if(az % 30 === 0){
-      const labelP = project(displayAz(az), -6, cx, cy, rmax);
-      ctx.fillText(`${az}°`, labelP.x, labelP.y);
-    }
-  }
-
-  // Círculos de altitud cada 15°
-  for(let alt=15; alt<=75; alt+=15){
-    const rr = ((90-alt)/90)*rmax;
-    ctx.strokeStyle = "rgba(0,255,120,.16)";
-    ctx.beginPath();
-    ctx.arc(cx, cy, rr, 0, Math.PI*2);
-    ctx.stroke();
-    ctx.fillText(`ALT ${alt}°`, cx + rr + 24, cy - 4);
-  }
-
   ctx.restore();
 }
 
-function drawEngineeringTelemetry(ctx, x, y, w, h){
-  const az = currentRotation || 0;
-  const alt = estimateDeviceAltitude();
+function drawCurveFromEquatorial(ctx, samples, color, label){
+  const date = getDate();
+  const lat = App.lat, lon = App.lon;
   ctx.save();
-
-  ctx.fillStyle = "rgba(0,0,0,.62)";
-  ctx.strokeStyle = "rgba(0,255,120,.42)";
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, x, y, w, h, 14);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = "rgba(0,255,120,.92)";
-  ctx.font = "bold 13px monospace";
-  ctx.textAlign = "left";
-  ctx.fillText("AIRE ACONDICIONADO Y CONFORT · LAB", x+12, y+23);
-
-  ctx.font = "12px monospace";
-  ctx.fillText(`ACIMUT  : ${az.toFixed(1)}°`, x+12, y+49);
-  ctx.fillText(`ALTITUD : ${alt.toFixed(1)}°`, x+12, y+70);
-  ctx.fillText(`PITCH   : ${(sensorPitch || 0).toFixed(1)}°`, x+12, y+91);
-  ctx.fillText(`ROLL    : ${(sensorRoll || 0).toFixed(1)}°`, x+12, y+112);
-
-  ctx.textAlign = "right";
-  ctx.fillStyle = "rgba(0,255,120,.68)";
-  ctx.fillText(sensorMode || "SENSOR OFF", x+w-12, y+112);
-
-  ctx.restore();
-}
-
-/* ============================================================
-   STARVIEW FIELD INSTRUMENT MODULE
-   Eclíptica + Horizonte artificial + Pitch/Roll HUD
-   ============================================================ */
-
-function updateFieldInstrumentReadout(){
-  const headingPill = document.getElementById("fieldHeadingPill");
-  const pitchPill = document.getElementById("fieldPitchPill");
-  const rollPill = document.getElementById("fieldRollPill");
-  const altitudePill = document.getElementById("fieldAltitudePill");
-  const modePill = document.getElementById("fieldModePill");
-
-  if(headingPill) headingPill.textContent = `HDG ${currentRotation.toFixed(0)}°`;
-  if(pitchPill) pitchPill.textContent = `PITCH ${sensorPitch.toFixed(0)}°`;
-  if(rollPill) rollPill.textContent = `ROLL ${sensorRoll.toFixed(0)}°`;
-  if(altitudePill) altitudePill.textContent = `ALT ${estimateDeviceAltitude().toFixed(0)}°`;
-  if(modePill) modePill.textContent = sensorMode || "SENSOR OFF";
-}
-
-function eclipticToEquatorial(lambdaDeg){
-  const eps = 23.439291 * Math.PI / 180;
-  const lambda = lambdaDeg * Math.PI / 180;
-
-  const sinDec = Math.sin(lambda) * Math.sin(eps);
-  const dec = Math.asin(sinDec);
-
-  const y = Math.sin(lambda) * Math.cos(eps);
-  const x = Math.cos(lambda);
-  let ra = Math.atan2(y, x);
-  if(ra < 0) ra += Math.PI * 2;
-
-  return {
-    raHours: (ra * 180 / Math.PI) / 15,
-    decDeg: dec * 180 / Math.PI
-  };
-}
-
-function drawEcliptic(ctx, cx, cy, rmax, lat, lon, date){
-  ctx.save();
-
-  // Limitar al círculo del radar
   ctx.beginPath();
-  ctx.arc(cx, cy, rmax, 0, Math.PI * 2);
+  ctx.arc(App.cx, App.cy, App.rmax, 0, Math.PI*2);
   ctx.clip();
 
-  ctx.lineWidth = 2.4;
-  ctx.strokeStyle = nightMode ? "rgba(255,180,120,.72)" : "rgba(255,242,168,.70)";
-  ctx.shadowColor = "rgba(255,242,168,.55)";
-  ctx.shadowBlur = 12;
+  ctx.strokeStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = App.mode === "civil" ? 9 : 0;
+  ctx.lineWidth = App.mode === "op" ? 1.7 : 2.2;
 
-  let started = false;
-
-  for(let lambda = 0; lambda <= 360; lambda += 2){
-    const eq = eclipticToEquatorial(lambda);
-    const aa = altAz(eq.raHours, eq.decDeg, lat, lon, date);
-
-    if(aa.alt <= 0){
-      if(started){
-        ctx.stroke();
-        started = false;
-      }
-      continue;
+  let open = false;
+  samples.forEach(eq=>{
+    const hz = equatorialToHorizontal(eq.raHours, eq.decDeg, lat, lon, date);
+    if(hz.alt <= 0){
+      if(open){ ctx.stroke(); open = false; }
+      return;
     }
-
-    const p = project(displayAz(aa.az), aa.alt, cx, cy, rmax);
-
-    if(!started){
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      started = true;
-    } else {
-      ctx.lineTo(p.x, p.y);
-    }
-  }
-
-  if(started) ctx.stroke();
-
+    const p = projectedPoint(hz.az, hz.alt);
+    if(!open){ ctx.beginPath(); ctx.moveTo(p.x,p.y); open = true; }
+    else ctx.lineTo(p.x,p.y);
+  });
+  if(open) ctx.stroke();
   ctx.shadowBlur = 0;
   ctx.restore();
 
-  // Etiqueta técnica
   ctx.save();
-  ctx.fillStyle = nightMode ? "rgba(255,190,150,.88)" : "rgba(255,242,168,.90)";
-  ctx.font = "13px monospace";
+  ctx.fillStyle = color;
+  ctx.font = "12px monospace";
   ctx.textAlign = "left";
-  ctx.fillText("ECLÍPTICA · ruta Sol/Luna/planetas", cx - rmax + 16, cy + rmax - 24);
+  ctx.fillText(label, App.cx - App.rmax + 16, App.cy + App.rmax - (label.includes("ECL") ? 28 : 46));
   ctx.restore();
+}
+
+function drawEclipticAndEquator(ctx){
+  const date = getDate();
+  const ecliptic = [];
+  for(let lam=0; lam<=360; lam+=2){
+    ecliptic.push(eclipticToEquatorial(lam, 0, date));
+  }
+  drawCurveFromEquatorial(ctx, ecliptic, App.mode === "op" ? "rgba(0,255,136,.74)" : "rgba(255,242,168,.72)", "ECLÍPTICA · SOL/LUNA/PLANETAS");
+
+  const equator = [];
+  for(let ra=0; ra<=24; ra+=.15){
+    equator.push({raHours:ra, decDeg:0});
+  }
+  drawCurveFromEquatorial(ctx, equator, App.mode === "op" ? "rgba(0,200,255,.64)" : "rgba(120,220,255,.42)", "ECUADOR CELESTE");
+}
+
+function computeStars(date){
+  App.visibleStars = Stars.map(s=>{
+    const hz = equatorialToHorizontal(s[1], s[2], App.lat, App.lon, date);
+    return {name:s[0], ra:s[1], dec:s[2], mag:s[3], cons:s[4], alt:hz.alt, az:hz.az};
+  }).filter(s=>s.alt > 0).sort((a,b)=>a.mag-b.mag);
+}
+
+function drawStars(ctx){
+  const byName = {};
+  App.visibleStars.forEach(s=>byName[s.name]=s);
+
+  // Constellation lines in civil mode, data lines in op.
+  ctx.save();
+  ctx.strokeStyle = App.mode === "op" ? "rgba(0,255,136,.22)" : "rgba(120,220,255,.18)";
+  ctx.lineWidth = 1.5;
+  Lines.forEach(([a,b])=>{
+    const A = byName[a], B = byName[b];
+    if(!A || !B) return;
+    const p1 = projectedPoint(A.az, A.alt);
+    const p2 = projectedPoint(B.az, B.alt);
+    ctx.beginPath();
+    ctx.moveTo(p1.x,p1.y);
+    ctx.lineTo(p2.x,p2.y);
+    ctx.stroke();
+  });
+  ctx.restore();
+
+  App.visibleStars.forEach(s=>{
+    const p = projectedPoint(s.az, s.alt);
+    const size = clamp((6 - s.mag) * 1.45, 2.2, 13);
+
+    if(App.mode === "civil"){
+      const bloom = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,size*5);
+      bloom.addColorStop(0, "rgba(255,255,255,.95)");
+      bloom.addColorStop(.22, s.mag < 0.5 ? "rgba(255,242,168,.55)" : "rgba(160,230,255,.40)");
+      bloom.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = bloom;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,size*5,0,Math.PI*2);
+      ctx.fill();
+    }
+
+    ctx.fillStyle = App.mode === "op" ? "#00ff88" : (s.mag < 0.7 ? "#fff2a8" : "#eaf7ff");
+    ctx.beginPath();
+    ctx.arc(p.x,p.y,size,0,Math.PI*2);
+    ctx.fill();
+
+    if(s.mag < 1.7 || App.mode === "op"){
+      ctx.fillStyle = App.mode === "op" ? "rgba(0,255,136,.82)" : "rgba(234,247,255,.90)";
+      ctx.font = App.mode === "op" ? "11px monospace" : "14px system-ui";
+      ctx.textAlign = "left";
+      ctx.fillText(App.mode === "op" ? `${s.name} ALT ${s.alt.toFixed(0)} AZ ${s.az.toFixed(0)}` : s.name, p.x+10, p.y-8);
+    }
+  });
+}
+
+function drawBodies(ctx){
+  App.visibleBodies.forEach(b=>{
+    if(b.alt <= 0) return;
+    const p = projectedPoint(b.az, b.alt);
+    const isSun = b.name === "Sol";
+    const size = isSun ? 12 : (b.name === "Venus" || b.name === "Jupiter" ? 8 : 6);
+
+    ctx.save();
+    if(App.mode === "civil"){
+      const bloom = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,size*6);
+      bloom.addColorStop(0, b.color);
+      bloom.addColorStop(.3, b.color + "88");
+      bloom.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = bloom;
+      ctx.beginPath(); ctx.arc(p.x,p.y,size*6,0,Math.PI*2); ctx.fill();
+    }
+
+    ctx.fillStyle = App.mode === "op" ? "#00ff88" : b.color;
+    ctx.strokeStyle = App.mode === "op" ? "rgba(0,255,136,.9)" : "rgba(255,255,255,.8)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(p.x,p.y,size,0,Math.PI*2); ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = App.mode === "op" ? "rgba(0,255,136,.92)" : "rgba(255,255,255,.92)";
+    ctx.font = App.mode === "op" ? "12px monospace" : "bold 13px system-ui";
+    ctx.textAlign = "left";
+    ctx.fillText(App.mode === "op" ? `${b.name} RA ${b.ra.toFixed(2)} DEC ${b.dec.toFixed(1)}` : b.name, p.x+12, p.y+5);
+    ctx.restore();
+  });
 }
 
 function roundRect(ctx, x, y, w, h, r){
-  const radius = Math.min(r, w / 2, h / 2);
+  const rr = Math.min(r, w/2, h/2);
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + w - radius, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-  ctx.lineTo(x + w, y + h - radius);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
-  ctx.lineTo(x + radius, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.moveTo(x+rr,y);
+  ctx.lineTo(x+w-rr,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
+  ctx.lineTo(x+w,y+h-rr);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);
+  ctx.lineTo(x+rr,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-rr);
+  ctx.lineTo(x,y+rr);
+  ctx.quadraticCurveTo(x,y,x+rr,y);
   ctx.closePath();
 }
 
-function drawArtificialHorizon(ctx, x, y, w, h){
-  const pitch = clamp(sensorPitch || 0, -45, 45);
-  const roll = clamp(sensorRoll || 0, -60, 60);
+function drawArtificialHorizon(ctx){
+  if(App.mode !== "op") return;
+  const w = 210, h = 132, x = App.W - w - 18, y = 18;
+  const pitch = clamp(Sensor.pitch, -45, 45);
+  const roll = clamp(Sensor.roll, -60, 60);
 
   ctx.save();
-  ctx.translate(x + w / 2, y + h / 2);
-
-  ctx.fillStyle = "rgba(0,0,0,.50)";
-  ctx.strokeStyle = nightMode ? "rgba(255,120,120,.38)" : "rgba(120,220,255,.38)";
+  ctx.translate(x+w/2, y+h/2);
+  ctx.fillStyle = "rgba(0,0,0,.68)";
+  ctx.strokeStyle = "rgba(0,255,136,.45)";
   ctx.lineWidth = 1.5;
-
-  roundRect(ctx, -w / 2, -h / 2, w, h, 15);
-  ctx.fill();
-  ctx.stroke();
+  roundRect(ctx, -w/2, -h/2, w, h, 14);
+  ctx.fill(); ctx.stroke();
 
   ctx.save();
-  roundRect(ctx, -w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 10);
+  roundRect(ctx, -w/2+9, -h/2+9, w-18, h-18, 10);
   ctx.clip();
+  ctx.rotate(-deg(roll));
+  const po = pitch * 1.25;
 
-  ctx.rotate(-roll * Math.PI / 180);
-  const pitchOffset = pitch * 1.25;
+  ctx.fillStyle = "rgba(0,255,136,.10)";
+  ctx.fillRect(-w, -h*2 + po, w*2, h*2);
+  ctx.fillStyle = "rgba(0,0,0,.55)";
+  ctx.fillRect(-w, po, w*2, h*2);
 
-  ctx.fillStyle = nightMode ? "rgba(120,35,35,.26)" : "rgba(0,180,255,.25)";
-  ctx.fillRect(-w, -h * 2 + pitchOffset, w * 2, h * 2);
-
-  ctx.fillStyle = nightMode ? "rgba(255,90,90,.16)" : "rgba(255,49,87,.18)";
-  ctx.fillRect(-w, pitchOffset, w * 2, h * 2);
-
-  ctx.strokeStyle = "rgba(255,242,168,.92)";
+  ctx.strokeStyle = "rgba(0,255,136,.95)";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(-w, pitchOffset);
-  ctx.lineTo(w, pitchOffset);
+  ctx.moveTo(-w, po);
+  ctx.lineTo(w, po);
   ctx.stroke();
-
   ctx.restore();
 
-  // Cruz central
-  ctx.strokeStyle = "rgba(234,247,255,.92)";
+  ctx.strokeStyle = "rgba(216,255,231,.92)";
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(-24, 0);
-  ctx.lineTo(-7, 0);
-  ctx.moveTo(7, 0);
-  ctx.lineTo(24, 0);
-  ctx.moveTo(0, -9);
-  ctx.lineTo(0, 9);
+  ctx.moveTo(-24,0); ctx.lineTo(-7,0);
+  ctx.moveTo(7,0); ctx.lineTo(24,0);
+  ctx.moveTo(0,-9); ctx.lineTo(0,9);
   ctx.stroke();
 
-  ctx.fillStyle = "rgba(234,247,255,.88)";
+  ctx.fillStyle = "rgba(0,255,136,.92)";
   ctx.font = "11px monospace";
   ctx.textAlign = "center";
-  ctx.fillText("PITCH / ROLL", 0, -h / 2 + 20);
-
-  ctx.font = "10px monospace";
-  ctx.fillText(`P ${pitch.toFixed(0)}° · R ${roll.toFixed(0)}°`, 0, h / 2 - 12);
-
+  ctx.fillText("6-DoF ATTITUDE DISPLAY", 0, -h/2+20);
+  ctx.fillText(`P ${Sensor.pitch.toFixed(1)}°  R ${Sensor.roll.toFixed(1)}°  Y ${Sensor.yaw.toFixed(1)}°`, 0, h/2-12);
   ctx.restore();
 }
 
-tagModeElements();
-selectAppMode('normal');
-showModeLaunch();
-buildBackgroundStars();
-useNow();
-track("app_loaded");
+function drawOperationalRawOverlay(ctx){
+  if(App.mode !== "op") return;
+  const x = 18, y = 18, w = 284, h = 150;
+  ctx.save();
+  ctx.fillStyle = "rgba(0,0,0,.70)";
+  ctx.strokeStyle = "rgba(0,255,136,.45)";
+  ctx.lineWidth = 1.5;
+  roundRect(ctx,x,y,w,h,14);
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = "rgba(0,255,136,.94)";
+  ctx.font = "bold 12px monospace";
+  ctx.fillText("AACYCLAB RAW TELEMETRY", x+12, y+24);
+
+  ctx.font = "11px monospace";
+  ctx.fillText(`ACIMUT/HDG : ${Sensor.yaw.toFixed(1)}°`, x+12, y+48);
+  ctx.fillText(`ALTITUD/EL : ${Sensor.pitch.toFixed(1)}°`, x+12, y+68);
+  ctx.fillText(`PITCH      : ${Sensor.pitch.toFixed(1)}°`, x+12, y+88);
+  ctx.fillText(`ROLL       : ${Sensor.roll.toFixed(1)}°`, x+12, y+108);
+  ctx.fillText(`ERR RMS    : ±${Sensor.errorRms.toFixed(1)}°`, x+12, y+128);
+  ctx.fillText(`SENSOR     : ${Sensor.mode}`, x+12, y+148);
+
+  // Error marker: red if the heading innovation is high.
+  if(Sensor.errorRms > 8){
+    ctx.fillStyle = "rgba(255,73,108,.95)";
+    ctx.fillText("ERR: MAGNETIC NOISE / CALIBRATION REQUIRED", x+122, y+128);
+  }
+  ctx.restore();
+}
+
+function render(timestamp){
+  resizeCanvas();
+  const ctx = App.ctx;
+  const date = getDate();
+  App.lat = parseFloat(document.getElementById("lat").value) || 20.624;
+  App.lon = parseFloat(document.getElementById("lon").value) || -103.234;
+
+  if(Sensor.enabled){
+    Sensor.yaw = lowPassAngle(Sensor.yaw, Sensor.targetYaw, 0.10);
+  }
+
+  clearAndBackground(ctx, timestamp);
+  drawGrid(ctx);
+  drawEclipticAndEquator(ctx);
+
+  computeStars(date);
+  App.visibleBodies = computeSolarSystem(date, App.lat, App.lon);
+
+  drawStars(ctx);
+  drawBodies(ctx);
+  drawOperationalRawOverlay(ctx);
+  drawArtificialHorizon(ctx);
+
+  if(timestamp - App.lastDomUpdate > 160){
+    updateDOM(date);
+    App.lastDomUpdate = timestamp;
+  }
+
+  requestAnimationFrame(render);
+}
+
+function updateDOM(date){
+  const jd = julianDate(date);
+  const lst = lstDeg(date, App.lon);
+
+  document.getElementById("rawHeading").textContent = `${Sensor.yaw.toFixed(1)}°`;
+  document.getElementById("rawYaw").textContent = `${Sensor.rawYaw.toFixed(1)}°`;
+  document.getElementById("rawPitch").textContent = `${Sensor.pitch.toFixed(1)}°`;
+  document.getElementById("rawRoll").textContent = `${Sensor.roll.toFixed(1)}°`;
+  document.getElementById("rawLST").textContent = `${lst.toFixed(3)}° / ${(lst/15).toFixed(3)}h`;
+  document.getElementById("rawJD").textContent = jd.toFixed(5);
+  document.getElementById("rawSensor").textContent = Sensor.mode;
+  document.getElementById("rawError").textContent = `±${Sensor.errorRms.toFixed(1)}°`;
+
+  document.getElementById("sensorBadge").textContent = Sensor.enabled ? `${Sensor.mode} · HDG ${Sensor.yaw.toFixed(0)}°` : "SENSOR OFF";
+
+  const civilList = document.getElementById("civilList");
+  civilList.innerHTML = App.visibleStars.slice(0,9).map(s=>`
+    <div class="item"><div><b>${s.name}</b><br><small>${s.cons}</small></div><small>Alt ${s.alt.toFixed(0)}° · Az ${s.az.toFixed(0)}°</small></div>
+  `).join("");
+
+  const civilPlanets = document.getElementById("civilPlanets");
+  civilPlanets.innerHTML = App.visibleBodies.filter(b=>b.alt>0).slice(0,8).map(b=>`
+    <div class="item"><div><b>${b.name}</b><br><small>${b.kind === "planet" ? "planeta" : "solar"}</small></div><small>Alt ${b.alt.toFixed(0)}° · Az ${b.az.toFixed(0)}°</small></div>
+  `).join("") || `<div class="item"><div><b>Sin cuerpos visibles</b><br><small>Revisa hora o ubicación</small></div></div>`;
+
+  const opObjects = document.getElementById("opObjects");
+  const opRows = [...App.visibleBodies.filter(b=>b.alt>0), ...App.visibleStars.slice(0,6)];
+  opObjects.innerHTML = opRows.slice(0,12).map(o=>`
+    <div class="row"><span>${o.name}</span><span>ALT ${o.alt.toFixed(1)}° / AZ ${o.az.toFixed(1)}°</span></div>
+  `).join("");
+}
+
+function initTimeInput(){
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  document.getElementById("time").value = d.toISOString().slice(0,16);
+  document.getElementById("time").addEventListener("change",()=>{App.useCurrentTime=false;});
+}
+
+function init(){
+  App.canvas = document.getElementById("sky");
+  App.ctx = App.canvas.getContext("2d", {alpha:false});
+  generateWeakStars();
+  initTimeInput();
+  bootSequence();
+  window.addEventListener("resize", resizeCanvas, {passive:true});
+  requestAnimationFrame(render);
+  track("app_loaded");
+}
+
+document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
