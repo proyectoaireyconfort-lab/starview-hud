@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v12 | Mapa del Cielo</title>
+<title>StarView HUD v13 | Mapa del Cielo</title>
 <meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -289,6 +289,87 @@
     margin-top:8px;
   }
 
+
+  .hero-mission{
+    border:1px solid rgba(255,242,168,.22);
+    border-radius:20px;
+    padding:14px;
+    margin:12px 0;
+    background:linear-gradient(135deg,rgba(255,242,168,.11),rgba(0,180,255,.10),rgba(255,49,87,.08));
+  }
+  .hero-mission b{color:#fff2a8}
+  .star-target{
+    border:1px solid rgba(255,242,168,.28);
+    border-radius:18px;
+    padding:12px;
+    background:rgba(0,0,0,.25);
+    box-shadow:0 0 18px rgba(255,242,168,.08);
+  }
+  .arrow-guide{
+    font-size:48px;
+    text-align:center;
+    color:#fff2a8;
+    text-shadow:0 0 16px rgba(255,242,168,.45);
+    margin:8px 0;
+  }
+  .score-ring{
+    width:130px;height:130px;border-radius:50%;margin:auto;
+    display:grid;place-items:center;
+    border:2px solid rgba(255,242,168,.35);
+    background:radial-gradient(circle,rgba(255,242,168,.16),rgba(0,0,0,.28));
+    font-size:34px;font-weight:900;color:#fff2a8;
+    box-shadow:0 0 28px rgba(255,242,168,.10);
+  }
+  .target-lock{
+    animation:lockPulse 1.4s infinite ease-in-out;
+  }
+  @keyframes lockPulse{
+    0%,100%{filter:drop-shadow(0 0 4px rgba(255,242,168,.35))}
+    50%{filter:drop-shadow(0 0 18px rgba(255,242,168,.85))}
+  }
+  .timeline-controls{
+    display:grid;
+    gap:8px;
+  }
+  input[type="range"]{accent-color:#00b4ff}
+  .mission-check{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.05);
+  }
+  .mission-done{color:#b7ffce;font-weight:800}
+  .story-box{
+    min-height:105px;
+    border:1px solid rgba(120,220,255,.22);
+    border-radius:16px;
+    padding:12px;
+    background:rgba(0,0,0,.22);
+    line-height:1.45;
+  }
+  .mode-banner{
+    border-radius:16px;
+    border:1px solid rgba(120,220,255,.22);
+    padding:10px;
+    background:rgba(0,0,0,.22);
+  }
+  .premium-poster-wrap{
+    display:grid;
+    gap:8px;
+  }
+  .lock-pill{
+    position:absolute;
+    right:18px;
+    top:58px;
+    z-index:4;
+    border:1px solid rgba(255,242,168,.35);
+    border-radius:999px;
+    padding:7px 12px;
+    background:rgba(0,0,0,.42);
+    color:#fff2a8;
+    font-family:monospace;
+    font-size:12px;
+    pointer-events:none;
+  }
+
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -305,7 +386,7 @@
 <body>
 <div id="introModal" class="modal-backdrop">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v12</h2>
+    <h2>🌌 Bienvenido a StarView HUD v13</h2>
     <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
     <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
@@ -325,7 +406,7 @@
     <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD v12</h1>
+        <h1>🌌 StarView HUD v13</h1>
         <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
@@ -333,7 +414,7 @@
 
     <div class="intro-panel">
       <h2>📌 ¿Qué es y cómo se utiliza?</h2>
-      <p><b>StarView HUD</b> convierte tu celular en una guía visual del cielo. Te muestra qué estrellas brillantes pueden estar arriba de ti según tu ubicación y la hora.</p>
+      <p><b>StarView HUD</b> convierte tu celular en una guía visual del cielo. Ahora incluye <b>Star Hunter</b>: elige una estrella y la app te ayuda a encontrarla.</p>
       <p>El círculo representa el cielo sobre ti: arriba es <b>Norte</b>, derecha <b>Este</b>, abajo <b>Sur</b> e izquierda <b>Oeste</b>.</p>
       <div class="quick-grid">
         <div class="quick-item">📍 <b>Ubicación</b><br>Calcula qué estrellas están sobre tu horizonte.</div>
@@ -373,6 +454,9 @@
       <button class="button-secondary" onclick="scrollToSection('starFinder')">❓ ¿Qué estrella veo?</button>
       <button class="button-secondary" onclick="createPoster()">📸 Crear postal</button>
       <button class="button-secondary" onclick="sendFeedback()">💬 Enviar opinión</button>
+      <button class="button-gold" onclick="scrollToSection('starHunter')">🎯 Star Hunter</button>
+      <button class="button-secondary" onclick="scrollToSection('specialSky')">💫 Fecha especial</button>
+      <button class="button-secondary" onclick="scrollToSection('challengeMode')">🏆 Reto nocturno</button>
     </div>
   </div>
 
@@ -396,6 +480,7 @@
     <canvas id="sky" width="900" height="900"></canvas>
     <div class="radar-spin-ring"></div>
     <div class="heading-hud" id="headingHud">Radar fijo · N arriba</div>
+    <div class="lock-pill" id="lockPill">Sin objetivo</div>
     <div class="guide-overlay">
       <div class="guide-chip">Centro = cielo arriba</div>
       <div class="guide-chip">Borde = horizonte</div>
@@ -478,6 +563,107 @@
     </div>
   </div>
 
+
+  <div class="card" id="starHunter">
+    <h2>🎯 Star Hunter — Cazador de estrellas</h2>
+    <p class="small">Elige una estrella visible y la app te dará dirección, altura y guía tipo “GPS del cielo”.</p>
+    <div class="grid">
+      <div>
+        <label>Objetivo</label>
+        <select id="targetStar" onchange="lockTargetStar()"></select>
+      </div>
+      <div>
+        <label>Modo de cielo</label>
+        <select id="skyQuality" onchange="updateAllAdvancedModules()">
+          <option value="city">Ciudad / mucha luz</option>
+          <option value="suburb" selected>Zona urbana normal</option>
+          <option value="dark">Rancho / carretera / cielo oscuro</option>
+        </select>
+      </div>
+    </div>
+    <div class="star-target" style="margin-top:10px">
+      <div id="targetStatus"><b>Sin objetivo.</b> Actualiza el cielo y elige una estrella.</div>
+      <div class="arrow-guide" id="targetArrow">⬆️</div>
+      <div id="targetInstructions" class="pill">Aquí aparecerán instrucciones: gira, sube la mirada y busca color/brillo.</div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h2>🌌 Índice StarView</h2>
+      <div class="score-ring" id="nightScore">--</div>
+      <div id="nightScoreText" class="pill" style="margin-top:10px">Calculando calidad de observación...</div>
+    </div>
+
+    <div class="card">
+      <h2>⏱️ Próximos 60 minutos</h2>
+      <div id="nextHourList" class="list"></div>
+      <p class="small">La app calcula una vista rápida del cielo en 15, 30 y 60 minutos.</p>
+    </div>
+
+    <div class="card">
+      <h2>🕒 Cielo en movimiento</h2>
+      <div class="timeline-controls">
+        <label>Simular tiempo: <span id="timeOffsetLabel">Ahora</span></label>
+        <input type="range" id="timeOffset" min="0" max="120" value="0" step="15" oninput="applyTimeOffset()" />
+        <button class="button-secondary" onclick="resetTimeOffset()">Volver a ahora</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card" id="specialSky">
+      <h2>💫 Cielo de mi fecha especial</h2>
+      <p class="small">Pon una fecha especial y genera un reporte emocional del cielo.</p>
+      <input id="specialDate" type="datetime-local" />
+      <button style="margin-top:10px" onclick="generateSpecialSky()">Generar cielo especial</button>
+      <div id="specialSkyResult" class="pill" style="margin-top:10px">Ejemplo: cumpleaños, aniversario, día de casa nueva o una noche importante.</div>
+    </div>
+
+    <div class="card">
+      <h2>📖 Historias del cielo</h2>
+      <select id="storyStar" onchange="showStarStory()"></select>
+      <div id="starStory" class="story-box" style="margin-top:10px">Elige una estrella para leer una historia corta.</div>
+    </div>
+
+    <div class="card">
+      <h2>👨‍👩‍👧 Modo niños / principiante</h2>
+      <div id="kidModeBox" class="mode-banner">
+        Busca la estrella más brillante. Si está cerca del centro del radar, está arriba de ti. Si está cerca del borde, está bajita.
+      </div>
+      <button style="margin-top:10px" onclick="toggleKidsMode()">Activar modo niños</button>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card" id="challengeMode">
+      <h2>🏆 Reto nocturno</h2>
+      <div id="challengeList" class="list"></div>
+      <button style="margin-top:10px" onclick="completeChallenge()">Completar misión</button>
+    </div>
+
+    <div class="card">
+      <h2>💌 Mensaje bajo las estrellas</h2>
+      <div id="romanticMessage" class="pill">Genera un mensaje bonito con la Luna y estrellas de hoy.</div>
+      <button style="margin-top:10px" onclick="generateRomanticMessage()">Generar mensaje</button>
+      <button class="button-secondary" style="margin-top:8px" onclick="shareRomanticMessage()">Compartir mensaje</button>
+    </div>
+
+    <div class="card">
+      <h2>📜 Sky Report Premium</h2>
+      <div class="premium-poster-wrap">
+        <canvas id="premiumPosterCanvas" class="poster" width="900" height="1200"></canvas>
+        <button onclick="createPremiumPoster()">Crear reporte premium</button>
+        <button class="button-secondary" onclick="downloadPremiumPoster()">Descargar reporte</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>⭐ Ranking fácil de encontrar</h2>
+    <div id="easyRanking" class="list"></div>
+  </div>
+
   <div class="card info">
     <div class="pill" id="status">Listo.</div>
     <div>
@@ -511,7 +697,7 @@
     <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
   </div>
 
-  <div class="footer">StarView HUD v12 · Guía visual básica, no sustituye software astronómico profesional.</div>
+  <div class="footer">StarView HUD v13 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>
@@ -865,6 +1051,8 @@ function drawSky(sendTrack = true){
   updateSkyEvents();
   updatePlanets();
   createPoster();
+  lastVisibleStars = visible;
+  updateAllAdvancedModules();
 }
 
 
@@ -1235,6 +1423,358 @@ function sendFeedback(){
   const text = encodeURIComponent("Hola, probé StarView HUD y esta es mi opinión: ");
   const url = "https://wa.me/?text=" + text;
   window.open(url, "_blank", "noopener,noreferrer");
+}
+
+
+let lockedTargetName = null;
+let lockedTargetData = null;
+let kidsMode = false;
+let lastRomanticMessage = "";
+
+const starStories = {
+  "Sirius":"Sirius es la estrella más brillante del cielo nocturno. Muchas culturas la usaron como señal de temporada y orientación.",
+  "Betelgeuse":"Betelgeuse es una supergigante roja en Orión. Su tono anaranjado la hace fácil de distinguir cuando Orión está visible.",
+  "Rigel":"Rigel es una estrella azul-blanca muy brillante de Orión. Marca uno de los pies del cazador celeste.",
+  "Polaris":"Polaris es famosa porque ayuda a encontrar el norte. No es la más brillante, pero sí una de las más útiles.",
+  "Vega":"Vega es una estrella blanca-azulada muy brillante. En verano suele ser una de las reinas del cielo del norte.",
+  "Antares":"Antares tiene tono rojizo y es el corazón del Escorpión. Su nombre significa rival de Marte por su color.",
+  "Aldebaran":"Aldebaran es el ojo del Toro. Tiene brillo cálido y se encuentra cerca de las Pléyades.",
+  "Pléyades":"Las Pléyades son un cúmulo de estrellas. A simple vista parecen un pequeño racimo o nubecita brillante."
+};
+
+function getVisibleByName(name){
+  return lastVisibleStars.find(s => s.name === name);
+}
+
+function populateStarSelectors(){
+  const target = document.getElementById("targetStar");
+  const story = document.getElementById("storyStar");
+  if(target){
+    const options = lastVisibleStars.slice(0,14).map(s=>`<option value="${s.name}">${s.name} · ${s.cons}</option>`).join("");
+    target.innerHTML = options || "<option>Actualiza el cielo</option>";
+  }
+  if(story){
+    const names = Object.keys(starStories);
+    story.innerHTML = names.map(n=>`<option value="${n}">${n}</option>`).join("");
+  }
+}
+
+function directionName(az){
+  const dirs = ["Norte","Noreste","Este","Sureste","Sur","Suroeste","Oeste","Noroeste"];
+  return dirs[Math.round(((az % 360) / 45)) % 8];
+}
+
+function altitudeAdvice(alt){
+  if(alt >= 65) return "mira casi arriba de tu cabeza";
+  if(alt >= 40) return "sube bastante la mirada";
+  if(alt >= 20) return "mira a media altura";
+  return "mira bajo, cerca del horizonte";
+}
+
+function starColorHint(name){
+  const warm = ["Betelgeuse","Antares","Aldebaran"];
+  const blue = ["Rigel","Vega","Spica"];
+  if(warm.includes(name)) return "tono rojizo/anaranjado";
+  if(blue.includes(name)) return "tono blanco/azulado";
+  return "brillo blanco o claro";
+}
+
+function arrowForTarget(star){
+  if(!star) return "⬆️";
+  const display = displayAz(star.az);
+  if(display > 330 || display < 30) return "⬆️";
+  if(display >= 30 && display < 80) return "↗️";
+  if(display >= 80 && display < 120) return "➡️";
+  if(display >= 120 && display < 170) return "↘️";
+  if(display >= 170 && display < 210) return "⬇️";
+  if(display >= 210 && display < 260) return "↙️";
+  if(display >= 260 && display < 300) return "⬅️";
+  return "↖️";
+}
+
+function lockTargetStar(){
+  const select = document.getElementById("targetStar");
+  if(!select || !select.value) return;
+  lockedTargetName = select.value;
+  lockedTargetData = getVisibleByName(lockedTargetName);
+  updateTargetGuide();
+  if(navigator.vibrate) navigator.vibrate(60);
+  track("star_hunter_lock", {star:lockedTargetName});
+}
+
+function updateTargetGuide(){
+  const status = document.getElementById("targetStatus");
+  const arrow = document.getElementById("targetArrow");
+  const instructions = document.getElementById("targetInstructions");
+  const lockPill = document.getElementById("lockPill");
+  if(!status || !arrow || !instructions) return;
+
+  if(!lockedTargetName && lastVisibleStars.length){
+    lockedTargetName = lastVisibleStars[0].name;
+    lockedTargetData = lastVisibleStars[0];
+  } else if(lockedTargetName){
+    lockedTargetData = getVisibleByName(lockedTargetName);
+  }
+
+  if(!lockedTargetData){
+    status.innerHTML = "<b>Objetivo no visible.</b> Prueba otra estrella o cambia la hora.";
+    arrow.textContent = "❌";
+    instructions.textContent = "Ese objetivo no está sobre el horizonte en este momento.";
+    if(lockPill) lockPill.textContent = "Sin objetivo visible";
+    return;
+  }
+
+  const s = lockedTargetData;
+  const dir = directionName(s.az);
+  const altText = altitudeAdvice(s.alt);
+  const color = starColorHint(s.name);
+  const vis = visibilityLabel(s);
+
+  status.innerHTML = `<b>Objetivo bloqueado:</b> ${s.name}<br>
+  <span class="small">Dirección: ${dir} · Az ${s.az.toFixed(0)}° · Alt ${s.alt.toFixed(0)}° · ${vis.label}</span>`;
+  arrow.textContent = arrowForTarget(s);
+  instructions.innerHTML = `Gira hacia <b>${dir}</b>, ${altText} y busca una estrella de <b>${color}</b>.`;
+  if(lockPill) lockPill.textContent = `LOCK: ${s.name}`;
+}
+
+function computeNightScore(){
+  const m = moonPhase(getDateFromInput());
+  const visibleScore = Math.min(45, lastVisibleStars.length * 2.6);
+  const moonPenalty = m.pct > 85 ? 22 : m.pct > 60 ? 14 : m.pct > 35 ? 7 : 0;
+  const quality = document.getElementById("skyQuality")?.value || "suburb";
+  const qualityBonus = quality === "dark" ? 18 : quality === "suburb" ? 8 : -5;
+  const easyCount = lastVisibleStars.filter(s => s.alt > 25 && s.mag < 2.1).length;
+  let score = Math.round(Math.max(10, Math.min(99, 45 + visibleScore + qualityBonus + easyCount*2 - moonPenalty)));
+  return {score, m, easyCount, quality};
+}
+
+function updateNightScore(){
+  const ring = document.getElementById("nightScore");
+  const txt = document.getElementById("nightScoreText");
+  if(!ring || !txt) return;
+  const data = computeNightScore();
+  ring.textContent = data.score;
+  let label = data.score >= 80 ? "Noche muy buena" : data.score >= 60 ? "Noche decente" : "Noche difícil";
+  txt.innerHTML = `<b>${label}</b><br><span class="small">Luna: ${data.m.pct}% · Estrellas fáciles: ${data.easyCount} · Ajuste: ${data.quality}</span>`;
+}
+
+function predictVisibleAt(minutes){
+  const lat = parseFloat(document.getElementById("lat").value);
+  const lon = parseFloat(document.getElementById("lon").value);
+  const date = new Date(getDateFromInput().getTime() + minutes*60000);
+  let arr = [];
+  stars.forEach(s=>{
+    const aa = altAz(s[1],s[2],lat,lon,date);
+    if(aa.alt > 0) arr.push({name:s[0], mag:s[3], cons:s[4], alt:aa.alt, az:aa.az});
+  });
+  arr.sort((a,b)=>a.mag-b.mag);
+  return arr;
+}
+
+function updateNextHour(){
+  const box = document.getElementById("nextHourList");
+  if(!box) return;
+  const marks = [15,30,60];
+  box.innerHTML = marks.map(min=>{
+    const v = predictVisibleAt(min)[0];
+    return v ? `<div class="starrow">
+      <div><b>+${min} min: ${v.name}</b><br><span class="small">${v.cons}</span></div>
+      <div class="small">Alt ${v.alt.toFixed(0)}°</div>
+    </div>` : `<div class="starrow"><div>+${min} min</div><div class="small">Sin datos</div></div>`;
+  }).join("");
+}
+
+function applyTimeOffset(){
+  const slider = document.getElementById("timeOffset");
+  const label = document.getElementById("timeOffsetLabel");
+  if(!slider) return;
+  const min = parseInt(slider.value,10);
+  if(label) label.textContent = min === 0 ? "Ahora" : `+${min} min`;
+  const d = new Date();
+  d.setMinutes(d.getMinutes() + min - d.getTimezoneOffset());
+  document.getElementById("time").value = d.toISOString().slice(0,16);
+  drawSky();
+  track("time_slider_used", {minutes:min});
+}
+
+function resetTimeOffset(){
+  const slider = document.getElementById("timeOffset");
+  if(slider) slider.value = 0;
+  useNow();
+  const label = document.getElementById("timeOffsetLabel");
+  if(label) label.textContent = "Ahora";
+}
+
+function generateSpecialSky(){
+  const input = document.getElementById("specialDate");
+  const result = document.getElementById("specialSkyResult");
+  if(!input || !input.value || !result) return;
+  const old = document.getElementById("time").value;
+  document.getElementById("time").value = input.value;
+  drawSky();
+  const m = moonPhase(getDateFromInput());
+  const top = lastVisibleStars.slice(0,4).map(s=>s.name).join(", ");
+  result.innerHTML = `<b>Así se veía tu cielo:</b><br>
+  Luna: ${m.emoji} ${m.name} · Iluminación aprox ${m.pct}%<br>
+  Estrellas dominantes: ${top || "sin datos visibles"}<br>
+  <span class="small">Puedes descargar el Sky Report Premium con esta fecha.</span>`;
+  track("special_sky_generated");
+  // Mantener la fecha elegida; el usuario puede volver con “Usar hora actual”.
+}
+
+function showStarStory(){
+  const select = document.getElementById("storyStar");
+  const box = document.getElementById("starStory");
+  if(!select || !box) return;
+  box.innerHTML = `<b>${select.value}</b><br>${starStories[select.value] || "Historia no disponible todavía."}`;
+  track("star_story_opened", {star:select.value});
+}
+
+function toggleKidsMode(){
+  kidsMode = !kidsMode;
+  const box = document.getElementById("kidModeBox");
+  if(box){
+    box.innerHTML = kidsMode
+      ? "🌟 Modo niños activo: busca primero la estrella más grande del radar. Si está arriba en el mapa, mira hacia esa dirección. Si vibra o aparece LOCK, estás cerca del objetivo."
+      : "Busca la estrella más brillante. Si está cerca del centro del radar, está arriba de ti. Si está cerca del borde, está bajita.";
+  }
+  track("kids_mode_toggle", {enabled:kidsMode});
+}
+
+function updateChallenge(){
+  const box = document.getElementById("challengeList");
+  if(!box) return;
+  const top = lastVisibleStars.slice(0,3);
+  const items = [
+    ["Encontrar una estrella brillante", top[0]?.name || "Sirius"],
+    ["Activar radar automático", autoRadarEnabled ? "Listo" : "Pendiente"],
+    ["Bloquear objetivo Star Hunter", lockedTargetName || "Pendiente"],
+    ["Crear postal del cielo", "Opcional"]
+  ];
+  box.innerHTML = items.map((it,i)=>`<div class="mission-check">
+    <div><b>${i+1}. ${it[0]}</b><br><span class="small">${it[1]}</span></div>
+    <div class="${it[1] !== 'Pendiente' ? 'mission-done' : 'small'}">${it[1] !== 'Pendiente' ? '✓' : '○'}</div>
+  </div>`).join("");
+}
+
+function completeChallenge(){
+  if(navigator.vibrate) navigator.vibrate([80,40,80]);
+  alert("🏆 Misión completada: Explorador del cielo nivel 1");
+  track("challenge_completed");
+}
+
+function generateRomanticMessage(){
+  const m = moonPhase(getDateFromInput());
+  const top = lastVisibleStars[0]?.name || "una estrella brillante";
+  lastRomanticMessage = `Esta noche la ${m.name.toLowerCase()} acompaña el cielo y ${top} domina la vista. A veces solo hace falta mirar arriba para recordar que todavía hay cosas bonitas que no cuestan nada.`;
+  const box = document.getElementById("romanticMessage");
+  if(box) box.textContent = lastRomanticMessage;
+  track("romantic_message_generated");
+}
+
+function shareRomanticMessage(){
+  if(!lastRomanticMessage) generateRomanticMessage();
+  window.open("https://wa.me/?text=" + encodeURIComponent(lastRomanticMessage), "_blank", "noopener,noreferrer");
+  track("romantic_message_shared");
+}
+
+function createPremiumPoster(){
+  const canvas = document.getElementById("premiumPosterCanvas");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0,"#02040a");
+  grad.addColorStop(.45,"#071d38");
+  grad.addColorStop(1,"#2b0711");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  for(let i=0;i<220;i++){
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.60})`;
+    ctx.fillRect(Math.random()*w, Math.random()*h, Math.random()<.92?2:3, Math.random()<.92?2:3);
+  }
+
+  ctx.strokeStyle = "rgba(0,180,255,.6)";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(42,42,w-84,h-84);
+
+  ctx.fillStyle = "#9eeaff";
+  ctx.font = "bold 34px monospace";
+  ctx.fillText("STARVIEW SKY REPORT", 60, 105);
+
+  ctx.fillStyle = "#eaf7ff";
+  ctx.font = "bold 58px system-ui";
+  ctx.fillText("Reporte del cielo", 60, 175);
+
+  const d = getDateFromInput();
+  const m = moonPhase(d);
+  const score = computeNightScore().score;
+  ctx.font = "28px system-ui";
+  ctx.fillStyle = "rgba(234,247,255,.82)";
+  ctx.fillText(`Fecha: ${d.toLocaleString()}`, 60, 235);
+  ctx.fillText(`Índice StarView: ${score}/100`, 60, 275);
+  ctx.fillText(`Luna: ${m.emoji} ${m.name} · ${m.pct}%`, 60, 315);
+
+  ctx.font = "bold 34px system-ui";
+  ctx.fillStyle = "#fff2a8";
+  ctx.fillText("Top estrellas visibles", 60, 390);
+
+  ctx.font = "30px system-ui";
+  ctx.fillStyle = "#eaf7ff";
+  lastVisibleStars.slice(0,7).forEach((s,i)=>{
+    ctx.fillText(`${i+1}. ${s.name} · ${directionName(s.az)} · Alt ${s.alt.toFixed(0)}°`, 80, 445 + i*52);
+  });
+
+  ctx.font = "26px system-ui";
+  ctx.fillStyle = "rgba(234,247,255,.75)";
+  ctx.fillText("Creado por Aire Acondicionado y Confort Lab", 60, h-135);
+  ctx.fillText("Tecnología, clima y cielo desde Jalisco.", 60, h-95);
+  ctx.fillText("proyectoaireyconfort-lab.github.io/starview-hud", 60, h-55);
+  track("premium_poster_created");
+}
+
+function downloadPremiumPoster(){
+  createPremiumPoster();
+  const canvas = document.getElementById("premiumPosterCanvas");
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = "starview-sky-report-premium.png";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  track("premium_poster_downloaded");
+}
+
+function updateEasyRanking(){
+  const box = document.getElementById("easyRanking");
+  if(!box) return;
+  const quality = document.getElementById("skyQuality")?.value || "suburb";
+  const minAlt = quality === "city" ? 18 : quality === "suburb" ? 10 : 5;
+  const ranking = lastVisibleStars
+    .filter(s => s.alt >= minAlt)
+    .map(s => ({...s, score:(6-s.mag)*12 + s.alt*0.55}))
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,8);
+
+  box.innerHTML = ranking.map((s,i)=>{
+    const vis = visibilityLabel(s);
+    return `<div class="starrow">
+      <div><b>${i+1}. ${s.name}</b><br><span class="small">${s.cons} · ${directionName(s.az)}</span></div>
+      <div class="small ${vis.cls}">${vis.label}<br>Alt ${s.alt.toFixed(0)}°</div>
+    </div>`;
+  }).join("") || "<div class='pill'>No hay suficientes estrellas para ranking en este momento.</div>";
+}
+
+function updateAllAdvancedModules(){
+  populateStarSelectors();
+  updateTargetGuide();
+  updateNightScore();
+  updateNextHour();
+  showStarStory();
+  updateChallenge();
+  updateEasyRanking();
+  createPremiumPoster();
 }
 
 buildBackgroundStars();

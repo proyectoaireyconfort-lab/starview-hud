@@ -1,32 +1,27 @@
-# StarView HUD v12 - Radar automático fluido al tocar
+# StarView HUD v13 - Star Hunter completa
 
-Esta versión ajusta el radar como pediste:
+Esta versión mete todas las ideas nuevas en una sola app:
 
-## Cambio principal
-
-Al tocar `Activar radar automático`, el radar empieza a girar fluido de inmediato.
-
-- Si el celular permite sensores, el radar se alinea con la orientación real.
-- Si el sensor tarda o el navegador lo bloquea, entra en modo demo fluido.
-- Ya no dependes del botón separado de prueba.
-- Se agregó `Detener radar` para regresar a Norte arriba.
-
-## Se conserva
-
-- Modo principiante
-- Qué estrella estoy viendo
-- Nivel de visibilidad
-- Modo noche de observación
-- Eventos del cielo
-- Planetas visibles experimental
-- Postal para compartir
-- QR
+- Star Hunter: elige una estrella y recibe guía
+- Flecha guía dentro del modo objetivo
+- Índice StarView / Noche perfecta
+- Qué ver en los próximos 60 minutos
+- Cielo en movimiento con slider de tiempo
+- Cielo de mi fecha especial
+- Sky Report Premium tipo NASA
+- Vibración al bloquear objetivo / completar reto
+- Historias cortas de estrellas
+- Reto nocturno / gamificación
+- Modo niños / principiante
+- Mensaje bajo las estrellas
+- Radar Lock-On
+- Ranking de estrellas fáciles
+- Modo ciudad / suburbio / cielo oscuro
+- Radar automático fluido de v12
 - Google Analytics 4 en segundo plano
 - Sin tarjeta visible de métricas privadas
 
-## Archivos para subir a GitHub
-
-Sube y reemplaza:
+## Archivos para subir
 
 - `index.html`
 - `manifest.webmanifest`
@@ -35,4 +30,4 @@ Sube y reemplaza:
 
 ## Probar
 
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=12`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=13`

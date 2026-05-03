@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v12",
+  "name": "StarView HUD v13",
   "short_name": "StarView",
-  "description": "Radar estelar que gira fluido al tocar el botón y se alinea con sensores del celular.",
+  "description": "Star Hunter, radar lock-on, cielo en movimiento, retos, historias y reportes premium.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",
