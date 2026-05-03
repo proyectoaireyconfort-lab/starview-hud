@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v5",
+  "name": "StarView HUD v6",
   "short_name": "StarView",
-  "description": "Mapa estelar interactivo con instrucciones y Google Analytics 4 instalado.",
+  "description": "Mapa estelar interactivo con Google Analytics 4 instalado directamente.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",

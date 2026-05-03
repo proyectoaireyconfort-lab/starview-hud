@@ -1,29 +1,37 @@
-# StarView HUD v5
+# StarView HUD v6 - Analytics fijo
 
-Mapa estelar interactivo tipo HUD con pantalla de bienvenida, instrucciones y Google Analytics 4 instalado de forma directa.
+Esta versión trae Google Analytics 4 instalado directamente en `index.html`.
 
-## Google Analytics
-
-Este paquete ya trae instalado el ID de medición:
+## ID instalado
 
 `G-Y7W6O4KLRR`
 
-No depende de Google Tag Manager. Al subir este `index.html` a GitHub Pages, Google Analytics debería empezar a recibir datos cuando alguien abra la app.
+## Archivos que debes subir a GitHub
+
+Sube y reemplaza estos 3 archivos en tu repositorio:
+
+- `index.html`
+- `manifest.webmanifest`
+- `README.md`
 
 ## Cómo probar
 
-1. Sube y reemplaza en GitHub:
-   - `index.html`
-   - `manifest.webmanifest`
-   - `README.md`
-2. Espera 1 a 3 minutos.
-3. Abre:
-   `https://proyectoaireyconfort-lab.github.io/starview-hud/?v=5`
-4. Déjala abierta 30 a 60 segundos.
-5. En Google Analytics entra a:
-   **Informes > En tiempo real**
+1. Sube los archivos a GitHub.
+2. Confirma cambios.
+3. Espera 1 a 3 minutos.
+4. Abre:
 
-## Privacidad
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=6`
 
-La app no muestra contador público. Solo el dueño de la propiedad de Google Analytics puede ver las visitas.
-La ubicación se usa dentro del navegador para calcular el mapa; no se guarda en una base de datos propia.
+5. Déjala abierta 1 minuto.
+6. En Google Analytics entra a:
+
+`Informes > En tiempo real`
+
+Debe aparecer 1 usuario activo.
+
+## Nota
+
+No compartas el link del repositorio. Comparte el link de GitHub Pages:
+
+`https://proyectoaireyconfort-lab.github.io/starview-hud/`
