@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v8 | Mapa del Cielo</title>
+<title>StarView HUD v9 | Mapa del Cielo</title>
 <meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -211,6 +211,40 @@
     h1{font-size:25px}
     body{padding:10px}
   }
+
+  .guide-overlay{
+    position:absolute;left:18px;bottom:18px;right:18px;
+    display:grid;grid-template-columns:repeat(4,1fr);gap:8px;pointer-events:none;
+  }
+  .guide-chip{
+    border:1px solid rgba(120,220,255,.25);border-radius:14px;padding:8px;
+    background:rgba(0,0,0,.35);font-size:12px;color:rgba(234,247,255,.85);text-align:center;
+  }
+  .observation-mode{filter:brightness(.72) saturate(.85) sepia(.18) hue-rotate(310deg)}
+  .observation-mode .card{box-shadow:none}
+  .compass-box{display:grid;grid-template-columns:1fr;gap:8px}
+  .compass-dial{
+    width:150px;height:150px;border-radius:50%;border:1px solid rgba(120,220,255,.35);
+    margin:auto;position:relative;background:radial-gradient(circle,rgba(0,180,255,.12),rgba(0,0,0,.25));
+    box-shadow:0 0 22px rgba(0,180,255,.13);
+  }
+  .compass-needle{
+    position:absolute;left:50%;top:13px;width:4px;height:62px;margin-left:-2px;border-radius:8px;
+    background:linear-gradient(#ff3157,#fff2a8);transform-origin:50% 62px;box-shadow:0 0 10px rgba(255,49,87,.5);
+  }
+  .compass-label{position:absolute;font-weight:800;color:#9eeaff;font-family:monospace}
+  .compass-label.n{top:8px;left:50%;transform:translateX(-50%)}
+  .compass-label.e{right:10px;top:50%;transform:translateY(-50%)}
+  .compass-label.s{bottom:8px;left:50%;transform:translateX(-50%)}
+  .compass-label.o{left:10px;top:50%;transform:translateY(-50%)}
+  select{
+    width:100%;border-radius:14px;border:1px solid rgba(120,220,255,.28);
+    background:rgba(0,0,0,.3);color:#fff;padding:12px;font-size:15px;outline:none;
+  }
+  .vis-easy{color:#b7ffce}.vis-mid{color:#fff2a8}.vis-hard{color:#ffb0b0}
+  .poster{width:100%;border:1px solid rgba(120,220,255,.25);border-radius:18px;background:rgba(0,0,0,.22);padding:10px}
+  @media(max-width:760px){.guide-overlay{grid-template-columns:1fr 1fr;left:10px;right:10px;bottom:10px}.guide-chip{font-size:11px;padding:6px}}
+
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -227,7 +261,7 @@
 <body>
 <div id="introModal" class="modal-backdrop">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v8</h2>
+    <h2>🌌 Bienvenido a StarView HUD v9</h2>
     <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
     <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
@@ -247,7 +281,7 @@
     <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD v8</h1>
+        <h1>🌌 StarView HUD v9</h1>
         <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
@@ -289,6 +323,11 @@
       <button class="button-secondary" onclick="shareWhatsApp()">🟢 Compartir por WhatsApp</button>
       <button class="button-secondary" onclick="showInstallHelp()">📲 Agregar a pantalla de inicio</button>
       <button class="button-secondary" onclick="openIntro()">ℹ️ Ver instrucciones</button>
+      <button class="button-gold" onclick="enableCompass()">🧭 Activar brújula real</button>
+      <button class="button-gold" onclick="toggleObservation()">🔴 Noche de observación</button>
+      <button class="button-secondary" onclick="scrollToSection('starFinder')">❓ ¿Qué estrella veo?</button>
+      <button class="button-secondary" onclick="createPoster()">📸 Crear postal</button>
+      <button class="button-secondary" onclick="sendFeedback()">💬 Enviar opinión</button>
     </div>
   </div>
 
@@ -310,6 +349,12 @@
 
   <div class="card hud">
     <canvas id="sky" width="900" height="900"></canvas>
+    <div class="guide-overlay">
+      <div class="guide-chip">Centro = cielo arriba</div>
+      <div class="guide-chip">Borde = horizonte</div>
+      <div class="guide-chip">N/E/S/O = dirección</div>
+      <div class="guide-chip">Punto grande = brillante</div>
+    </div>
   </div>
 
   <div class="grid-3 grid-2-clean">
@@ -326,6 +371,66 @@
     </div>
 
     
+  </div>
+
+
+  <div class="grid-3">
+    <div class="card">
+      <h2>🧭 Brújula real</h2>
+      <div class="compass-box">
+        <div class="compass-dial">
+          <div class="compass-needle" id="compassNeedle"></div>
+          <div class="compass-label n">N</div>
+          <div class="compass-label e">E</div>
+          <div class="compass-label s">S</div>
+          <div class="compass-label o">O</div>
+        </div>
+        <div class="pill" id="compassStatus">Presiona “Activar brújula real”. En algunos celulares debes permitir sensores de movimiento.</div>
+      </div>
+    </div>
+
+    <div class="card" id="starFinder">
+      <h2>❓ ¿Qué estrella estoy viendo?</h2>
+      <p class="small">Elige hacia dónde estás mirando y la app te sugiere estrellas cercanas a esa dirección.</p>
+      <select id="lookDirection" onchange="suggestStarsByDirection()">
+        <option value="0">Estoy mirando al Norte</option>
+        <option value="45">Noreste</option>
+        <option value="90">Este</option>
+        <option value="135">Sureste</option>
+        <option value="180">Sur</option>
+        <option value="225">Suroeste</option>
+        <option value="270">Oeste</option>
+        <option value="315">Noroeste</option>
+      </select>
+      <div id="starGuessList" class="list" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>👁️ Nivel de visibilidad</h2>
+      <p class="small">Clasificación práctica según altura y brillo aparente.</p>
+      <div id="visibilityList" class="list"></div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h2>🌠 Eventos del cielo</h2>
+      <div id="skyEvents" class="list"></div>
+      <p class="small">Eventos aproximados y de referencia para observación casual.</p>
+    </div>
+
+    <div class="card">
+      <h2>🪐 Planetas visibles</h2>
+      <div id="planetList" class="list"></div>
+      <p class="small">Módulo experimental: orientación aproximada para observación casual, no cálculo astronómico profesional.</p>
+    </div>
+
+    <div class="card">
+      <h2>📸 Postal para compartir</h2>
+      <canvas id="posterCanvas" class="poster" width="900" height="1200"></canvas>
+      <button style="margin-top:10px" onclick="downloadPoster()">Descargar postal</button>
+      <button class="button-secondary" style="margin-top:8px" onclick="shareWhatsApp()">Compartir link por WhatsApp</button>
+    </div>
   </div>
 
   <div class="card info">
@@ -361,7 +466,7 @@
     <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
   </div>
 
-  <div class="footer">StarView HUD v8 · Guía visual básica, no sustituye software astronómico profesional.</div>
+  <div class="footer">StarView HUD v9 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>
@@ -705,6 +810,251 @@ function drawSky(){
     <br><span class="small">Hora usada: ${date.toLocaleString()} | Lat ${lat.toFixed(3)} Lon ${lon.toFixed(3)}</span>
   `;
   updateMoon();
+  lastVisibleStars = visible;
+  updateVisibilityModules();
+  updateSkyEvents();
+  updatePlanets();
+  createPoster();
+}
+
+
+let lastVisibleStars = [];
+let lastHeading = null;
+let observationMode = false;
+
+function scrollToSection(id){
+  const el = document.getElementById(id);
+  if(el){ el.scrollIntoView({behavior:"smooth", block:"center"}); }
+  track("scroll_to_section", {section:id});
+}
+
+function angularDiff(a,b){
+  let d = Math.abs(a-b) % 360;
+  return d > 180 ? 360 - d : d;
+}
+
+function visibilityLabel(star){
+  if(star.alt >= 35 && star.mag <= 1.7) return {label:"Muy fácil de ver", cls:"vis-easy"};
+  if(star.alt >= 18 && star.mag <= 2.3) return {label:"Fácil", cls:"vis-easy"};
+  if(star.alt >= 8) return {label:"Difícil / baja", cls:"vis-mid"};
+  return {label:"Muy cerca del horizonte", cls:"vis-hard"};
+}
+
+function updateVisibilityModules(){
+  const visibilityList = document.getElementById("visibilityList");
+  if(!visibilityList) return;
+  visibilityList.innerHTML = lastVisibleStars.slice(0,7).map(v=>{
+    const vis = visibilityLabel(v);
+    return `<div class="starrow">
+      <div><b>${v.name}</b><br><span class="small">${v.cons}</span></div>
+      <div class="small ${vis.cls}">${vis.label}<br>Alt ${v.alt.toFixed(0)}°</div>
+    </div>`;
+  }).join("") || "<div class='pill'>Actualiza el cielo para calcular visibilidad.</div>";
+  suggestStarsByDirection();
+}
+
+function suggestStarsByDirection(){
+  const select = document.getElementById("lookDirection");
+  const box = document.getElementById("starGuessList");
+  if(!select || !box) return;
+  const dir = parseFloat(select.value);
+  const candidates = lastVisibleStars
+    .filter(s => s.alt > 4)
+    .map(s => ({...s, diff: angularDiff(s.az, dir)}))
+    .filter(s => s.diff <= 45)
+    .sort((a,b)=> a.diff - b.diff || a.mag - b.mag)
+    .slice(0,5);
+
+  box.innerHTML = candidates.length ? candidates.map(s=>`
+    <div class="starrow">
+      <div><b>⭐ ${s.name}</b><br><span class="small">${s.cons}</span></div>
+      <div class="small">Az ${s.az.toFixed(0)}° · Alt ${s.alt.toFixed(0)}°</div>
+    </div>
+  `).join("") : "<div class='pill'>No encontré estrellas brillantes cerca de esa dirección. Prueba otra zona o actualiza el cielo.</div>";
+  track("star_finder_used", {direction:dir});
+}
+
+function enableCompass(){
+  track("compass_enable_click");
+  const status = document.getElementById("compassStatus");
+
+  function handleOrientation(event){
+    let heading = null;
+    if(typeof event.webkitCompassHeading === "number"){
+      heading = event.webkitCompassHeading;
+    } else if(typeof event.alpha === "number"){
+      heading = 360 - event.alpha;
+    }
+    if(heading !== null){
+      lastHeading = (heading + 360) % 360;
+      const needle = document.getElementById("compassNeedle");
+      if(needle) needle.style.transform = `rotate(${lastHeading}deg)`;
+      if(status) status.innerHTML = `<b>Rumbo aproximado:</b> ${lastHeading.toFixed(0)}°<br><span class="small">Gira tu cuerpo y alinea la N del mapa con el norte real.</span>`;
+    }
+  }
+
+  if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
+    DeviceOrientationEvent.requestPermission().then(state=>{
+      if(state === "granted"){
+        window.addEventListener("deviceorientation", handleOrientation, true);
+        if(status) status.textContent = "Brújula activada. Mueve el celular lentamente.";
+        track("compass_enabled");
+      } else {
+        if(status) status.textContent = "Permiso de brújula rechazado.";
+        track("compass_permission_denied");
+      }
+    }).catch(()=>{
+      if(status) status.textContent = "No se pudo activar la brújula en este navegador.";
+      track("compass_error");
+    });
+  } else if(window.DeviceOrientationEvent){
+    window.addEventListener("deviceorientation", handleOrientation, true);
+    if(status) status.textContent = "Brújula activada. Si no se mueve, tu navegador bloqueó sensores.";
+    track("compass_enabled");
+  } else {
+    if(status) status.textContent = "Este celular/navegador no permite brújula desde la web.";
+    track("compass_not_supported");
+  }
+}
+
+function toggleObservation(){
+  observationMode = !observationMode;
+  document.body.classList.toggle("observation-mode", observationMode);
+  if(!nightMode && observationMode){
+    nightMode = true;
+    document.body.classList.add("night-red");
+  }
+  track("observation_mode_toggle", {enabled:observationMode});
+  drawSky();
+}
+
+function updateSkyEvents(){
+  const box = document.getElementById("skyEvents");
+  if(!box) return;
+  const d = getDateFromInput();
+  const month = d.getMonth() + 1;
+  const m = moonPhase(d);
+  let events = [];
+  if(m.pct > 90) events.push(["🌕 Luna muy brillante", "Buen momento para observar la Luna; estrellas débiles se verán menos."]);
+  if(m.pct < 15) events.push(["🌑 Cielo más oscuro", "Mejor oportunidad para ver estrellas débiles si el clima ayuda."]);
+  const meteorShowers = [
+    {name:"Cuadrántidas", month:1, note:"Principios de enero"},
+    {name:"Líridas", month:4, note:"Finales de abril"},
+    {name:"Eta Acuáridas", month:5, note:"Principios de mayo"},
+    {name:"Perseidas", month:8, note:"Agosto"},
+    {name:"Oriónidas", month:10, note:"Octubre"},
+    {name:"Leónidas", month:11, note:"Noviembre"},
+    {name:"Gemínidas", month:12, note:"Diciembre"}
+  ];
+  meteorShowers.filter(x=>x.month===month).forEach(x=>events.push(["🌠 "+x.name, x.note+" · evento aproximado de referencia."]));
+  events.push(["🧭 Tip de observación", "Apaga luces cercanas y espera 10 minutos para adaptar la vista."]);
+
+  box.innerHTML = events.map(e=>`
+    <div class="starrow">
+      <div><b>${e[0]}</b><br><span class="small">${e[1]}</span></div>
+    </div>
+  `).join("");
+}
+
+function updatePlanets(){
+  const box = document.getElementById("planetList");
+  if(!box) return;
+  const d = getDateFromInput();
+  const hour = d.getHours();
+  let planets = [];
+  if(hour >= 18 || hour <= 5){
+    planets = [
+      ["Venus", "Muy brillante si está cerca del amanecer/atardecer"],
+      ["Júpiter", "Brillante, blanco/crema"],
+      ["Saturno", "Menos brillante, tono amarillento"],
+      ["Marte", "Rojizo cuando está visible"]
+    ];
+  } else {
+    planets = [
+      ["Venus", "A veces visible cerca del Sol al amanecer/atardecer"],
+      ["Júpiter", "Mejor revisar de noche"],
+      ["Saturno", "Mejor revisar de noche"],
+      ["Marte", "Variable según temporada"]
+    ];
+  }
+  box.innerHTML = planets.map(p=>`
+    <div class="starrow">
+      <div><b>🪐 ${p[0]}</b><br><span class="small">${p[1]}</span></div>
+      <div class="small">Experimental</div>
+    </div>
+  `).join("");
+}
+
+function createPoster(){
+  track("poster_created");
+  const canvas = document.getElementById("posterCanvas");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const w = canvas.width, h = canvas.height;
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0,"#030711");
+  grad.addColorStop(.55,"#07172c");
+  grad.addColorStop(1,"#250713");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  for(let i=0;i<160;i++){
+    ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.55})`;
+    ctx.fillRect(Math.random()*w, Math.random()*h, Math.random()<.9?2:3, Math.random()<.9?2:3);
+  }
+
+  ctx.fillStyle = "#eaf7ff";
+  ctx.font = "bold 58px system-ui";
+  ctx.fillText("StarView HUD", 55, 110);
+  ctx.font = "30px system-ui";
+  ctx.fillStyle = "rgba(234,247,255,.78)";
+  ctx.fillText("Esta noche desde tu ubicación", 55, 160);
+
+  const m = moonPhase(getDateFromInput());
+  ctx.font = "bold 42px system-ui";
+  ctx.fillStyle = "#fff2a8";
+  ctx.fillText(`${m.emoji} ${m.name}`, 55, 235);
+  ctx.font = "26px system-ui";
+  ctx.fillStyle = "rgba(234,247,255,.78)";
+  ctx.fillText(`Iluminación aprox: ${m.pct}%`, 55, 275);
+
+  ctx.font = "bold 34px system-ui";
+  ctx.fillStyle = "#9eeaff";
+  ctx.fillText("Estrellas destacadas:", 55, 360);
+
+  ctx.font = "32px system-ui";
+  ctx.fillStyle = "#eaf7ff";
+  lastVisibleStars.slice(0,6).forEach((s,i)=>{
+    ctx.fillText(`⭐ ${s.name} · Alt ${s.alt.toFixed(0)}°`, 75, 420 + i*58);
+  });
+
+  ctx.strokeStyle = "rgba(0,180,255,.55)";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(38,38,w-76,h-76);
+
+  ctx.font = "24px system-ui";
+  ctx.fillStyle = "rgba(234,247,255,.75)";
+  ctx.fillText("Creado por Aire Acondicionado y Confort Lab", 55, h-95);
+  ctx.fillText("https://proyectoaireyconfort-lab.github.io/starview-hud/", 55, h-55);
+}
+
+function downloadPoster(){
+  createPoster();
+  const canvas = document.getElementById("posterCanvas");
+  const a = document.createElement("a");
+  a.href = canvas.toDataURL("image/png");
+  a.download = "starview-hud-postal.png";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  track("poster_downloaded");
+}
+
+function sendFeedback(){
+  track("feedback_click");
+  const text = encodeURIComponent("Hola, probé StarView HUD y esta es mi opinión: ");
+  const url = "https://wa.me/?text=" + text;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 buildBackgroundStars();

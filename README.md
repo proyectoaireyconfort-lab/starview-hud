@@ -1,22 +1,27 @@
-# StarView HUD v8
+# StarView HUD v9 completa
 
-Versión igual a la v7, pero sin la tarjeta visible de “Métricas privadas”.
+Versión completa con:
 
-## Cambios
+- Modo brújula real con sensores del celular
+- Botón “¿Qué estrella estoy viendo?”
+- Nivel de visibilidad
+- Explicación visual dentro del mapa
+- Modo “Noche de observación”
+- Eventos del cielo aproximados
+- Planetas visibles en módulo experimental
+- Captura/postal para compartir
+- Branding de Aire Acondicionado y Confort Lab
+- Botón de opinión por WhatsApp
+- Google Analytics 4 instalado en segundo plano
+- QR para compartir
 
-- Se quitó la sección visible “Métricas privadas”.
-- Google Analytics sigue instalado en segundo plano para que el dueño pueda ver visitas.
-- El público no ve contador ni mensajes sobre métricas.
-- Se conserva:
-  - Pantalla de bienvenida
-  - Instrucciones
-  - Modo principiante
-  - Compartir por WhatsApp
-  - Fase lunar aproximada
-  - Qué puedo ver hoy
-  - QR para compartir
+## Analytics
 
-## Archivos a subir a GitHub
+ID instalado:
+
+`G-Y7W6O4KLRR`
+
+## Archivos para subir a GitHub
 
 Sube y reemplaza:
 
@@ -29,4 +34,8 @@ Sube y reemplaza:
 
 Abre:
 
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=8`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=9`
+
+## Link para compartir
+
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v9`
