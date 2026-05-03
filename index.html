@@ -133,6 +133,83 @@
     h1{font-size:24px}
     body{padding:10px}
   }
+
+  .instructions{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:12px;
+    margin-top:12px;
+  }
+  .mini-card{
+    border:1px solid rgba(100,220,255,.22);
+    border-radius:18px;
+    padding:13px;
+    background:rgba(0,0,0,.22);
+    line-height:1.45;
+  }
+  .mini-card h3{
+    margin:0 0 8px;
+    font-size:16px;
+  }
+  .steps{
+    margin:0;
+    padding-left:20px;
+  }
+  .steps li{
+    margin:6px 0;
+  }
+  .legend{
+    display:grid;
+    gap:7px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:14px;
+  }
+  .dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:#e7fbff;
+    box-shadow:0 0 10px rgba(174,239,255,.9);
+    flex:0 0 auto;
+  }
+  .dot.big{
+    width:17px;
+    height:17px;
+    background:#fff7d1;
+  }
+  .line-demo{
+    width:25px;
+    height:2px;
+    background:rgba(120,220,255,.6);
+    box-shadow:0 0 8px rgba(120,220,255,.5);
+    flex:0 0 auto;
+  }
+  .help-title{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .help-title button{
+    max-width:190px;
+    padding:9px 12px;
+    font-size:13px;
+  }
+  .notice{
+    border-left:3px solid rgba(255,80,110,.8);
+    padding-left:10px;
+    color:rgba(234,247,255,.86);
+  }
+  @media(max-width:700px){
+    .instructions{grid-template-columns:1fr}
+    .help-title{flex-direction:column;align-items:flex-start}
+    .help-title button{max-width:100%}
+  }
+
 </style>
 </head>
 <body>
@@ -141,7 +218,7 @@
     <div class="brand">
       <div>
         <h1>🌌 StarView HUD</h1>
-        <div class="sub">Mapa básico del cielo visible desde tu ubicación. App 100% estática para GitHub Pages.</div>
+        <div class="sub">App para consultar qué estrellas brillantes pueden verse sobre tu cielo según tu ubicación, fecha y hora.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
     </div>
@@ -167,6 +244,49 @@
       <button onclick="drawSky()">🔭 Actualizar cielo</button>
       <button class="button-secondary" onclick="setTonala()">📌 Usar Tonalá/ZMG</button>
       <button class="button-secondary" onclick="toggleNight()">🌙 Modo rojo nocturno</button>
+    </div>
+
+    <div class="instructions">
+      <div class="mini-card">
+        <div class="help-title">
+          <h3>🛰️ ¿Para qué sirve?</h3>
+          <button onclick="scrollToSky()">Ver mapa del cielo</button>
+        </div>
+        <p>
+          <b>StarView HUD</b> te muestra una vista básica del cielo sobre tu ubicación:
+          estrellas destacadas, constelaciones principales y dirección aproximada.
+        </p>
+        <p class="notice">
+          No es un telescopio ni una app científica profesional; es una guía visual rápida para orientarte y saber qué estrellas buscar.
+        </p>
+      </div>
+
+      <div class="mini-card">
+        <h3>⚡ Cómo usarlo en 30 segundos</h3>
+        <ol class="steps">
+          <li>Presiona <b>Usar ubicación del celular</b>.</li>
+          <li>Presiona <b>Actualizar cielo</b>.</li>
+          <li>Apunta la parte de arriba del mapa hacia el <b>Norte</b>.</li>
+          <li>Busca las estrellas más brillantes que aparecen con nombre.</li>
+        </ol>
+      </div>
+
+      <div class="mini-card">
+        <h3>🧭 Cómo leer el mapa</h3>
+        <div class="legend">
+          <div class="legend-item"><span class="dot big"></span> Estrella muy brillante.</div>
+          <div class="legend-item"><span class="dot"></span> Estrella visible destacada.</div>
+          <div class="legend-item"><span class="line-demo"></span> Línea de constelación.</div>
+          <div class="legend-item"><b>N / E / S / O</b> Direcciones: Norte, Este, Sur y Oeste.</div>
+        </div>
+      </div>
+
+      <div class="mini-card">
+        <h3>🔒 Privacidad</h3>
+        <p>
+          La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos.
+        </p>
+      </div>
     </div>
   </div>
 
@@ -324,6 +444,10 @@ function setTonala(){
   document.getElementById("lat").value = "20.624";
   document.getElementById("lon").value = "-103.234";
   drawSky();
+}
+
+function scrollToSky(){
+  document.getElementById("sky").scrollIntoView({behavior:"smooth", block:"center"});
 }
 
 function toggleNight(){

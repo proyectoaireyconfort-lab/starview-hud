@@ -1,33 +1,42 @@
 # StarView HUD
 
-Mapa básico del cielo visible desde tu ubicación.
+Mapa estelar interactivo tipo HUD para ver estrellas brillantes visibles desde la ubicación del usuario.
+
+## ¿Para qué sirve?
+
+StarView HUD ayuda a una persona a orientarse en el cielo nocturno de forma sencilla. La app muestra:
+
+- Estrellas brillantes visibles sobre el horizonte.
+- Dirección aproximada: Norte, Este, Sur y Oeste.
+- Altura y azimut de cada estrella.
+- Líneas básicas de constelaciones destacadas.
+- Modo rojo nocturno para no molestar tanto la vista de noche.
 
 ## Cómo usar
 
-1. Abre `index.html` en el navegador.
-2. Presiona **Usar ubicación del celular** o escribe latitud y longitud.
+1. Abre la página desde GitHub Pages.
+2. Presiona **Usar ubicación del celular**.
 3. Presiona **Actualizar cielo**.
+4. Apunta la parte superior del mapa hacia el **Norte**.
+5. Busca en el cielo las estrellas más brillantes que aparecen con nombre.
 
-## Listo para GitHub Pages
+## Privacidad
 
-Este proyecto es completamente estático. No ocupa Python, servidor ni base de datos.
+La ubicación se usa solamente dentro del navegador para calcular el mapa. No se guarda en servidores ni se envía a una base de datos.
 
-### Publicar en GitHub Pages
+## Publicar en GitHub Pages
 
-1. Crea un repositorio nuevo en GitHub, por ejemplo: `starview-hud`.
-2. Sube estos archivos:
+1. Sube estos archivos al repositorio:
    - `index.html`
    - `manifest.webmanifest`
-   - `.nojekyll`
    - `README.md`
-3. En GitHub ve a:
-   **Settings > Pages**
-4. En **Build and deployment**, elige:
+2. Ve a **Settings > Pages**.
+3. Selecciona:
    - Source: `Deploy from a branch`
-   - Branch: `main`
+   - Branch: `principal`
    - Folder: `/root`
-5. Guarda y espera a que GitHub te dé tu enlace.
+4. Guarda y espera a que GitHub publique el sitio.
 
 ## Nota
 
-La ubicación GPS funciona mejor cuando la página se abre desde HTTPS, como GitHub Pages.
+Esta app es una guía visual básica. No sustituye software astronómico profesional.
