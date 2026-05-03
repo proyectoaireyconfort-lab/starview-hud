@@ -1,41 +1,29 @@
-# StarView HUD v4
+# StarView HUD v5
 
-Mapa estelar interactivo tipo HUD con pantalla de bienvenida, instrucciones integradas y Google Tag Manager instalado.
+Mapa estelar interactivo tipo HUD con pantalla de bienvenida, instrucciones y Google Analytics 4 instalado de forma directa.
 
-## Google Tag Manager
+## Google Analytics
 
-Este paquete ya trae instalado el contenedor:
+Este paquete ya trae instalado el ID de medición:
 
-`GTM-5KX5WPLM`
+`G-Y7W6O4KLRR`
 
-## Para ver cuánta gente la usa
+No depende de Google Tag Manager. Al subir este `index.html` a GitHub Pages, Google Analytics debería empezar a recibir datos cuando alguien abra la app.
 
-GitHub Pages no guarda estadísticas privadas por sí solo. Para ver usuarios activos, conecta este contenedor con Google Analytics 4 desde Google Tag Manager.
+## Cómo probar
 
-### Pasos rápidos
-
-1. Crea una propiedad en Google Analytics 4.
-2. Crea un flujo web con esta URL:
-   `https://proyectoaireyconfort-lab.github.io/starview-hud/`
-3. Copia el Measurement ID, algo como:
-   `G-XXXXXXXXXX`
-4. En Google Tag Manager crea una etiqueta:
-   - Tipo: Google Analytics / Google tag
-   - Tag ID: tu `G-XXXXXXXXXX`
-   - Activador: All Pages
-5. Guarda.
-6. Toca **Enviar** en Tag Manager.
-7. Publica la versión.
-
-Después podrás ver usuarios activos en Google Analytics, en el reporte de tiempo real.
+1. Sube y reemplaza en GitHub:
+   - `index.html`
+   - `manifest.webmanifest`
+   - `README.md`
+2. Espera 1 a 3 minutos.
+3. Abre:
+   `https://proyectoaireyconfort-lab.github.io/starview-hud/?v=5`
+4. Déjala abierta 30 a 60 segundos.
+5. En Google Analytics entra a:
+   **Informes > En tiempo real**
 
 ## Privacidad
 
-La app no muestra contador público. Solo el dueño de la cuenta de Google Analytics / Tag Manager puede ver el uso.
-La ubicación de la app se usa en el navegador para calcular el mapa; no se guarda en una base de datos propia.
-
-## Archivos
-
-- `index.html`
-- `manifest.webmanifest`
-- `README.md`
+La app no muestra contador público. Solo el dueño de la propiedad de Google Analytics puede ver las visitas.
+La ubicación se usa dentro del navegador para calcular el mapa; no se guarda en una base de datos propia.
