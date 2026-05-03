@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v13 | Mapa del Cielo</title>
+<title>StarView HUD v14 | Mapa del Cielo</title>
 <meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -370,6 +370,41 @@
     pointer-events:none;
   }
 
+
+  .field-readout{
+    display:flex;
+    gap:7px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .field-pill{
+    border:1px solid rgba(120,220,255,.28);
+    border-radius:999px;
+    padding:7px 10px;
+    background:rgba(0,0,0,.30);
+    color:#9eeaff;
+    font-family:monospace;
+    font-size:12px;
+  }
+  .field-pill.warn{
+    color:#fff2a8;
+    border-color:rgba(255,242,168,.35);
+  }
+  .ecliptic-badge{
+    position:absolute;
+    left:18px;
+    top:58px;
+    z-index:4;
+    border:1px solid rgba(255,242,168,.32);
+    border-radius:999px;
+    padding:7px 12px;
+    background:rgba(0,0,0,.42);
+    color:#fff2a8;
+    font-family:monospace;
+    font-size:12px;
+    pointer-events:none;
+  }
+
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -386,7 +421,7 @@
 <body>
 <div id="introModal" class="modal-backdrop">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v13</h2>
+    <h2>🌌 Bienvenido a StarView HUD v14</h2>
     <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
     <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
@@ -406,7 +441,7 @@
     <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD v13</h1>
+        <h1>🌌 StarView HUD v14</h1>
         <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
@@ -481,6 +516,7 @@
     <div class="radar-spin-ring"></div>
     <div class="heading-hud" id="headingHud">Radar fijo · N arriba</div>
     <div class="lock-pill" id="lockPill">Sin objetivo</div>
+    <div class="ecliptic-badge">ECLÍPTICA ON</div>
     <div class="guide-overlay">
       <div class="guide-chip">Centro = cielo arriba</div>
       <div class="guide-chip">Borde = horizonte</div>
@@ -515,7 +551,14 @@
       <div class="chips">
         <span class="chip">Top del celular = hacia donde miras</span>
         <span class="chip">Giro fluido al tocar</span>
-        <span class="chip">Si no hay sensor, usa giro demo</span>
+        <span class="chip">Eclíptica activa</span>
+        <span class="chip">Horizonte artificial</span>
+      </div>
+      <div class="field-readout">
+        <span class="field-pill" id="fieldHeadingPill">HDG --°</span>
+        <span class="field-pill" id="fieldPitchPill">PITCH --°</span>
+        <span class="field-pill" id="fieldRollPill">ROLL --°</span>
+        <span class="field-pill warn" id="fieldModePill">SENSOR OFF</span>
       </div>
     </div>
 
@@ -697,7 +740,7 @@
     <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
   </div>
 
-  <div class="footer">StarView HUD v13 · Guía visual básica, no sustituye software astronómico profesional.</div>
+  <div class="footer">StarView HUD v14 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>
@@ -976,6 +1019,9 @@ function drawSky(sendTrack = true){
     ctx.fillText(txt,p.x,p.y);
   });
 
+  // Capa de eclíptica: ruta aparente del Sol, Luna y planetas
+  drawEcliptic(ctx, cx, cy, rmax, lat, lon, date);
+
   let calculated = {};
   let visible = [];
   stars.forEach(s=>{
@@ -1041,6 +1087,10 @@ function drawSky(sendTrack = true){
     </div>
   `).join("") || "<div class='pill'>No hay estrellas destacadas calculadas sobre el horizonte en este momento.</div>";
 
+  // Horizonte artificial de campo: nivel pitch/roll del celular
+  drawArtificialHorizon(ctx, W - 225, 22, 205, 128);
+  updateFieldInstrumentReadout();
+
   document.getElementById("status").innerHTML = `
     <b>Lectura:</b> ${visible.length} objetos brillantes sobre el horizonte. 
     <br><span class="small">Hora usada: ${date.toLocaleString()} | Lat ${lat.toFixed(3)} Lon ${lon.toFixed(3)}</span>
@@ -1065,6 +1115,9 @@ let autoRadarEnabled = false;
 let autoRadarAnimationId = null;
 let demoSpin = false;
 let lastFrameTime = 0;
+let sensorPitch = 0;
+let sensorRoll = 0;
+let sensorMode = "OFF";
 let observationMode = false;
 
 function scrollToSection(id){
@@ -1200,9 +1253,15 @@ function enableAutoRadar(){
 
     if(typeof event.webkitCompassHeading === "number"){
       heading = event.webkitCompassHeading;
+      sensorMode = "ABS_COMPASS";
     } else if(typeof event.alpha === "number"){
       heading = 360 - event.alpha;
+      sensorMode = "DEVICE_ALPHA";
     }
+
+    if(typeof event.beta === "number") sensorPitch = event.beta;
+    if(typeof event.gamma === "number") sensorRoll = event.gamma;
+    updateFieldInstrumentReadout();
 
     if(heading !== null){
       sensorReceived = true;
@@ -1775,6 +1834,169 @@ function updateAllAdvancedModules(){
   updateChallenge();
   updateEasyRanking();
   createPremiumPoster();
+}
+
+
+/* ============================================================
+   STARVIEW FIELD INSTRUMENT MODULE
+   Eclíptica + Horizonte artificial + Pitch/Roll HUD
+   ============================================================ */
+
+function updateFieldInstrumentReadout(){
+  const headingPill = document.getElementById("fieldHeadingPill");
+  const pitchPill = document.getElementById("fieldPitchPill");
+  const rollPill = document.getElementById("fieldRollPill");
+  const modePill = document.getElementById("fieldModePill");
+
+  if(headingPill) headingPill.textContent = `HDG ${currentRotation.toFixed(0)}°`;
+  if(pitchPill) pitchPill.textContent = `PITCH ${sensorPitch.toFixed(0)}°`;
+  if(rollPill) rollPill.textContent = `ROLL ${sensorRoll.toFixed(0)}°`;
+  if(modePill) modePill.textContent = sensorMode || "SENSOR OFF";
+}
+
+function eclipticToEquatorial(lambdaDeg){
+  const eps = 23.439291 * Math.PI / 180;
+  const lambda = lambdaDeg * Math.PI / 180;
+
+  const sinDec = Math.sin(lambda) * Math.sin(eps);
+  const dec = Math.asin(sinDec);
+
+  const y = Math.sin(lambda) * Math.cos(eps);
+  const x = Math.cos(lambda);
+  let ra = Math.atan2(y, x);
+  if(ra < 0) ra += Math.PI * 2;
+
+  return {
+    raHours: (ra * 180 / Math.PI) / 15,
+    decDeg: dec * 180 / Math.PI
+  };
+}
+
+function drawEcliptic(ctx, cx, cy, rmax, lat, lon, date){
+  ctx.save();
+
+  // Limitar al círculo del radar
+  ctx.beginPath();
+  ctx.arc(cx, cy, rmax, 0, Math.PI * 2);
+  ctx.clip();
+
+  ctx.lineWidth = 2.4;
+  ctx.strokeStyle = nightMode ? "rgba(255,180,120,.72)" : "rgba(255,242,168,.70)";
+  ctx.shadowColor = "rgba(255,242,168,.55)";
+  ctx.shadowBlur = 12;
+
+  let started = false;
+
+  for(let lambda = 0; lambda <= 360; lambda += 2){
+    const eq = eclipticToEquatorial(lambda);
+    const aa = altAz(eq.raHours, eq.decDeg, lat, lon, date);
+
+    if(aa.alt <= 0){
+      if(started){
+        ctx.stroke();
+        started = false;
+      }
+      continue;
+    }
+
+    const p = project(displayAz(aa.az), aa.alt, cx, cy, rmax);
+
+    if(!started){
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      started = true;
+    } else {
+      ctx.lineTo(p.x, p.y);
+    }
+  }
+
+  if(started) ctx.stroke();
+
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // Etiqueta técnica
+  ctx.save();
+  ctx.fillStyle = nightMode ? "rgba(255,190,150,.88)" : "rgba(255,242,168,.90)";
+  ctx.font = "13px monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("ECLÍPTICA · ruta Sol/Luna/planetas", cx - rmax + 16, cy + rmax - 24);
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function drawArtificialHorizon(ctx, x, y, w, h){
+  const pitch = clamp(sensorPitch || 0, -45, 45);
+  const roll = clamp(sensorRoll || 0, -60, 60);
+
+  ctx.save();
+  ctx.translate(x + w / 2, y + h / 2);
+
+  ctx.fillStyle = "rgba(0,0,0,.50)";
+  ctx.strokeStyle = nightMode ? "rgba(255,120,120,.38)" : "rgba(120,220,255,.38)";
+  ctx.lineWidth = 1.5;
+
+  roundRect(ctx, -w / 2, -h / 2, w, h, 15);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.save();
+  roundRect(ctx, -w / 2 + 8, -h / 2 + 8, w - 16, h - 16, 10);
+  ctx.clip();
+
+  ctx.rotate(-roll * Math.PI / 180);
+  const pitchOffset = pitch * 1.25;
+
+  ctx.fillStyle = nightMode ? "rgba(120,35,35,.26)" : "rgba(0,180,255,.25)";
+  ctx.fillRect(-w, -h * 2 + pitchOffset, w * 2, h * 2);
+
+  ctx.fillStyle = nightMode ? "rgba(255,90,90,.16)" : "rgba(255,49,87,.18)";
+  ctx.fillRect(-w, pitchOffset, w * 2, h * 2);
+
+  ctx.strokeStyle = "rgba(255,242,168,.92)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-w, pitchOffset);
+  ctx.lineTo(w, pitchOffset);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // Cruz central
+  ctx.strokeStyle = "rgba(234,247,255,.92)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-24, 0);
+  ctx.lineTo(-7, 0);
+  ctx.moveTo(7, 0);
+  ctx.lineTo(24, 0);
+  ctx.moveTo(0, -9);
+  ctx.lineTo(0, 9);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(234,247,255,.88)";
+  ctx.font = "11px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("PITCH / ROLL", 0, -h / 2 + 20);
+
+  ctx.font = "10px monospace";
+  ctx.fillText(`P ${pitch.toFixed(0)}° · R ${roll.toFixed(0)}°`, 0, h / 2 - 12);
+
+  ctx.restore();
 }
 
 buildBackgroundStars();

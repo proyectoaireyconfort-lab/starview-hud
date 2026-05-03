@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v13",
+  "name": "StarView HUD v14",
   "short_name": "StarView",
-  "description": "Star Hunter, radar lock-on, cielo en movimiento, retos, historias y reportes premium.",
+  "description": "Instrumento de campo con radar orientado, eclíptica y horizonte artificial.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",

@@ -1,27 +1,32 @@
-# StarView HUD v13 - Star Hunter completa
+# StarView HUD v14 - Field Instrument
 
-Esta versión mete todas las ideas nuevas en una sola app:
+Versión profesional tipo herramienta de campo.
 
-- Star Hunter: elige una estrella y recibe guía
-- Flecha guía dentro del modo objetivo
-- Índice StarView / Noche perfecta
-- Qué ver en los próximos 60 minutos
-- Cielo en movimiento con slider de tiempo
-- Cielo de mi fecha especial
-- Sky Report Premium tipo NASA
-- Vibración al bloquear objetivo / completar reto
-- Historias cortas de estrellas
-- Reto nocturno / gamificación
-- Modo niños / principiante
-- Mensaje bajo las estrellas
+## Nuevas capas técnicas
+
+- Brújula/radar orientado con `DeviceOrientationEvent`.
+- Si el usuario gira hacia el Este, el Este queda arriba del radar.
+- Capa de eclíptica: ruta aproximada del Sol, Luna y planetas.
+- Horizonte artificial dentro del canvas con Pitch/Roll.
+- Lecturas de HDG, PITCH, ROLL y modo de sensor.
+- Mantiene estilo HUD de Aire Acondicionado y Confort · Lab.
+- Sigue siendo 100% front-end para GitHub Pages.
+
+## Conserva
+
+- Star Hunter
 - Radar Lock-On
-- Ranking de estrellas fáciles
-- Modo ciudad / suburbio / cielo oscuro
-- Radar automático fluido de v12
-- Google Analytics 4 en segundo plano
-- Sin tarjeta visible de métricas privadas
+- Cielo en movimiento
+- Sky Report Premium
+- Reto nocturno
+- Modo niños
+- Mensaje bajo las estrellas
+- Analytics en segundo plano
+- QR para compartir
 
-## Archivos para subir
+## Archivos a subir
+
+Sube y reemplaza en GitHub:
 
 - `index.html`
 - `manifest.webmanifest`
@@ -30,4 +35,8 @@ Esta versión mete todas las ideas nuevas en una sola app:
 
 ## Probar
 
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=13`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=14`
+
+## Nota técnica
+
+Los sensores requieren HTTPS y activación por botón. GitHub Pages ya usa HTTPS.
