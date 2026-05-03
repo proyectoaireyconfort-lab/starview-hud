@@ -3,282 +3,233 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>StarView HUD Pro | Industrial Astronomical Telemetry</title>
-<meta name="description" content="StarView HUD Pro: estación de telemetría astronómica industrial con modo exploración y modo operativo." />
-<meta name="theme-color" content="#020814" />
+<title>STARVIEW-HUD-OMNI-OS | E.V.A. v8.0</title>
+<meta name="description" content="STARVIEW-HUD-OMNI-OS · E.V.A. Engineering Visual Assistant v8.0 · Aire Acondicionado y Confort · Lab" />
+<meta name="theme-color" content="#000b06" />
 <style>
   :root{
-    --bg:#020814;
-    --panel:rgba(8,18,34,.72);
-    --line:rgba(95,205,255,.26);
-    --text:#eaf7ff;
-    --muted:rgba(234,247,255,.68);
-    --cyan:#6de7ff;
-    --blue:#008cff;
-    --gold:#fff2a8;
+    --civil-bg:#020919;
+    --civil-panel:rgba(8,22,48,.74);
+    --civil-line:rgba(112,211,255,.25);
+    --civil-text:#eaf7ff;
+    --civil-muted:rgba(234,247,255,.70);
+    --civil-cyan:#7fe8ff;
+    --civil-gold:#fff2a8;
+    --op-bg:#000604;
+    --op-panel:rgba(0,13,7,.88);
     --op-green:#00ff88;
     --op-dim:rgba(0,255,136,.62);
-    --op-panel:rgba(0,10,5,.86);
+    --op-faint:rgba(0,255,136,.16);
     --danger:#ff496c;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;min-height:100%;background:#000;color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
+  html,body{margin:0;width:100%;min-height:100%;background:#000;color:var(--civil-text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow-x:hidden}
   body{
     background:
-      radial-gradient(circle at 22% 12%,rgba(0,140,255,.20),transparent 34%),
-      radial-gradient(circle at 82% 78%,rgba(90,40,255,.10),transparent 36%),
-      linear-gradient(180deg,#020814,#06142a 55%,#01040b);
-    transition:background .45s ease,color .45s ease,filter .45s ease;
+      radial-gradient(circle at 24% 12%,rgba(0,140,255,.22),transparent 32%),
+      radial-gradient(circle at 76% 84%,rgba(100,50,255,.12),transparent 36%),
+      linear-gradient(180deg,#020919,#06162d 58%,#01040b);
+    transition:background .45s ease,color .35s ease;
   }
-  body.mode-op{
+  body.state-b{
     background:
-      radial-gradient(circle at 18% 12%,rgba(0,255,136,.11),transparent 34%),
+      radial-gradient(circle at 20% 10%,rgba(0,255,136,.13),transparent 34%),
       radial-gradient(circle at 80% 82%,rgba(0,110,55,.10),transparent 38%),
-      linear-gradient(180deg,#000604,#00130b 60%,#000000);
+      linear-gradient(180deg,#000604,#001008 62%,#000000);
     color:#d8ffe7;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   }
-  .app{max-width:1220px;margin:0 auto;padding:14px;padding-top:66px}
-  .topbar{
-    position:fixed;left:0;right:0;top:0;z-index:60;
-    display:flex;align-items:center;justify-content:space-between;gap:10px;
-    padding:10px 14px;
-    background:rgba(0,0,0,.42);
-    border-bottom:1px solid rgba(120,220,255,.14);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  .boot{
+    position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;
+    background:
+      radial-gradient(circle at 20% 15%,rgba(0,255,136,.18),transparent 32%),
+      radial-gradient(circle at 80% 80%,rgba(0,120,255,.18),transparent 36%),
+      #000;
+    transition:opacity .45s ease,visibility .45s ease;
   }
-  body.mode-op .topbar{border-bottom-color:rgba(0,255,136,.20);background:rgba(0,8,4,.72)}
-  .brand{display:flex;flex-direction:column;line-height:1.12}
-  .brand strong{font-size:15px;letter-spacing:.4px}
-  .brand span{font-size:11px;color:var(--muted)}
-  body.mode-op .brand span{color:rgba(216,255,231,.66)}
-  .mode-chip{
-    border:1px solid rgba(120,220,255,.24);
-    border-radius:999px;
-    padding:7px 10px;
-    font-size:12px;
-    color:#c9f5ff;
-    background:rgba(0,0,0,.28);
-    font-family:monospace;
-    white-space:nowrap;
+  .boot.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .boot-shell{
+    width:min(980px,100%);
+    border:1px solid rgba(0,255,136,.32);
+    border-radius:26px;
+    background:rgba(0,8,4,.92);
+    box-shadow:0 0 60px rgba(0,255,136,.12), inset 0 0 30px rgba(0,255,136,.04);
+    padding:22px;
   }
-  body.mode-op .mode-chip{border-color:rgba(0,255,136,.32);color:var(--op-green)}
-  .gear-wrap{position:relative}
-  .gear{
-    border:1px solid rgba(120,220,255,.24);
-    background:rgba(0,0,0,.25);
-    color:#fff;
-    width:40px;height:40px;border-radius:50%;
-    display:grid;place-items:center;font-size:20px;cursor:pointer;
+  .ascii{
+    white-space:pre;
+    overflow:auto;
+    font-size:11px;
+    line-height:1.08;
+    color:rgba(0,255,136,.90);
+    text-shadow:0 0 8px rgba(0,255,136,.38);
+    margin:0 0 14px;
   }
-  .mode-menu{
-    display:none;position:absolute;right:0;top:48px;width:260px;
-    padding:10px;border-radius:18px;
-    border:1px solid rgba(120,220,255,.22);
-    background:rgba(0,10,20,.94);
-    box-shadow:0 0 30px rgba(0,140,255,.14);
-  }
-  .mode-menu.open{display:block}
-  body.mode-op .mode-menu{border-color:rgba(0,255,136,.24);background:rgba(0,8,4,.96)}
-  button{
-    border:1px solid rgba(120,220,255,.26);
+  .boot-log{
+    height:118px;overflow:hidden;
+    border:1px solid rgba(0,255,136,.18);
+    background:rgba(0,0,0,.44);
     border-radius:14px;
-    padding:12px 13px;
-    background:linear-gradient(135deg,rgba(0,140,255,.30),rgba(110,60,255,.20));
+    padding:10px;
+    font-size:12px;
+    color:rgba(0,255,136,.82);
+    margin-bottom:14px;
+  }
+  .mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  button{
+    border:1px solid rgba(112,211,255,.28);
+    border-radius:15px;
+    padding:12px 14px;
+    background:linear-gradient(135deg,rgba(0,140,255,.31),rgba(100,60,255,.18));
     color:#fff;
-    font-weight:800;
+    font-weight:850;
     cursor:pointer;
     touch-action:manipulation;
   }
   button:active{transform:scale(.985)}
-  button.secondary{background:rgba(255,255,255,.06)}
-  body.mode-op button{
-    border-color:rgba(0,255,136,.32);
-    background:linear-gradient(135deg,rgba(0,255,136,.18),rgba(0,60,35,.35));
+  body.state-b button{
+    border-color:rgba(0,255,136,.34);
+    background:linear-gradient(135deg,rgba(0,255,136,.18),rgba(0,50,28,.38));
     color:#d8ffe7;
-    font-family:monospace;
+    font-family:inherit;
   }
-  .mode-menu button{width:100%;margin:5px 0}
-  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:14px;align-items:start}
-  .card{
+  .pick{min-height:148px;text-align:left;border-radius:22px;padding:18px}
+  .pick b{font-size:21px;display:block;margin-bottom:8px}
+  .pick span{display:block;color:rgba(234,247,255,.72);font-weight:500;line-height:1.4}
+  .pick.op{border-color:rgba(0,255,136,.34);background:linear-gradient(135deg,rgba(0,255,136,.13),rgba(0,0,0,.20))}
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:80;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 14px;
+    background:rgba(0,0,0,.42);
+    border-bottom:1px solid rgba(112,211,255,.14);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  }
+  body.state-b .topbar{background:rgba(0,8,4,.78);border-bottom-color:rgba(0,255,136,.22)}
+  .brand{display:flex;flex-direction:column;line-height:1.12}
+  .brand strong{font-size:14px;letter-spacing:.35px}
+  .brand span{font-size:11px;color:var(--civil-muted)}
+  body.state-b .brand span{color:rgba(216,255,231,.65)}
+  .chip{
+    border:1px solid rgba(112,211,255,.24);
+    border-radius:999px;
+    padding:7px 10px;
+    background:rgba(0,0,0,.30);
+    color:#c8f4ff;
+    font-size:12px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    white-space:nowrap;
+  }
+  body.state-b .chip{border-color:rgba(0,255,136,.32);color:var(--op-green)}
+  .gear-wrap{position:relative}
+  .gear{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;padding:0;font-size:20px}
+  .menu{
+    display:none;position:absolute;right:0;top:48px;width:278px;
+    border:1px solid rgba(112,211,255,.24);
+    border-radius:18px;padding:10px;background:rgba(0,10,20,.95);
+    box-shadow:0 0 30px rgba(0,140,255,.13);
+  }
+  .menu.open{display:block}
+  body.state-b .menu{border-color:rgba(0,255,136,.25);background:rgba(0,8,4,.96)}
+  .menu button{width:100%;margin:5px 0}
+  .app{max-width:1280px;margin:0 auto;padding:14px;padding-top:66px}
+  .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:start}
+  .panel{
     position:relative;overflow:hidden;
-    background:var(--panel);
-    border:1px solid var(--line);
+    border:1px solid var(--civil-line);
+    background:var(--civil-panel);
     border-radius:24px;
-    box-shadow:0 0 34px rgba(0,140,255,.10);
     padding:16px;
-    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
     margin-bottom:14px;
+    box-shadow:0 0 34px rgba(0,140,255,.10);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
   }
-  body.mode-op .card{
+  body.state-b .panel{
+    border-color:rgba(0,255,136,.23);
     background:var(--op-panel);
-    border-color:rgba(0,255,136,.24);
     box-shadow:0 0 34px rgba(0,255,136,.07);
   }
-  .hero h1{font-size:32px;margin:0 0 6px;letter-spacing:.4px}
-  .hero p{margin:0;color:var(--muted);line-height:1.42}
-  body.mode-op .hero p{color:rgba(216,255,231,.70)}
-  .control-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
-  label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+  .hero h1{margin:0 0 6px;font-size:30px;letter-spacing:.5px}
+  .hero p{margin:0;color:var(--civil-muted);line-height:1.45}
+  body.state-b .hero p{color:rgba(216,255,231,.66)}
+  .controls{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+  label{font-size:12px;color:var(--civil-muted);display:block;margin-bottom:5px}
+  body.state-b label{color:rgba(216,255,231,.62)}
   input{
-    width:100%;
-    border:1px solid rgba(120,220,255,.24);
-    background:rgba(0,0,0,.30);
-    color:#fff;
-    border-radius:14px;
-    padding:11px;
-    font-size:15px;
-    outline:none;
+    width:100%;border:1px solid rgba(112,211,255,.24);background:rgba(0,0,0,.30);color:#fff;
+    border-radius:14px;padding:11px;font-size:15px;outline:none;
   }
-  body.mode-op input{border-color:rgba(0,255,136,.26);color:#d8ffe7;font-family:monospace}
-  .canvas-card{padding:10px}
+  body.state-b input{border-color:rgba(0,255,136,.25);color:#d8ffe7;font-family:inherit}
+  .canvas-panel{padding:10px}
   .canvas-shell{
-    position:relative;
-    border-radius:22px;
-    overflow:hidden;
-    border:1px solid rgba(120,220,255,.18);
-    background:#01040b;
+    position:relative;overflow:hidden;border-radius:22px;background:#01040b;border:1px solid rgba(112,211,255,.18);
   }
-  body.mode-op .canvas-shell{border-color:rgba(0,255,136,.22);background:#000}
-  canvas#sky{
-    width:100%;
-    height:min(72vh,760px);
-    min-height:440px;
-    display:block;
-    background:#01040b;
-  }
-  .hud-label{
-    position:absolute;left:14px;top:14px;z-index:2;
-    border:1px solid rgba(120,220,255,.22);
-    background:rgba(0,0,0,.36);
-    border-radius:999px;
-    padding:7px 10px;
-    font-size:12px;
-    color:#c9f5ff;
-    font-family:monospace;
+  body.state-b .canvas-shell{background:#000;border-color:rgba(0,255,136,.22)}
+  #sky{width:100%;height:min(74vh,780px);min-height:450px;display:block;background:#000}
+  .hud-corner{
+    position:absolute;top:14px;left:14px;z-index:3;
+    border:1px solid rgba(112,211,255,.24);background:rgba(0,0,0,.40);
+    border-radius:999px;padding:7px 10px;color:#c8f4ff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
     pointer-events:none;
   }
-  body.mode-op .hud-label{border-color:rgba(0,255,136,.28);color:var(--op-green)}
-  .sensor-badge{
-    position:absolute;right:14px;top:14px;z-index:2;
-    border:1px solid rgba(255,242,168,.22);
-    background:rgba(0,0,0,.36);
-    color:var(--gold);
-    border-radius:999px;
-    padding:7px 10px;
-    font-size:12px;
-    font-family:monospace;
+  body.state-b .hud-corner{border-color:rgba(0,255,136,.32);color:var(--op-green)}
+  .sensor-corner{
+    position:absolute;top:14px;right:14px;z-index:3;
+    border:1px solid rgba(255,242,168,.26);background:rgba(0,0,0,.40);
+    border-radius:999px;padding:7px 10px;color:var(--civil-gold);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;
     pointer-events:none;
   }
-  body.mode-op .sensor-badge{border-color:rgba(0,255,136,.26);color:var(--op-green)}
-  .readout{
-    display:grid;gap:8px;
-    font-family:monospace;
-    font-size:12px;
-  }
-  .row{
-    display:flex;justify-content:space-between;gap:10px;
-    padding:8px 10px;border-radius:12px;
-    background:rgba(255,255,255,.045);
-  }
-  body.mode-op .row{background:rgba(0,255,136,.045);border:1px solid rgba(0,255,136,.10)}
-  .civil-only{}
+  body.state-b .sensor-corner{border-color:rgba(0,255,136,.32);color:var(--op-green)}
   .op-only{display:none}
-  body.mode-op .civil-only{display:none!important}
-  body.mode-op .op-only{display:block}
-  .raw-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-  .raw-cell{
-    padding:10px;border-radius:12px;
-    border:1px solid rgba(0,255,136,.16);
-    background:rgba(0,0,0,.34);
-    font-family:monospace;
-    color:#d8ffe7;
-  }
-  .raw-cell b{display:block;color:var(--op-green);font-size:11px;margin-bottom:5px}
+  body.state-b .civil-only{display:none!important}
+  body.state-b .op-only{display:block}
   .list{display:grid;gap:7px}
-  .item{
-    display:flex;justify-content:space-between;gap:8px;
-    padding:9px 11px;border-radius:14px;
-    background:rgba(255,255,255,.055);
+  .row{
+    display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:13px;background:rgba(255,255,255,.05);
   }
-  body.mode-op .item{background:rgba(0,255,136,.045);border:1px solid rgba(0,255,136,.10)}
-  .item small{color:var(--muted)}
-  body.mode-op .item small{color:rgba(216,255,231,.62)}
-  .boot{
-    position:fixed;inset:0;z-index:200;
-    display:flex;align-items:center;justify-content:center;
-    padding:18px;
-    background:
-      radial-gradient(circle at 22% 12%,rgba(0,140,255,.24),transparent 32%),
-      radial-gradient(circle at 80% 78%,rgba(0,255,136,.16),transparent 38%),
-      #000;
-    transition:opacity .38s ease,visibility .38s ease;
+  body.state-b .row{background:rgba(0,255,136,.045);border:1px solid rgba(0,255,136,.10)}
+  .row small{color:var(--civil-muted)}
+  body.state-b .row small{color:rgba(216,255,231,.60)}
+  .raw{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .cell{
+    padding:9px;border-radius:12px;background:rgba(0,0,0,.34);
+    border:1px solid rgba(0,255,136,.14);font-family:inherit;color:#d8ffe7;
   }
-  .boot.hidden{opacity:0;visibility:hidden;pointer-events:none}
-  .boot-box{
-    width:min(820px,100%);
-    border:1px solid rgba(120,220,255,.26);
-    border-radius:28px;
-    padding:22px;
-    background:rgba(0,10,18,.92);
-    box-shadow:0 0 50px rgba(0,140,255,.18);
-  }
-  .boot-log{
-    height:132px;
-    overflow:hidden;
-    font-family:monospace;
-    font-size:12px;
-    color:rgba(0,255,136,.86);
-    background:rgba(0,0,0,.42);
-    border-radius:16px;
-    border:1px solid rgba(0,255,136,.18);
-    padding:12px;
-    margin-bottom:16px;
-  }
-  .boot-title{font-size:30px;margin:0 0 8px}
-  .boot-sub{margin:0 0 16px;color:rgba(234,247,255,.70)}
-  .mode-pick{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .pick{
-    min-height:154px;text-align:left;border-radius:22px;padding:18px;
-  }
-  .pick b{display:block;font-size:22px;margin-bottom:8px}
-  .pick span{display:block;color:rgba(234,247,255,.72);font-weight:500;line-height:1.4}
-  .pick.op{border-color:rgba(0,255,136,.32);background:linear-gradient(135deg,rgba(0,255,136,.13),rgba(0,0,0,.26))}
-  .note{font-size:12px;color:var(--muted);line-height:1.38}
-  body.mode-op .note{color:rgba(216,255,231,.62)}
-  @media(max-width:880px){
+  .cell b{display:block;color:var(--op-green);font-size:11px;margin-bottom:4px}
+  .note{font-size:12px;color:var(--civil-muted);line-height:1.38;margin-top:10px}
+  body.state-b .note{color:rgba(216,255,231,.62)}
+  @media(max-width:920px){
     .grid{grid-template-columns:1fr}
-    .control-grid{grid-template-columns:1fr}
-    .raw-grid{grid-template-columns:1fr}
-    .mode-pick{grid-template-columns:1fr}
-    .hero h1{font-size:25px}
-    canvas#sky{height:62vh;min-height:390px}
+    .controls{grid-template-columns:1fr}
+    .raw{grid-template-columns:1fr}
+    .mode-grid{grid-template-columns:1fr}
+    .hero h1{font-size:24px}
+    #sky{height:64vh;min-height:390px}
   }
 </style>
-
-<!-- Google Analytics 4 - StarView HUD -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y7W6O4KLRR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-Y7W6O4KLRR');
-</script>
 </head>
-<body class="mode-civil">
+<body class="state-a">
 
 <div class="boot" id="boot">
-  <div class="boot-box">
-    <h2 class="boot-title">STARVIEW HUD PRO</h2>
-    <p class="boot-sub">Industrial Astronomical Telemetry Station · Aire Acondicionado y Confort · Lab</p>
+  <div class="boot-shell">
+<pre class="ascii" id="asciiLogo">
+ ███████╗██╗   ██╗ █████╗      ██████╗ ███╗   ███╗███╗   ██╗██╗      ██████╗ ███████╗
+ ██╔════╝██║   ██║██╔══██╗    ██╔═══██╗████╗ ████║████╗  ██║██║     ██╔═══██╗██╔════╝
+ █████╗  ██║   ██║███████║    ██║   ██║██╔████╔██║██╔██╗ ██║██║     ██║   ██║███████╗
+ ██╔══╝  ╚██╗ ██╔╝██╔══██║    ██║   ██║██║╚██╔╝██║██║╚██╗██║██║     ██║   ██║╚════██║
+ ███████╗ ╚████╔╝ ██║  ██║    ╚██████╔╝██║ ╚═╝ ██║██║ ╚████║███████╗╚██████╔╝███████║
+ ╚══════╝  ╚═══╝  ╚═╝  ╚═╝     ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚══════╝
+        AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. ENGINEERING VISUAL ASSISTANT v8.0
+</pre>
     <div class="boot-log" id="bootLog"></div>
-    <div class="mode-pick">
-      <button class="pick" onclick="setMode('civil')">
-        <b>🌌 Modo Exploración</b>
-        <span>Experiencia civil cinematográfica: cielo limpio, estrellas con bloom, constelaciones, planetas y UX visual.</span>
+    <div class="mode-grid">
+      <button class="pick" onclick="setSystemState('A')">
+        <b>STATE_A · CIVIL_EXPLORER</b>
+        <span>Neuromorphic cinematic sky. Bloom, spectral star colors, intuitive navigation and civil exploration UX.</span>
       </button>
-      <button class="pick op" onclick="setMode('op')">
-        <b>🧪 Modo Operativo</b>
-        <span>Telemetría cruda: terminal, rejillas altazimutales, eclíptica, ecuador celeste, errores de sensor y hardware HUD.</span>
+      <button class="pick op" onclick="setSystemState('B')">
+        <b>STATE_B · ENGINEERING_TACTICAL</b>
+        <span>Phosphor-green terminal, raw data, 10° altaz grid, sensor fusion diagnostics, HVAC solar incidence telemetry.</span>
       </button>
     </div>
   </div>
@@ -286,384 +237,352 @@
 
 <div class="topbar">
   <div class="brand">
-    <strong>Aire Acondicionado y Confort · Lab</strong>
-    <span>High-Precision Telemetry Unit</span>
+    <strong>AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. v8.0</strong>
+    <span>Engineering Visual Assistant · High-Precision Telemetry Unit</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <div class="mode-chip" id="modeChip">EXPLORACIÓN</div>
+    <div class="chip" id="stateChip">STATE_A</div>
     <div class="gear-wrap">
       <button class="gear" onclick="toggleMenu()">⚙️</button>
-      <div class="mode-menu" id="modeMenu">
-        <button onclick="setMode('civil', true)">🌌 Modo Exploración</button>
-        <button onclick="setMode('op', true)">🧪 Modo Operativo</button>
-        <button class="secondary" onclick="showBoot()">Reiniciar selector</button>
+      <div class="menu" id="modeMenu">
+        <button onclick="setSystemState('A', true)">STATE_A · Civil Explorer</button>
+        <button onclick="setSystemState('B', true)">STATE_B · Engineering Tactical</button>
+        <button onclick="enableFusionCore()">🧭 Enable Sensor Fusion Core</button>
+        <button onclick="zeroYaw()">🎯 Zero Yaw Reference</button>
+        <button onclick="showBoot()">BIOS Mode Selector</button>
       </div>
     </div>
   </div>
 </div>
 
 <main class="app">
-  <section class="card hero">
-    <h1>StarView HUD Pro</h1>
-    <p class="civil-only">Estación visual para explorar el cielo desde tu ubicación. Usa GPS, sensores del celular y cálculos astronómicos para ubicar estrellas, planetas, Sol, eclíptica y constelaciones.</p>
-    <p class="op-only">OPERATIVE TERMINAL ONLINE · RAW DATA · ALTAZ GRID · SENSOR FUSION · LST COMPUTATION · ECLIPTIC FRAME</p>
+  <section class="panel hero">
+    <h1>STARVIEW-HUD-OMNI-OS</h1>
+    <p class="civil-only">Modo exploración: una bóveda celeste cinematográfica con estrellas en bloom, planetas, Sol, eclíptica y navegación limpia.</p>
+    <p class="op-only">ENGINEERING_TACTICAL ONLINE · RAW SENSOR FUSION · LST/JD KERNEL · ALTAZ 10° GRID · SOLAR INCIDENCE HVAC MODULE</p>
 
-    <div class="control-grid">
+    <div class="controls">
       <div>
-        <label>Latitud</label>
+        <label>LATITUDE</label>
         <input id="lat" type="number" step="0.00001" value="20.62400">
       </div>
       <div>
-        <label>Longitud</label>
+        <label>LONGITUDE</label>
         <input id="lon" type="number" step="0.00001" value="-103.23400">
       </div>
       <div>
-        <label>Fecha/hora</label>
+        <label>UTC/LOCAL DATE-TIME</label>
         <input id="time" type="datetime-local">
       </div>
-      <button onclick="useNow()">Usar hora actual</button>
-      <button onclick="useGPS()">📍 Usar GPS</button>
-      <button class="secondary" onclick="useTonala()">📌 Tonalá/ZMG</button>
-      <button onclick="enableSensors()">🧭 Activar sensores</button>
-      <button class="secondary" onclick="zeroHeading()">🎯 Calibrar frente</button>
+      <button onclick="syncNow()">SYNC NOW</button>
+      <button onclick="useGPS()">USE GPS</button>
+      <button onclick="useTonala()">TONALÁ/ZMG REF</button>
+      <button onclick="enableFusionCore()">SENSOR FUSION CORE</button>
+      <button onclick="zeroYaw()">ZERO YAW</button>
     </div>
-    <p class="note" style="margin-top:10px">Tonalá/ZMG queda como ubicación predeterminada. Los sensores requieren HTTPS y activación manual.</p>
+    <div class="note">Zero-library dependency · single-file HTML/CSS/JS · requestAnimationFrame loop · OffscreenCanvas-compatible background buffer pattern.</div>
   </section>
 
   <div class="grid">
-    <section class="card canvas-card">
-      <div class="canvas-shell" id="canvasShell">
-        <div class="hud-label" id="hudLabel">STARVIEW · CIVIL LAYER</div>
-        <div class="sensor-badge" id="sensorBadge">SENSOR OFF</div>
+    <section class="panel canvas-panel">
+      <div class="canvas-shell">
+        <div class="hud-corner" id="hudCorner">CIVIL_EXPLORER · SKY DOME</div>
+        <div class="sensor-corner" id="sensorCorner">FUSION OFF</div>
         <canvas id="sky"></canvas>
       </div>
     </section>
 
     <aside>
-      <section class="card civil-only">
-        <h2>✨ Cielo destacado</h2>
-        <div class="list" id="civilList"></div>
+      <section class="panel civil-only">
+        <h2>Sky Objects</h2>
+        <div class="list" id="civilObjects"></div>
       </section>
 
-      <section class="card civil-only">
-        <h2>🪐 Planetas / Sol</h2>
-        <div class="list" id="civilPlanets"></div>
+      <section class="panel civil-only">
+        <h2>Solar / Planetary</h2>
+        <div class="list" id="civilBodies"></div>
       </section>
 
-      <section class="card op-only">
-        <h2>RAW DATA STREAM</h2>
-        <div class="raw-grid">
-          <div class="raw-cell"><b>HDG FILTERED</b><span id="rawHeading">--</span></div>
-          <div class="raw-cell"><b>YAW RAW</b><span id="rawYaw">--</span></div>
-          <div class="raw-cell"><b>PITCH</b><span id="rawPitch">--</span></div>
-          <div class="raw-cell"><b>ROLL</b><span id="rawRoll">--</span></div>
-          <div class="raw-cell"><b>LST</b><span id="rawLST">--</span></div>
-          <div class="raw-cell"><b>JD</b><span id="rawJD">--</span></div>
-          <div class="raw-cell"><b>SENSOR MODE</b><span id="rawSensor">OFF</span></div>
-          <div class="raw-cell"><b>HDG ERROR RMS</b><span id="rawError">--</span></div>
+      <section class="panel op-only">
+        <h2>RAW DATA BUS</h2>
+        <div class="raw">
+          <div class="cell"><b>YAW FILTER</b><span id="dYaw">--</span></div>
+          <div class="cell"><b>YAW RAW</b><span id="dYawRaw">--</span></div>
+          <div class="cell"><b>PITCH FUSION</b><span id="dPitch">--</span></div>
+          <div class="cell"><b>ROLL FUSION</b><span id="dRoll">--</span></div>
+          <div class="cell"><b>GYRO α/β/γ</b><span id="dGyro">--</span></div>
+          <div class="cell"><b>ACCEL P/R</b><span id="dAccel">--</span></div>
+          <div class="cell"><b>JD / J2000</b><span id="dJD">--</span></div>
+          <div class="cell"><b>LST TONALÁ</b><span id="dLST">--</span></div>
+          <div class="cell"><b>SOLAR INCIDENCE</b><span id="dSolar">--</span></div>
+          <div class="cell"><b>FUSION ERR</b><span id="dErr">--</span></div>
         </div>
       </section>
 
-      <section class="card op-only">
-        <h2>OBJECT TELEMETRY</h2>
-        <div class="readout" id="opObjects"></div>
+      <section class="panel op-only">
+        <h2>TACTICAL OBJECTS</h2>
+        <div class="list" id="opObjects"></div>
       </section>
     </aside>
   </div>
 </main>
 
 <script>
-/* ============================================================
-   STARVIEW HUD PRO · INDUSTRIAL ASTRONOMICAL TELEMETRY
-   Single-file front-end station for GitHub Pages.
-   No server, no external libraries.
-   ============================================================ */
+"use strict";
 
-const App = {
-  mode: "civil",
+/* ============================================================
+   E.V.A. CORE STATE
+   ============================================================ */
+const STAR_CATALOG = [["Sirius", 6.7525, -16.7161, -1.46, "A1V", "Can Mayor"], ["Canopus", 6.3992, -52.6957, -0.74, "F0II", "Carina"], ["Arcturus", 14.261, 19.1825, -0.05, "K1III", "Boyero"], ["Alpha Centauri", 14.6601, -60.8339, -0.27, "G2V/K1V", "Centauro"], ["Vega", 18.6156, 38.7837, 0.03, "A0V", "Lira"], ["Capella", 5.2782, 45.998, 0.08, "G8III", "Auriga"], ["Rigel", 5.2423, -8.2016, 0.13, "B8Ia", "Orión"], ["Procyon", 7.655, 5.225, 0.34, "F5IV", "Can Menor"], ["Achernar", 1.6286, -57.2368, 0.46, "B6V", "Erídano"], ["Betelgeuse", 5.9195, 7.4071, 0.5, "M1Ia", "Orión"], ["Hadar", 14.0637, -60.373, 0.61, "B1III", "Centauro"], ["Altair", 19.8464, 8.8683, 0.77, "A7V", "Águila"], ["Acrux", 12.4433, -63.0991, 0.76, "B0.5IV", "Cruz del Sur"], ["Aldebaran", 4.5987, 16.5093, 0.85, "K5III", "Tauro"], ["Spica", 13.4199, -11.1614, 0.98, "B1V", "Virgo"], ["Antares", 16.4901, -26.4319, 1.06, "M1.5Iab", "Escorpio"], ["Pollux", 7.7553, 28.0262, 1.14, "K0III", "Géminis"], ["Fomalhaut", 22.9608, -29.6222, 1.16, "A3V", "Pez Austral"], ["Deneb", 20.6905, 45.2803, 1.25, "A2Ia", "Cisne"], ["Mimosa", 12.7953, -59.6888, 1.25, "B0.5III", "Cruz del Sur"], ["Regulus", 10.1395, 11.9672, 1.35, "B8IV", "Leo"], ["Adhara", 6.9771, -28.9721, 1.5, "B2II", "Can Mayor"], ["Shaula", 17.5601, -37.1038, 1.62, "B2IV", "Escorpio"], ["Castor", 7.5767, 31.8883, 1.58, "A1V", "Géminis"], ["Gacrux", 12.5194, -57.1132, 1.63, "M3.5III", "Cruz del Sur"], ["Bellatrix", 5.4189, 6.3497, 1.64, "B2III", "Orión"], ["Elnath", 5.4382, 28.6075, 1.65, "B7III", "Tauro"], ["Miaplacidus", 9.22, -69.7172, 1.67, "A2IV", "Carina"], ["Alnilam", 5.6036, -1.2019, 1.69, "B0Ia", "Orión"], ["Alnair", 22.1372, -46.9609, 1.74, "B6V", "Grulla"], ["Alioth", 12.9005, 55.9598, 1.77, "A0p", "Osa Mayor"], ["Alnitak", 5.6793, -1.9426, 1.74, "O9.5Ib", "Orión"], ["Dubhe", 11.0621, 61.751, 1.79, "K0III", "Osa Mayor"], ["Mirfak", 3.4054, 49.8612, 1.79, "F5Ib", "Perseo"], ["Wezen", 7.1399, -26.3932, 1.83, "F8Ia", "Can Mayor"], ["Sargas", 17.6219, -42.9978, 1.86, "F1II", "Escorpio"], ["Kaus Australis", 18.4029, -34.3846, 1.85, "B9.5III", "Sagitario"], ["Avior", 8.3752, -59.5095, 1.86, "K3III/B2V", "Carina"], ["Menkalinan", 5.9921, 44.9474, 1.9, "A2IV", "Auriga"], ["Atria", 16.8111, -69.0277, 1.91, "K2II", "Triángulo Austral"], ["Alhena", 6.6285, 16.3993, 1.93, "A1IV", "Géminis"], ["Peacock", 20.4275, -56.7351, 1.94, "B2IV", "Pavo"], ["Mirzam", 6.3783, -17.9559, 1.98, "B1II", "Can Mayor"], ["Polaris", 2.5303, 89.2641, 1.98, "F7Ib", "Osa Menor"], ["Alphard", 9.4598, -8.6586, 2.0, "K3II", "Hidra"], ["Hamal", 2.1195, 23.4624, 2.0, "K2III", "Aries"], ["Diphda", 0.7265, -17.9867, 2.04, "K0III", "Ballena"], ["Nunki", 18.9211, -26.2967, 2.05, "B2.5V", "Sagitario"], ["Mirach", 1.1622, 35.6206, 2.05, "M0III", "Andrómeda"], ["Algol", 3.1361, 40.9556, 2.12, "B8V", "Perseo"], ["Denebola", 11.8177, 14.5721, 2.14, "A3V", "Leo"], ["Alphecca", 15.5781, 26.7147, 2.22, "A0V", "Corona Boreal"], ["Mizar", 13.3987, 54.9254, 2.23, "A2V", "Osa Mayor"], ["Sadr", 20.3705, 40.2567, 2.23, "F8Ib", "Cisne"], ["Eltanin", 17.9434, 51.4889, 2.24, "K5III", "Dragón"], ["Schedar", 0.6751, 56.5373, 2.24, "K0III", "Casiopea"], ["Naos", 8.0597, -40.0031, 2.25, "O5Ia", "Puppis"], ["Almach", 2.0649, 42.3297, 2.26, "K3II", "Andrómeda"], ["Caph", 0.1529, 59.1498, 2.27, "F2III", "Casiopea"], ["Izar", 14.7498, 27.0742, 2.27, "K0II", "Boyero"], ["Dschubba", 16.0056, -22.6217, 2.29, "B0.5IV", "Escorpio"], ["Larawag", 17.7081, -39.03, 2.29, "F1II", "Escorpio"], ["Ankaa", 0.4381, -42.3061, 2.4, "K0III", "Fénix"], ["Merak", 11.0307, 56.3824, 2.37, "A1V", "Osa Mayor"], ["Enif", 21.7364, 9.875, 2.38, "K2Ib", "Pegaso"], ["Algieba", 10.3328, 19.8415, 2.08, "K0III", "Leo"], ["Menkent", 14.1114, -36.37, 2.06, "K0III", "Centauro"], ["Rasalhague", 17.5822, 12.56, 2.08, "A5III", "Ofiuco"], ["Zubeneschamali", 15.2835, -9.3831, 2.61, "B8V", "Libra"], ["Kochab", 14.8451, 74.1555, 2.08, "K4III", "Osa Menor"], ["Alpheratz", 0.1398, 29.0904, 2.07, "B9p", "Andrómeda"], ["Algenib", 0.2206, 15.1836, 2.83, "B2IV", "Pegaso"], ["Markab", 23.0793, 15.2053, 2.49, "B9III", "Pegaso"], ["Scheat", 23.0629, 28.0828, 2.42, "M2II", "Pegaso"], ["Alrescha", 2.0341, 2.7638, 3.82, "A0p", "Piscis"], ["Sheratan", 1.9107, 20.808, 2.64, "A5V", "Aries"], ["Mesarthim", 1.8922, 19.2936, 3.88, "A1p", "Aries"], ["Botein", 3.1938, 19.7267, 4.35, "K2III", "Aries"], ["Zaurak", 3.9672, -13.5085, 2.95, "M0III", "Erídano"], ["Cursa", 5.1308, -5.0864, 2.79, "A3III", "Erídano"], ["Keid", 4.2545, -7.6529, 4.43, "K1V", "Erídano"], ["Saiph", 5.7959, -9.6696, 2.07, "B0.5Ia", "Orión"], ["Mintaka", 5.5334, -0.2991, 2.23, "O9.5II", "Orión"], ["Meissa", 5.5856, 9.9342, 3.39, "O8III", "Orión"], ["Hatysa", 5.5906, -5.9099, 2.75, "O9III", "Orión"], ["Tabit", 4.8307, 6.9613, 3.19, "F6V", "Orión"], ["Phact", 5.6608, -34.0741, 2.65, "B7IV", "Columba"], ["Wazn", 5.8493, -35.7683, 3.12, "K1II", "Columba"], ["Nihal", 5.4708, -20.7594, 2.84, "G5II", "Lepus"], ["Arneb", 5.5455, -17.8223, 2.58, "F0Ib", "Lepus"], ["Ras Elased Australis", 9.7642, 23.7743, 2.98, "G1II", "Leo"], ["Chertan", 11.2373, 15.4296, 3.33, "A2V", "Leo"], ["Zosma", 11.2351, 20.5237, 2.56, "A4V", "Leo"], ["Vindemiatrix", 13.0363, 10.9591, 2.85, "G8III", "Virgo"], ["Porrima", 12.6943, -1.4494, 2.74, "F0V", "Virgo"], ["Heze", 13.5782, -0.5959, 3.38, "A2V", "Virgo"], ["Muphrid", 13.9114, 18.3977, 2.68, "G0IV", "Boyero"], ["Nekkar", 15.0324, 40.3906, 3.49, "G8III", "Boyero"], ["Seginus", 14.5346, 38.3083, 3.03, "A7III", "Boyero"], ["Zubenelgenubi", 14.8479, -16.0418, 2.75, "A3IV", "Libra"], ["Graffias", 16.0906, -19.8054, 2.56, "B1V", "Escorpio"], ["Lesath", 17.5127, -37.2958, 2.7, "B2IV", "Escorpio"], ["Rasalgethi", 17.2441, 14.3903, 3.08, "M5II", "Hércules"], ["Kornephoros", 16.5037, 21.4896, 2.78, "G8III", "Hércules"], ["Sulafat", 18.9824, 32.6896, 3.25, "B9III", "Lira"], ["Sheliak", 18.8347, 33.3627, 3.52, "B7V", "Lira"], ["Tarazed", 19.7709, 10.6133, 2.72, "K3II", "Águila"], ["Alshain", 19.9219, 6.4068, 3.71, "G8IV", "Águila"], ["Sualocin", 20.6606, 15.9121, 3.77, "B9IV", "Delfín"], ["Rotanev", 20.6258, 14.5951, 3.63, "F5IV", "Delfín"], ["Albireo", 19.512, 27.9597, 3.05, "K3II", "Cisne"], ["Gienah Cygni", 20.7702, 33.9703, 2.48, "K0III", "Cisne"], ["Alderamin", 21.3096, 62.5856, 2.45, "A7IV", "Cefeo"], ["Errai", 23.6558, 77.6323, 3.21, "K1III", "Cefeo"], ["Kaus Media", 18.3499, -29.8281, 2.72, "K3III", "Sagitario"], ["Ascella", 19.0435, -29.8801, 2.6, "A2III", "Sagitario"], ["Alnasl", 18.0968, -30.4241, 2.98, "K1III", "Sagitario"], ["Rukbat", 19.3981, -40.6162, 3.97, "B8V", "Sagitario"], ["Algedi", 20.3009, -12.5449, 3.58, "G8III", "Capricornio"], ["Dabih", 20.3502, -14.7814, 3.05, "K0II", "Capricornio"], ["Sadalsuud", 21.526, -5.5712, 2.91, "G0Ib", "Acuario"], ["Sadalmelik", 22.0964, -0.3198, 2.95, "G2Ib", "Acuario"], ["Skat", 22.9108, -15.8208, 3.27, "A3V", "Acuario"], ["Alnair", 22.1372, -46.9609, 1.74, "Grulla"], ["Formalhaut", 22.9608, -29.6222, 1.16, "A3V", "Pez Austral"]];
+
+const EVA = {
+  state: "A",
   canvas: null,
   ctx: null,
-  W: 0,
-  H: 0,
-  cx: 0,
-  cy: 0,
-  rmax: 0,
-  lat: 20.624,
-  lon: -103.234,
-  useCurrentTime: true,
-  selectedDate: new Date(),
+  backCanvas: null,
+  backCtx: null,
+  W: 0, H: 0, cx: 0, cy: 0, rmax: 0,
+  lat: 20.62400,
+  lon: -103.23400,
+  timeLive: true,
   weakStars: [],
   visibleStars: [],
   visibleBodies: [],
-  lastDomUpdate: 0,
-  frame: 0
+  lastDom: 0,
+  lastFrame: 0,
+  fps: 60
 };
 
-const Sensor = {
+const Fusion = {
   enabled: false,
-  mode: "OFF",
-  rawYaw: 0,
-  targetYaw: 0,
-  yaw: 0,
-  offset: 0,
+  yawRaw: 0,
+  yawFiltered: 0,
+  yawTarget: 0,
+  yawOffset: 0,
   pitch: 0,
   roll: 0,
-  alpha: null,
-  beta: null,
-  gamma: null,
-  errorRms: 0,
-  lastInnovation: 0,
-  samples: 0
+  accelPitch: 0,
+  accelRoll: 0,
+  gyroAlpha: 0,
+  gyroBeta: 0,
+  gyroGamma: 0,
+  lastMotionTs: 0,
+  lastOrientationTs: 0,
+  sensorMode: "OFF",
+  err: 0,
+  alpha: 0.985
 };
 
-function track(eventName, params = {}){
-  try{
-    if(typeof gtag === "function") gtag("event", eventName, Object.assign({app_name:"StarView HUD Pro"}, params));
-  }catch(e){}
+function gtagSafe(eventName, params={}){
+  try{ if(typeof gtag === "function") gtag("event", eventName, Object.assign({app:"STARVIEW-HUD-OMNI-OS"}, params)); }catch(e){}
 }
 
 function deg(x){return x * Math.PI / 180}
 function rad(x){return x * 180 / Math.PI}
-function clamp(v,a,b){return Math.max(a, Math.min(b, v))}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 function norm360(x){return ((x % 360) + 360) % 360}
-function angleDelta(from, to){
-  let d = norm360(to - from);
-  if(d > 180) d -= 360;
-  return d;
-}
+function signedDelta(from,to){let d=norm360(to-from); if(d>180)d-=360; return d}
+function lowPassAngle(current,target,k){return norm360(current + signedDelta(current,target)*k)}
 
-/*
-  Low-pass filter for circular angles:
-  delta = shortest signed angular distance.
-  filtered = filtered + alpha * delta.
-  This avoids vibration and avoids wrap jumps at 0°/360°.
-*/
-function lowPassAngle(current, target, alpha){
-  return norm360(current + angleDelta(current, target) * alpha);
-}
-
-function setMode(mode, fromMenu=false){
-  App.mode = (mode === "op") ? "op" : "civil";
-  document.body.classList.toggle("mode-op", App.mode === "op");
-  document.body.classList.toggle("mode-civil", App.mode === "civil");
-  document.getElementById("modeChip").textContent = App.mode === "op" ? "OPERATIVO" : "EXPLORACIÓN";
-  document.getElementById("hudLabel").textContent = App.mode === "op" ? "AACYCLAB · OPERATIVE ALTAZ GRID" : "STARVIEW · EXPLORATION LAYER";
-  document.getElementById("modeMenu").classList.remove("open");
-  document.getElementById("boot").classList.add("hidden");
-  track("mode_selected", {mode:App.mode, from_menu:fromMenu});
-}
-
-function toggleMenu(){ document.getElementById("modeMenu").classList.toggle("open") }
-function showBoot(){ document.getElementById("boot").classList.remove("hidden"); document.getElementById("modeMenu").classList.remove("open") }
-
+/* ============================================================
+   MODULE_1: BOOT_SEQUENCE / DUAL STATE MACHINE
+   ============================================================ */
 function bootSequence(){
-  const lines = [
-    "BIOS: STARVIEW-HUD-PRO rev.industrial",
-    "INIT: canvas telemetry renderer ........ OK",
-    "INIT: orbital propagation kernel ....... OK",
-    "INIT: LST / GMST timebase .............. OK",
-    "INIT: sensor fusion low-pass filter .... READY",
-    "INIT: altazimuth coordinate grid ....... READY",
-    "STATUS: awaiting operating mode selection"
-  ];
   const log = document.getElementById("bootLog");
+  const lines = [
+    "KERNEL_OVERRIDE_PROMPT::TARGET_GPT4_PRO_VERSION accepted",
+    "ROLE: Lead Aerospace GNC Engineer & Systems Architect",
+    "Compiling STARVIEW-HUD-OMNI-OS ............... OK",
+    "Initializing Dual-State Machine .............. OK",
+    "STATE_A CIVIL_EXPLORER ....................... READY",
+    "STATE_B ENGINEERING_TACTICAL ................. READY",
+    "Sensor Fusion Core complementary filter ...... READY",
+    "Astro Engine: JD/LST/AltAz/Ecliptic .......... READY",
+    "HVAC Solar Incidence Module .................. READY",
+    "E.V.A. v8.0 awaiting operator mode selection"
+  ];
   log.innerHTML = "";
-  let i = 0;
-  const t = setInterval(()=>{
-    if(i >= lines.length){ clearInterval(t); return; }
+  let i=0;
+  const timer = setInterval(()=>{
+    if(i>=lines.length){clearInterval(timer); return;}
     log.innerHTML += "&gt; " + lines[i] + "<br>";
     log.scrollTop = log.scrollHeight;
     i++;
-  }, 170);
+  },130);
 }
 
-function useNow(){
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  document.getElementById("time").value = d.toISOString().slice(0,16);
-  App.useCurrentTime = true;
-  App.selectedDate = new Date();
-  track("use_now");
+function setSystemState(state, fromMenu=false){
+  EVA.state = state === "B" ? "B" : "A";
+  document.body.classList.toggle("state-b", EVA.state === "B");
+  document.body.classList.toggle("state-a", EVA.state === "A");
+  document.getElementById("stateChip").textContent = EVA.state === "B" ? "STATE_B" : "STATE_A";
+  document.getElementById("hudCorner").textContent = EVA.state === "B" ? "ENGINEERING_TACTICAL · ALTAZ GRID" : "CIVIL_EXPLORER · SKY DOME";
+  document.getElementById("boot").classList.add("hidden");
+  document.getElementById("modeMenu").classList.remove("open");
+  renderStaticBackground();
+  gtagSafe("eva_state_switch", {state:EVA.state, from_menu:fromMenu});
 }
 
-function getDate(){
-  if(App.useCurrentTime) return new Date();
-  const v = document.getElementById("time").value;
-  return v ? new Date(v) : new Date();
-}
+function toggleMenu(){document.getElementById("modeMenu").classList.toggle("open")}
+function showBoot(){document.getElementById("boot").classList.remove("hidden");document.getElementById("modeMenu").classList.remove("open")}
 
-function useTonala(){
-  document.getElementById("lat").value = "20.62400";
-  document.getElementById("lon").value = "-103.23400";
-  App.lat = 20.624;
-  App.lon = -103.234;
-  track("use_tonala");
-}
-
-function useGPS(){
-  if(!navigator.geolocation){
-    alert("Este navegador no permitió geolocalización.");
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(pos=>{
-    App.lat = pos.coords.latitude;
-    App.lon = pos.coords.longitude;
-    document.getElementById("lat").value = App.lat.toFixed(5);
-    document.getElementById("lon").value = App.lon.toFixed(5);
-    track("gps_success");
-  }, err=>{
-    alert("No se pudo obtener GPS. Se mantiene Tonalá/ZMG.");
-    track("gps_error", {code:err.code});
-  }, {enableHighAccuracy:true, timeout:9000});
-}
-
-async function enableSensors(){
+/* ============================================================
+   MODULE_2: SENSOR_FUSION_CORE
+   Complementary Filter:
+     filteredAngle = α * (filteredAngle + gyroData * dt) + (1 - α) * accelData
+   For yaw we fuse gyro Z with compass/magnetic heading where available.
+   For pitch/roll we fuse rotationRate beta/gamma with accelerometer-derived pitch/roll.
+   ============================================================ */
+async function enableFusionCore(){
   try{
     if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
       const p = await DeviceOrientationEvent.requestPermission();
-      if(p !== "granted"){
-        document.getElementById("sensorBadge").textContent = "SENSOR DENIED";
-        return;
-      }
+      if(p !== "granted"){Fusion.sensorMode="ORIENTATION_DENIED";return;}
     }
-
-    window.addEventListener("deviceorientationabsolute", handleOrientation, true);
-    window.addEventListener("deviceorientation", handleOrientation, true);
-    Sensor.enabled = true;
-    document.getElementById("sensorBadge").textContent = "SENSOR ACTIVE";
-    track("sensor_enabled");
-  }catch(e){
-    document.getElementById("sensorBadge").textContent = "SENSOR ERROR";
-    track("sensor_error");
+    if(typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function"){
+      const p2 = await DeviceMotionEvent.requestPermission();
+      if(p2 !== "granted"){Fusion.sensorMode="MOTION_DENIED";}
+    }
+    window.addEventListener("deviceorientationabsolute", onOrientation, true);
+    window.addEventListener("deviceorientation", onOrientation, true);
+    window.addEventListener("devicemotion", onMotion, true);
+    Fusion.enabled = true;
+    Fusion.sensorMode = "FUSION_ARMED";
+    document.getElementById("sensorCorner").textContent = "FUSION ARMED";
+    gtagSafe("fusion_enabled");
+  }catch(err){
+    Fusion.sensorMode = "FUSION_ERROR";
+    document.getElementById("sensorCorner").textContent = "FUSION ERROR";
   }
 }
 
-function handleOrientation(ev){
-  let heading = null;
-
+function onOrientation(ev){
+  let hdg = null;
   if(typeof ev.webkitCompassHeading === "number"){
-    heading = ev.webkitCompassHeading;
-    Sensor.mode = "WEBKIT_COMPASS";
+    hdg = ev.webkitCompassHeading;
+    Fusion.sensorMode = "WEBKIT_COMPASS";
   }else if(ev.type === "deviceorientationabsolute" && typeof ev.alpha === "number"){
-    heading = 360 - ev.alpha;
-    Sensor.mode = "ABS_ALPHA";
+    hdg = 360 - ev.alpha;
+    Fusion.sensorMode = "ABS_ALPHA";
   }else if(typeof ev.alpha === "number"){
-    heading = 360 - ev.alpha;
-    Sensor.mode = ev.absolute ? "ABS_FLAG_ALPHA" : "REL_ALPHA";
+    hdg = 360 - ev.alpha;
+    Fusion.sensorMode = ev.absolute ? "ABS_FLAG_ALPHA" : "REL_ALPHA";
   }
 
-  if(typeof ev.alpha === "number") Sensor.alpha = ev.alpha;
-  if(typeof ev.beta === "number") Sensor.beta = ev.beta;
-  if(typeof ev.gamma === "number") Sensor.gamma = ev.gamma;
+  if(hdg !== null){
+    Fusion.yawRaw = norm360(hdg);
+    Fusion.yawTarget = norm360(Fusion.yawRaw - Fusion.yawOffset);
+    const innovation = Math.abs(signedDelta(Fusion.yawFiltered, Fusion.yawTarget));
+    Fusion.err = Math.sqrt(0.94*Fusion.err*Fusion.err + 0.06*innovation*innovation);
+    Fusion.yawFiltered = lowPassAngle(Fusion.yawFiltered, Fusion.yawTarget, 0.10);
+  }
 
-  // DeviceOrientation beta/gamma approximate attitude angles.
-  if(typeof ev.beta === "number") Sensor.pitch = ev.beta;
-  if(typeof ev.gamma === "number") Sensor.roll = ev.gamma;
+  if(typeof ev.beta === "number" && !Number.isNaN(ev.beta)) Fusion.pitch = Fusion.pitch*0.92 + ev.beta*0.08;
+  if(typeof ev.gamma === "number" && !Number.isNaN(ev.gamma)) Fusion.roll = Fusion.roll*0.92 + ev.gamma*0.08;
+  Fusion.lastOrientationTs = performance.now();
+}
 
-  if(heading !== null){
-    Sensor.rawYaw = norm360(heading);
-    Sensor.targetYaw = norm360(Sensor.rawYaw - Sensor.offset);
+function onMotion(ev){
+  const now = performance.now();
+  let dt = Fusion.lastMotionTs ? (now - Fusion.lastMotionTs)/1000 : 0.016;
+  dt = clamp(dt, 0.001, 0.070);
+  Fusion.lastMotionTs = now;
 
-    const innovation = Math.abs(angleDelta(Sensor.yaw, Sensor.targetYaw));
-    Sensor.lastInnovation = innovation;
-    Sensor.errorRms = Math.sqrt(0.92 * Sensor.errorRms * Sensor.errorRms + 0.08 * innovation * innovation);
+  const rr = ev.rotationRate || {};
+  Fusion.gyroAlpha = typeof rr.alpha === "number" ? rr.alpha : 0;
+  Fusion.gyroBeta = typeof rr.beta === "number" ? rr.beta : 0;
+  Fusion.gyroGamma = typeof rr.gamma === "number" ? rr.gamma : 0;
 
-    if(!Sensor.samples){
-      Sensor.yaw = Sensor.targetYaw;
-    }else{
-      Sensor.yaw = lowPassAngle(Sensor.yaw, Sensor.targetYaw, 0.14);
-    }
+  const a = ev.accelerationIncludingGravity;
+  if(a && typeof a.x === "number" && typeof a.y === "number" && typeof a.z === "number"){
+    // Accelerometer attitude approximation.
+    // pitch = atan2(-x, sqrt(y² + z²)); roll = atan2(y, z)
+    Fusion.accelPitch = rad(Math.atan2(-a.x, Math.sqrt(a.y*a.y + a.z*a.z)));
+    Fusion.accelRoll = rad(Math.atan2(a.y, a.z));
 
-    Sensor.samples++;
+    const alpha = Fusion.alpha;
+    Fusion.pitch = alpha * (Fusion.pitch + Fusion.gyroBeta * dt) + (1 - alpha) * Fusion.accelPitch;
+    Fusion.roll  = alpha * (Fusion.roll  + Fusion.gyroGamma * dt) + (1 - alpha) * Fusion.accelRoll;
+
+    // Yaw has no gravity reference; use gyro propagation and compass correction.
+    Fusion.yawFiltered = lowPassAngle(Fusion.yawFiltered + Fusion.gyroAlpha*dt, Fusion.yawTarget, 0.025);
   }
 }
 
-function zeroHeading(){
-  Sensor.offset = Sensor.rawYaw;
-  Sensor.targetYaw = 0;
-  Sensor.yaw = 0;
+function zeroYaw(){
+  Fusion.yawOffset = Fusion.yawRaw;
+  Fusion.yawFiltered = 0;
+  Fusion.yawTarget = 0;
   if(navigator.vibrate) navigator.vibrate(70);
-  track("zero_heading");
+  gtagSafe("yaw_zero_reference");
 }
 
 /* ============================================================
-   ASTRONOMY CORE
+   MODULE_3: ASTRO_ENGINE_MATHEMATICS
    ============================================================ */
+function getJulianDate(date){
+  return date.getTime()/86400000 + 2440587.5;
+}
 
-function julianDate(date){
-  return date.getTime() / 86400000 + 2440587.5;
+function getJ2000Days(date){
+  return getJulianDate(date) - 2451545.0;
+}
+
+function getLST(JD, lonDeg){
+  const T = (JD - 2451545.0)/36525;
+  const GMST = 280.46061837 + 360.98564736629*(JD - 2451545.0) + 0.000387933*T*T - (T*T*T)/38710000;
+  return norm360(GMST + lonDeg);
 }
 
 /*
-  Greenwich Mean Sidereal Time:
-  GMST = 280.46061837 + 360.98564736629*(JD-2451545)
-         + 0.000387933*T² - T³/38710000
-  Local Sidereal Time:
-  LST = GMST + observer longitude.
+  Project(RA, Dec, LST, Lat):
+  Equatorial -> Horizontal via spherical trigonometry.
+  H = LST - RA
+  sin(Alt) = sin(Dec)sin(Lat) + cos(Dec)cos(Lat)cos(H)
+  Az = atan2(-sin(H), tan(Dec)cos(Lat) - sin(Lat)cos(H))
 */
-function gmstDeg(date){
-  const JD = julianDate(date);
-  const T = (JD - 2451545.0) / 36525;
-  return norm360(280.46061837 + 360.98564736629*(JD-2451545.0) + 0.000387933*T*T - (T*T*T)/38710000);
+function Project(RA_hours, Dec_deg, LST_deg, Lat_deg){
+  const RA_deg = RA_hours * 15;
+  const H = deg(((LST_deg - RA_deg + 540) % 360) - 180);
+  const dec = deg(Dec_deg);
+  const lat = deg(Lat_deg);
+  const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(H);
+  let alt = rad(Math.asin(clamp(sinAlt,-1,1)));
+  let az = rad(Math.atan2(-Math.sin(H), Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H)));
+  az = norm360(az);
+  alt = AtmosphericRefraction(alt);
+  return {alt, az};
 }
-function lstDeg(date, lonDeg){ return norm360(gmstDeg(date) + lonDeg) }
 
 /*
-  Mean obliquity of the ecliptic:
-  epsilon ≈ 23.439291° - 0.0130042° * T
-  where T is Julian centuries from J2000.
+  Basic atmospheric refraction correction in degrees.
+  Good for visual horizon correction, not survey-grade metrology.
 */
-function obliquityDeg(date){
-  const JD = julianDate(date);
-  const T = (JD - 2451545.0) / 36525;
+function AtmosphericRefraction(Alt){
+  if(Alt < -1 || Alt > 89.9) return Alt;
+  const R = 1.02 / Math.tan(deg(Alt + 10.3/(Alt + 5.11))) / 60;
+  return Alt + R;
+}
+
+function obliquity(date){
+  const T = (getJulianDate(date) - 2451545.0)/36525;
   return 23.439291 - 0.0130042*T;
 }
 
-/*
-  Equatorial to Horizontal conversion.
-  Input: right ascension RA, declination DEC, observer lat/lon, time.
-  Hour angle:
-    H = LST - RA
-  Altitude:
-    sin(alt)=sin(dec)sin(lat)+cos(dec)cos(lat)cos(H)
-  Azimuth convention:
-    0° = North, 90° = East
-    az = atan2(-sin(H), tan(dec)cos(lat)-sin(lat)cos(H))
-*/
-function equatorialToHorizontal(raHours, decDeg, latDeg, lonDeg, date){
-  const LST = lstDeg(date, lonDeg);
-  const raDeg = raHours * 15;
-  const H = deg(((LST - raDeg + 540) % 360) - 180);
-  const dec = deg(decDeg);
-  const lat = deg(latDeg);
-
-  const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(H);
-  const alt = Math.asin(clamp(sinAlt, -1, 1));
-  const az = Math.atan2(-Math.sin(H), Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H));
-
-  return {alt:rad(alt), az:norm360(rad(az))};
-}
-
 function eclipticToEquatorial(lambdaDeg, betaDeg, date){
-  const eps = deg(obliquityDeg(date));
+  const eps = deg(obliquity(date));
   const lam = deg(lambdaDeg);
   const beta = deg(betaDeg || 0);
-
   const sinDec = Math.sin(beta)*Math.cos(eps) + Math.cos(beta)*Math.sin(eps)*Math.sin(lam);
-  const dec = Math.asin(clamp(sinDec, -1, 1));
+  const dec = Math.asin(clamp(sinDec,-1,1));
   const y = Math.sin(lam)*Math.cos(eps) - Math.tan(beta)*Math.sin(eps);
   const x = Math.cos(lam);
-  let ra = Math.atan2(y, x);
+  let ra = Math.atan2(y,x);
   if(ra < 0) ra += Math.PI*2;
-
   return {raHours:rad(ra)/15, decDeg:rad(dec)};
 }
 
-/* Low-precision orbital elements for real-time visual projection.
-   The goal is live physical motion without static planet positions.
-   d is days from 2000 Jan 0.0 epoch used by the element rates.
-*/
-function elements(name, d){
+function orbitalElements(name,d){
   const E = {
     Mercury:{N:48.3313+3.24587e-5*d,i:7.0047+5e-8*d,w:29.1241+1.01444e-5*d,a:.387098,e:.205635+5.59e-10*d,M:168.6562+4.0923344368*d},
     Venus:{N:76.6799+2.46590e-5*d,i:3.3946+2.75e-8*d,w:54.8910+1.38374e-5*d,a:.723330,e:.006773-1.302e-9*d,M:48.0052+1.6021302244*d},
@@ -677,547 +596,465 @@ function elements(name, d){
   return E[name];
 }
 
-function heliocentricEcliptic(name, d){
-  const e = elements(name, d);
+function heliocentricEcliptic(name,d){
+  const e = orbitalElements(name,d);
   const N = deg(e.N), i = deg(e.i), w = deg(e.w), M = deg(norm360(e.M));
-  let E = M + e.e * Math.sin(M) * (1 + e.e * Math.cos(M));
-
-  // Kepler equation iteration: E - e sin(E) = M.
-  for(let k=0;k<5;k++){
-    E = E - (E - e.e*Math.sin(E) - M) / (1 - e.e*Math.cos(E));
-  }
-
-  const xv = e.a * (Math.cos(E) - e.e);
-  const yv = e.a * (Math.sqrt(1 - e.e*e.e) * Math.sin(E));
-  const v = Math.atan2(yv, xv);
+  let E = M + e.e*Math.sin(M)*(1 + e.e*Math.cos(M));
+  for(let k=0;k<6;k++) E = E - (E - e.e*Math.sin(E) - M)/(1 - e.e*Math.cos(E));
+  const xv = e.a*(Math.cos(E)-e.e);
+  const yv = e.a*(Math.sqrt(1-e.e*e.e)*Math.sin(E));
+  const v = Math.atan2(yv,xv);
   const r = Math.sqrt(xv*xv + yv*yv);
-
-  const xh = r * (Math.cos(N)*Math.cos(v+w) - Math.sin(N)*Math.sin(v+w)*Math.cos(i));
-  const yh = r * (Math.sin(N)*Math.cos(v+w) + Math.cos(N)*Math.sin(v+w)*Math.cos(i));
-  const zh = r * (Math.sin(v+w)*Math.sin(i));
-
-  return {x:xh, y:yh, z:zh, r};
+  return {
+    x:r*(Math.cos(N)*Math.cos(v+w)-Math.sin(N)*Math.sin(v+w)*Math.cos(i)),
+    y:r*(Math.sin(N)*Math.cos(v+w)+Math.cos(N)*Math.sin(v+w)*Math.cos(i)),
+    z:r*(Math.sin(v+w)*Math.sin(i)),
+    r
+  };
 }
 
-function vectorToRaDec(vec, date){
-  const eps = deg(obliquityDeg(date));
+function vectorToRaDec(vec,date){
+  const eps = deg(obliquity(date));
   const x = vec.x;
-  const y = vec.y * Math.cos(eps) - vec.z * Math.sin(eps);
-  const z = vec.y * Math.sin(eps) + vec.z * Math.cos(eps);
-
-  let ra = Math.atan2(y, x);
-  if(ra < 0) ra += Math.PI*2;
-  const dec = Math.atan2(z, Math.sqrt(x*x + y*y));
-  const dist = Math.sqrt(x*x + y*y + z*z);
+  const y = vec.y*Math.cos(eps) - vec.z*Math.sin(eps);
+  const z = vec.y*Math.sin(eps) + vec.z*Math.cos(eps);
+  let ra = Math.atan2(y,x);
+  if(ra<0) ra += Math.PI*2;
+  const dec = Math.atan2(z, Math.sqrt(x*x+y*y));
+  const dist = Math.sqrt(x*x+y*y+z*z);
   return {raHours:rad(ra)/15, decDeg:rad(dec), dist};
 }
 
-function computeSolarSystem(date, lat, lon){
-  const JD = julianDate(date);
+function computeSolarSystem(date){
+  const JD = getJulianDate(date);
   const d = JD - 2451543.5;
-  const earth = heliocentricEcliptic("Earth", d);
-
-  const bodies = [];
-
-  // Sun: geocentric vector is opposite Earth's heliocentric vector.
-  const sunVec = {x:-earth.x, y:-earth.y, z:-earth.z};
-  const sunEq = vectorToRaDec(sunVec, date);
-  const sunHz = equatorialToHorizontal(sunEq.raHours, sunEq.decDeg, lat, lon, date);
-  bodies.push({name:"Sol", kind:"star", mag:-26.7, color:"#fff2a8", ra:sunEq.raHours, dec:sunEq.decDeg, alt:sunHz.alt, az:sunHz.az, dist:sunEq.dist});
-
+  const LST = getLST(JD,EVA.lon);
+  const earth = heliocentricEcliptic("Earth",d);
+  const out = [];
+  const sunVec = {x:-earth.x,y:-earth.y,z:-earth.z};
+  const sun = vectorToRaDec(sunVec,date);
+  const sunHz = Project(sun.raHours,sun.decDeg,LST,EVA.lat);
+  out.push({name:"Sol",type:"SOL",ra:sun.raHours,dec:sun.decDeg,alt:sunHz.alt,az:sunHz.az,dist:sun.dist,color:"#fff2a8"});
   ["Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune"].forEach(name=>{
-    const p = heliocentricEcliptic(name, d);
-    const geo = {x:p.x-earth.x, y:p.y-earth.y, z:p.z-earth.z};
-    const eq = vectorToRaDec(geo, date);
-    const hz = equatorialToHorizontal(eq.raHours, eq.decDeg, lat, lon, date);
-    bodies.push({name, kind:"planet", mag:0, color:planetColor(name), ra:eq.raHours, dec:eq.decDeg, alt:hz.alt, az:hz.az, dist:eq.dist});
+    const p = heliocentricEcliptic(name,d);
+    const geo = {x:p.x-earth.x,y:p.y-earth.y,z:p.z-earth.z};
+    const eq = vectorToRaDec(geo,date);
+    const hz = Project(eq.raHours,eq.decDeg,LST,EVA.lat);
+    out.push({name,type:"PLANET",ra:eq.raHours,dec:eq.decDeg,alt:hz.alt,az:hz.az,dist:eq.dist,color:planetColor(name)});
   });
-
-  return bodies;
+  return out;
 }
 
 function planetColor(name){
-  return {
-    Mercury:"#c8c8c8", Venus:"#fff2b7", Mars:"#ff8b62", Jupiter:"#ffd9a3",
-    Saturn:"#f7df9b", Uranus:"#94f5ff", Neptune:"#7ba6ff"
-  }[name] || "#fff";
+  return {Mercury:"#c8c8c8",Venus:"#fff1b6",Mars:"#ff8b62",Jupiter:"#ffd9a3",Saturn:"#f7df9b",Uranus:"#94f5ff",Neptune:"#7ba6ff"}[name] || "#fff";
 }
 
 /* ============================================================
-   STAR CATALOG / PROCEDURAL LAYERS
+   MODULE_4: HVAC_FIELD_INSTRUMENTATION
    ============================================================ */
+function solarIncidenceModule(bodies){
+  const sun = bodies.find(b=>b.name==="Sol");
+  if(!sun) return {alt:0,az:0,load:0,label:"NO SOL"};
+  const altFactor = Math.max(0, Math.sin(deg(sun.alt)));
+  const load = Math.round(1000 * altFactor);
+  return {alt:sun.alt, az:sun.az, load, label: load>750?"HIGH SOLAR LOAD":load>350?"MODERATE LOAD":"LOW SOLAR LOAD"};
+}
 
-const Stars = [
-  ["Sirius",6.7525,-16.7161,-1.46,"Can Mayor"],["Canopus",6.3992,-52.6957,-0.74,"Carina"],
-  ["Arcturus",14.2610,19.1825,-0.05,"Boyero"],["Vega",18.6156,38.7837,0.03,"Lira"],
-  ["Capella",5.2782,45.9980,0.08,"Auriga"],["Rigel",5.2423,-8.2016,0.13,"Orión"],
-  ["Procyon",7.6550,5.2250,0.34,"Can Menor"],["Betelgeuse",5.9195,7.4071,0.42,"Orión"],
-  ["Achernar",1.6286,-57.2368,0.46,"Erídano"],["Hadar",14.0637,-60.3730,0.61,"Centauro"],
-  ["Altair",19.8464,8.8683,0.77,"Águila"],["Acrux",12.4433,-63.0991,0.76,"Cruz del Sur"],
-  ["Aldebaran",4.5987,16.5093,0.85,"Tauro"],["Spica",13.4199,-11.1614,0.98,"Virgo"],
-  ["Antares",16.4901,-26.4319,1.06,"Escorpio"],["Pollux",7.7553,28.0262,1.14,"Géminis"],
-  ["Fomalhaut",22.9608,-29.6222,1.16,"Pez Austral"],["Deneb",20.6905,45.2803,1.25,"Cisne"],
-  ["Mimosa",12.7953,-59.6888,1.25,"Cruz del Sur"],["Regulus",10.1395,11.9672,1.35,"Leo"],
-  ["Adhara",6.9771,-28.9721,1.50,"Can Mayor"],["Shaula",17.5601,-37.1038,1.62,"Escorpio"],
-  ["Castor",7.5767,31.8883,1.58,"Géminis"],["Gacrux",12.5194,-57.1132,1.63,"Cruz del Sur"],
-  ["Bellatrix",5.4189,6.3497,1.64,"Orión"],["Elnath",5.4382,28.6075,1.65,"Tauro"],
-  ["Polaris",2.5303,89.2641,1.98,"Osa Menor"],["Dubhe",11.0621,61.7510,1.79,"Osa Mayor"],
-  ["Merak",11.0307,56.3824,2.37,"Osa Mayor"],["Phecda",11.8972,53.6948,2.44,"Osa Mayor"],
-  ["Megrez",12.2571,57.0326,3.30,"Osa Mayor"],["Alioth",12.9005,55.9598,1.77,"Osa Mayor"],
-  ["Mizar",13.3987,54.9254,2.23,"Osa Mayor"],["Alkaid",13.7923,49.3133,1.85,"Osa Mayor"]
-];
-
-const Lines = [
-  ["Betelgeuse","Bellatrix"],["Betelgeuse","Alnilam"],["Bellatrix","Alnilam"],["Alnilam","Rigel"],
-  ["Dubhe","Merak"],["Merak","Phecda"],["Phecda","Megrez"],["Megrez","Alioth"],["Alioth","Mizar"],["Mizar","Alkaid"],
-  ["Acrux","Mimosa"],["Gacrux","Acrux"]
-];
-
+/* ============================================================
+   PROCEDURAL LAYERS / RENDER ENGINE
+   ============================================================ */
 function seededRandom(seed){
   let s = seed >>> 0;
-  return () => ((s = (1664525 * s + 1013904223) >>> 0) / 4294967296);
+  return () => ((s = (1664525*s + 1013904223) >>> 0)/4294967296);
 }
 
-function generateWeakStars(){
-  const rnd = seededRandom(20260503);
-  App.weakStars = [];
-  for(let i=0;i<520;i++){
-    App.weakStars.push({
-      x:rnd()*2-1,
-      y:rnd()*2-1,
-      a:.12 + rnd()*.45,
-      size:rnd()<.90 ? 1 : 2,
-      twinkle:rnd()*Math.PI*2
-    });
+function generateWeakStarfield(){
+  const rnd = seededRandom(8080);
+  EVA.weakStars = [];
+  for(let i=0;i<900;i++){
+    const a = rnd()*Math.PI*2;
+    const r = Math.sqrt(rnd());
+    EVA.weakStars.push({x:Math.cos(a)*r,y:Math.sin(a)*r,size:rnd()<.90?1:2,alpha:.08+rnd()*.46,phase:rnd()*Math.PI*2});
   }
 }
-
-/* ============================================================
-   RENDERING
-   ============================================================ */
 
 function resizeCanvas(){
-  const c = App.canvas;
-  const rect = c.getBoundingClientRect();
+  const rect = EVA.canvas.getBoundingClientRect();
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
-  const w = Math.max(640, Math.floor(rect.width * dpr));
-  const h = Math.max(640, Math.floor(rect.height * dpr));
-  if(c.width !== w || c.height !== h){
-    c.width = w;
-    c.height = h;
-    App.W = w; App.H = h;
-    App.cx = w/2; App.cy = h/2;
-    App.rmax = Math.min(w,h) * .43;
+  const W = Math.max(640, Math.floor(rect.width*dpr));
+  const H = Math.max(640, Math.floor(rect.height*dpr));
+  if(EVA.canvas.width !== W || EVA.canvas.height !== H){
+    EVA.canvas.width = W; EVA.canvas.height = H;
+    EVA.W=W; EVA.H=H; EVA.cx=W/2; EVA.cy=H/2; EVA.rmax=Math.min(W,H)*.43;
+    buildBackBuffer();
   }
 }
 
-function projectedPoint(az, alt){
-  const displayAz = norm360(az - (Sensor.enabled ? Sensor.yaw : 0));
-  const r = ((90 - alt) / 90) * App.rmax;
-  const t = deg(displayAz);
-  return {x:App.cx + r*Math.sin(t), y:App.cy - r*Math.cos(t), r, displayAz};
-}
-
-function clearAndBackground(ctx, t){
-  const {W,H,cx,cy,rmax} = App;
-  const g = ctx.createRadialGradient(cx,cy,30,cx,cy,Math.max(W,H)*.65);
-  if(App.mode === "op"){
-    g.addColorStop(0,"#00180c");
-    g.addColorStop(.55,"#000904");
-    g.addColorStop(1,"#000000");
+function buildBackBuffer(){
+  if(typeof OffscreenCanvas !== "undefined"){
+    EVA.backCanvas = new OffscreenCanvas(EVA.W,EVA.H);
   }else{
-    g.addColorStop(0,"#0b2d5a");
-    g.addColorStop(.55,"#041229");
-    g.addColorStop(1,"#01040b");
+    EVA.backCanvas = document.createElement("canvas");
+    EVA.backCanvas.width=EVA.W; EVA.backCanvas.height=EVA.H;
   }
-  ctx.fillStyle = g;
-  ctx.fillRect(0,0,W,H);
+  EVA.backCtx = EVA.backCanvas.getContext("2d");
+  const ctx = EVA.backCtx;
+  const g = ctx.createRadialGradient(EVA.cx,EVA.cy,20,EVA.cx,EVA.cy,Math.max(EVA.W,EVA.H)*.62);
+  if(EVA.state==="B"){
+    g.addColorStop(0,"#00170b"); g.addColorStop(.62,"#000704"); g.addColorStop(1,"#000");
+  }else{
+    g.addColorStop(0,"#0a2c58"); g.addColorStop(.62,"#041329"); g.addColorStop(1,"#01040b");
+  }
+  ctx.fillStyle=g; ctx.fillRect(0,0,EVA.W,EVA.H);
+}
 
+function projectAltAz(az,alt){
+  const displayedAz = norm360(az - (Fusion.enabled ? Fusion.yawFiltered : 0));
+  const r = ((90-alt)/90)*EVA.rmax;
+  const t = deg(displayedAz);
+  return {x:EVA.cx + r*Math.sin(t), y:EVA.cy - r*Math.cos(t), r, displayedAz};
+}
+
+function spectralColor(spec){
+  const s = String(spec || "").toUpperCase()[0];
+  return {O:"#9bbcff",B:"#a9c7ff",A:"#dbe7ff",F:"#fff3d0",G:"#fff2a8",K:"#ffd29a",M:"#ff9d72"}[s] || "#eaf7ff";
+}
+
+function renderBackground(ctx,t){
+  ctx.drawImage(EVA.backCanvas,0,0);
   ctx.save();
-  ctx.beginPath();
-  ctx.arc(cx,cy,rmax,0,Math.PI*2);
-  ctx.clip();
-
-  App.weakStars.forEach(s=>{
-    const dist = Math.sqrt(s.x*s.x + s.y*s.y);
-    if(dist > 1) return;
-    const tw = .65 + .35*Math.sin(t*.0015 + s.twinkle);
-    ctx.fillStyle = App.mode === "op" ? `rgba(0,255,136,${s.a*.35})` : `rgba(255,255,255,${s.a*tw})`;
-    ctx.fillRect(cx+s.x*rmax, cy+s.y*rmax, s.size, s.size);
-  });
+  ctx.beginPath(); ctx.arc(EVA.cx,EVA.cy,EVA.rmax,0,Math.PI*2); ctx.clip();
+  for(const s of EVA.weakStars){
+    const tw = .65 + .35*Math.sin(t*.0014 + s.phase);
+    ctx.fillStyle = EVA.state==="B" ? `rgba(0,255,136,${s.alpha*.32})` : `rgba(255,255,255,${s.alpha*tw})`;
+    ctx.fillRect(EVA.cx+s.x*EVA.rmax,EVA.cy+s.y*EVA.rmax,s.size,s.size);
+  }
   ctx.restore();
 }
 
-function drawGrid(ctx){
-  const {cx,cy,rmax} = App;
+function renderGrid(ctx){
   ctx.save();
+  ctx.strokeStyle = EVA.state==="B" ? "rgba(0,255,136,.34)" : "rgba(112,211,255,.24)";
+  ctx.lineWidth=2;
+  ctx.beginPath(); ctx.arc(EVA.cx,EVA.cy,EVA.rmax,0,Math.PI*2); ctx.stroke();
 
-  ctx.strokeStyle = App.mode === "op" ? "rgba(0,255,136,.32)" : "rgba(120,220,255,.26)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(cx,cy,rmax,0,Math.PI*2);
-  ctx.stroke();
-
-  const altStep = App.mode === "op" ? 10 : 30;
-  for(let alt=altStep; alt<90; alt+=altStep){
-    const rr = ((90-alt)/90)*rmax;
-    ctx.strokeStyle = App.mode === "op" ? (alt%30===0?"rgba(0,255,136,.22)":"rgba(0,255,136,.10)") : "rgba(120,220,255,.12)";
-    ctx.lineWidth = alt%30===0 ? 1.4 : 1;
-    ctx.beginPath();
-    ctx.arc(cx,cy,rr,0,Math.PI*2);
-    ctx.stroke();
-
-    if(App.mode === "op"){
-      ctx.fillStyle = "rgba(0,255,136,.62)";
-      ctx.font = "10px monospace";
-      ctx.textAlign = "left";
-      ctx.fillText(`ALT ${alt}°`, cx+rr+8, cy-4);
+  const altStep = EVA.state==="B" ? 10 : 30;
+  for(let alt=altStep;alt<90;alt+=altStep){
+    const rr=((90-alt)/90)*EVA.rmax;
+    ctx.strokeStyle = EVA.state==="B" ? (alt%30===0?"rgba(0,255,136,.24)":"rgba(0,255,136,.10)") : "rgba(112,211,255,.11)";
+    ctx.lineWidth = EVA.state==="B" && alt%30===0 ? 1.25 : 1;
+    ctx.beginPath(); ctx.arc(EVA.cx,EVA.cy,rr,0,Math.PI*2); ctx.stroke();
+    if(EVA.state==="B"){
+      ctx.fillStyle="rgba(0,255,136,.62)"; ctx.font="10px monospace"; ctx.textAlign="left";
+      ctx.fillText(`ALT ${alt}°`,EVA.cx+rr+8,EVA.cy-4);
     }
   }
 
-  const azStep = App.mode === "op" ? 10 : 30;
-  for(let az=0; az<360; az+=azStep){
-    const p = projectedPoint(az, 0);
-    ctx.strokeStyle = App.mode === "op" ? (az%30===0?"rgba(0,255,136,.24)":"rgba(0,255,136,.09)") : (az%90===0?"rgba(255,242,168,.25)":"rgba(120,220,255,.10)");
-    ctx.lineWidth = az%30===0 ? 1.2 : 1;
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.lineTo(p.x,p.y);
-    ctx.stroke();
-
-    if(App.mode === "op" && az%30===0){
-      const lp = projectedPoint(az, -5);
-      ctx.fillStyle = "rgba(0,255,136,.62)";
-      ctx.font = "10px monospace";
-      ctx.textAlign = "center";
-      ctx.fillText(`${az}°`, lp.x, lp.y);
+  const azStep = EVA.state==="B" ? 10 : 30;
+  for(let az=0;az<360;az+=azStep){
+    const p=projectAltAz(az,0);
+    ctx.strokeStyle = EVA.state==="B" ? (az%30===0?"rgba(0,255,136,.24)":"rgba(0,255,136,.08)") : (az%90===0?"rgba(255,242,168,.22)":"rgba(112,211,255,.10)");
+    ctx.lineWidth = EVA.state==="B" && az%30===0 ? 1.2 : 1;
+    ctx.beginPath(); ctx.moveTo(EVA.cx,EVA.cy); ctx.lineTo(p.x,p.y); ctx.stroke();
+    if(EVA.state==="B" && az%30===0){
+      const lp=projectAltAz(az,-5);
+      ctx.fillStyle="rgba(0,255,136,.60)"; ctx.font="10px monospace"; ctx.textAlign="center"; ctx.fillText(`${az}°`,lp.x,lp.y);
     }
   }
 
   [["N",0],["E",90],["S",180],["O",270]].forEach(([txt,az])=>{
-    const p = projectedPoint(az, -6);
-    ctx.fillStyle = App.mode === "op" ? "#00ff88" : "#9eeaff";
-    ctx.font = "bold 26px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText(txt,p.x,p.y);
+    const p=projectAltAz(az,-6);
+    ctx.fillStyle = EVA.state==="B" ? "#00ff88" : "#9eeaff";
+    ctx.font="bold 26px monospace"; ctx.textAlign="center"; ctx.fillText(txt,p.x,p.y);
   });
-
   ctx.restore();
 }
 
-function drawCurveFromEquatorial(ctx, samples, color, label){
-  const date = getDate();
-  const lat = App.lat, lon = App.lon;
+function EclipticPlot(ctx,date,LST){
+  const samples=[];
+  for(let lam=0;lam<=360;lam+=2) samples.push(eclipticToEquatorial(lam,0,date));
+  drawEquatorialCurve(ctx,samples,EVA.state==="B"?"rgba(0,255,136,.78)":"rgba(255,242,168,.72)","ECLIPTIC");
+}
+
+function drawCelestialEquator(ctx,date){
+  const samples=[];
+  for(let ra=0;ra<=24;ra+=.15) samples.push({raHours:ra,decDeg:0});
+  drawEquatorialCurve(ctx,samples,EVA.state==="B"?"rgba(0,190,255,.55)":"rgba(112,211,255,.38)","CELESTIAL EQUATOR");
+}
+
+function drawEquatorialCurve(ctx,samples,color,label){
+  const date=getTime();
+  const LST=getLST(getJulianDate(date),EVA.lon);
   ctx.save();
-  ctx.beginPath();
-  ctx.arc(App.cx, App.cy, App.rmax, 0, Math.PI*2);
-  ctx.clip();
-
-  ctx.strokeStyle = color;
-  ctx.shadowColor = color;
-  ctx.shadowBlur = App.mode === "civil" ? 9 : 0;
-  ctx.lineWidth = App.mode === "op" ? 1.7 : 2.2;
-
-  let open = false;
-  samples.forEach(eq=>{
-    const hz = equatorialToHorizontal(eq.raHours, eq.decDeg, lat, lon, date);
-    if(hz.alt <= 0){
-      if(open){ ctx.stroke(); open = false; }
-      return;
-    }
-    const p = projectedPoint(hz.az, hz.alt);
-    if(!open){ ctx.beginPath(); ctx.moveTo(p.x,p.y); open = true; }
-    else ctx.lineTo(p.x,p.y);
-  });
+  ctx.beginPath(); ctx.arc(EVA.cx,EVA.cy,EVA.rmax,0,Math.PI*2); ctx.clip();
+  ctx.strokeStyle=color; ctx.shadowColor=color; ctx.shadowBlur=EVA.state==="A"?8:0; ctx.lineWidth=EVA.state==="B"?1.7:2.2;
+  let open=false;
+  for(const eq of samples){
+    const hz=Project(eq.raHours,eq.decDeg,LST,EVA.lat);
+    if(hz.alt<=0){ if(open){ctx.stroke();open=false;} continue; }
+    const p=projectAltAz(hz.az,hz.alt);
+    if(!open){ctx.beginPath();ctx.moveTo(p.x,p.y);open=true;} else ctx.lineTo(p.x,p.y);
+  }
   if(open) ctx.stroke();
-  ctx.shadowBlur = 0;
   ctx.restore();
-
   ctx.save();
-  ctx.fillStyle = color;
-  ctx.font = "12px monospace";
-  ctx.textAlign = "left";
-  ctx.fillText(label, App.cx - App.rmax + 16, App.cy + App.rmax - (label.includes("ECL") ? 28 : 46));
+  ctx.fillStyle=color; ctx.font="12px monospace"; ctx.textAlign="left";
+  ctx.fillText(label,EVA.cx-EVA.rmax+16,EVA.cy+EVA.rmax-(label==="ECLIPTIC"?28:46));
   ctx.restore();
 }
 
-function drawEclipticAndEquator(ctx){
-  const date = getDate();
-  const ecliptic = [];
-  for(let lam=0; lam<=360; lam+=2){
-    ecliptic.push(eclipticToEquatorial(lam, 0, date));
-  }
-  drawCurveFromEquatorial(ctx, ecliptic, App.mode === "op" ? "rgba(0,255,136,.74)" : "rgba(255,242,168,.72)", "ECLÍPTICA · SOL/LUNA/PLANETAS");
-
-  const equator = [];
-  for(let ra=0; ra<=24; ra+=.15){
-    equator.push({raHours:ra, decDeg:0});
-  }
-  drawCurveFromEquatorial(ctx, equator, App.mode === "op" ? "rgba(0,200,255,.64)" : "rgba(120,220,255,.42)", "ECUADOR CELESTE");
+function computeVisibleStars(date){
+  const JD=getJulianDate(date), LST=getLST(JD,EVA.lon);
+  EVA.visibleStars = STAR_CATALOG.map(s=>{
+    const hz=Project(s[1],s[2],LST,EVA.lat);
+    return {name:s[0],ra:s[1],dec:s[2],mag:s[3],spec:s[4],cons:s[5],alt:hz.alt,az:hz.az,color:spectralColor(s[4])};
+  }).filter(s=>s.alt>0).sort((a,b)=>a.mag-b.mag);
 }
 
-function computeStars(date){
-  App.visibleStars = Stars.map(s=>{
-    const hz = equatorialToHorizontal(s[1], s[2], App.lat, App.lon, date);
-    return {name:s[0], ra:s[1], dec:s[2], mag:s[3], cons:s[4], alt:hz.alt, az:hz.az};
-  }).filter(s=>s.alt > 0).sort((a,b)=>a.mag-b.mag);
-}
-
-function drawStars(ctx){
-  const byName = {};
-  App.visibleStars.forEach(s=>byName[s.name]=s);
-
-  // Constellation lines in civil mode, data lines in op.
+function renderStars(ctx){
   ctx.save();
-  ctx.strokeStyle = App.mode === "op" ? "rgba(0,255,136,.22)" : "rgba(120,220,255,.18)";
-  ctx.lineWidth = 1.5;
-  Lines.forEach(([a,b])=>{
-    const A = byName[a], B = byName[b];
-    if(!A || !B) return;
-    const p1 = projectedPoint(A.az, A.alt);
-    const p2 = projectedPoint(B.az, B.alt);
-    ctx.beginPath();
-    ctx.moveTo(p1.x,p1.y);
-    ctx.lineTo(p2.x,p2.y);
-    ctx.stroke();
-  });
-  ctx.restore();
+  ctx.beginPath(); ctx.arc(EVA.cx,EVA.cy,EVA.rmax,0,Math.PI*2); ctx.clip();
 
-  App.visibleStars.forEach(s=>{
-    const p = projectedPoint(s.az, s.alt);
-    const size = clamp((6 - s.mag) * 1.45, 2.2, 13);
-
-    if(App.mode === "civil"){
-      const bloom = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,size*5);
-      bloom.addColorStop(0, "rgba(255,255,255,.95)");
-      bloom.addColorStop(.22, s.mag < 0.5 ? "rgba(255,242,168,.55)" : "rgba(160,230,255,.40)");
-      bloom.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = bloom;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,size*5,0,Math.PI*2);
-      ctx.fill();
+  for(const s of EVA.visibleStars){
+    const p=projectAltAz(s.az,s.alt);
+    const size=clamp((6.2-s.mag)*1.18,1.4,13);
+    if(EVA.state==="A"){
+      const bloom=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,size*5.5);
+      bloom.addColorStop(0,s.color);
+      bloom.addColorStop(.26,s.color+"88");
+      bloom.addColorStop(1,"rgba(255,255,255,0)");
+      ctx.fillStyle=bloom; ctx.beginPath(); ctx.arc(p.x,p.y,size*5.5,0,Math.PI*2); ctx.fill();
     }
+    ctx.fillStyle = EVA.state==="B" ? "#00ff88" : s.color;
+    ctx.beginPath(); ctx.arc(p.x,p.y,size,0,Math.PI*2); ctx.fill();
 
-    ctx.fillStyle = App.mode === "op" ? "#00ff88" : (s.mag < 0.7 ? "#fff2a8" : "#eaf7ff");
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,size,0,Math.PI*2);
-    ctx.fill();
-
-    if(s.mag < 1.7 || App.mode === "op"){
-      ctx.fillStyle = App.mode === "op" ? "rgba(0,255,136,.82)" : "rgba(234,247,255,.90)";
-      ctx.font = App.mode === "op" ? "11px monospace" : "14px system-ui";
-      ctx.textAlign = "left";
-      ctx.fillText(App.mode === "op" ? `${s.name} ALT ${s.alt.toFixed(0)} AZ ${s.az.toFixed(0)}` : s.name, p.x+10, p.y-8);
+    if(s.mag<1.8 || EVA.state==="B"){
+      ctx.fillStyle = EVA.state==="B" ? "rgba(0,255,136,.85)" : "rgba(234,247,255,.90)";
+      ctx.font = EVA.state==="B" ? "10px monospace" : "13px system-ui";
+      ctx.textAlign="left";
+      ctx.fillText(EVA.state==="B"?`${s.name} ALT ${s.alt.toFixed(1)} AZ ${s.az.toFixed(1)}`:s.name,p.x+9,p.y-7);
     }
-  });
+  }
+  ctx.restore();
 }
 
-function drawBodies(ctx){
-  App.visibleBodies.forEach(b=>{
-    if(b.alt <= 0) return;
-    const p = projectedPoint(b.az, b.alt);
-    const isSun = b.name === "Sol";
-    const size = isSun ? 12 : (b.name === "Venus" || b.name === "Jupiter" ? 8 : 6);
+function computeSolarSystem(date){
+  const JD=getJulianDate(date), d=JD-2451543.5, LST=getLST(JD,EVA.lon);
+  const earth=heliocentricEcliptic("Earth",d);
+  const out=[];
+  const sunEq=vectorToRaDec({x:-earth.x,y:-earth.y,z:-earth.z},date);
+  const sunHz=Project(sunEq.raHours,sunEq.decDeg,LST,EVA.lat);
+  out.push({name:"Sol",type:"SOL",ra:sunEq.raHours,dec:sunEq.decDeg,alt:sunHz.alt,az:sunHz.az,dist:sunEq.dist,color:"#fff2a8"});
+  ["Mercury","Venus","Mars","Jupiter","Saturn","Uranus","Neptune"].forEach(name=>{
+    const p=heliocentricEcliptic(name,d);
+    const eq=vectorToRaDec({x:p.x-earth.x,y:p.y-earth.y,z:p.z-earth.z},date);
+    const hz=Project(eq.raHours,eq.decDeg,LST,EVA.lat);
+    out.push({name,type:"PLANET",ra:eq.raHours,dec:eq.decDeg,alt:hz.alt,az:hz.az,dist:eq.dist,color:planetColor(name)});
+  });
+  return out;
+}
 
-    ctx.save();
-    if(App.mode === "civil"){
-      const bloom = ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,size*6);
-      bloom.addColorStop(0, b.color);
-      bloom.addColorStop(.3, b.color + "88");
-      bloom.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.fillStyle = bloom;
-      ctx.beginPath(); ctx.arc(p.x,p.y,size*6,0,Math.PI*2); ctx.fill();
+function renderBodies(ctx){
+  ctx.save();
+  ctx.beginPath(); ctx.arc(EVA.cx,EVA.cy,EVA.rmax,0,Math.PI*2); ctx.clip();
+  for(const b of EVA.visibleBodies){
+    if(b.alt<=0) continue;
+    const p=projectAltAz(b.az,b.alt);
+    const size=b.name==="Sol"?12:(b.name==="Venus"||b.name==="Jupiter"?8:6);
+    if(EVA.state==="A"){
+      const bloom=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,size*6);
+      bloom.addColorStop(0,b.color); bloom.addColorStop(.3,b.color+"99"); bloom.addColorStop(1,"rgba(255,255,255,0)");
+      ctx.fillStyle=bloom; ctx.beginPath(); ctx.arc(p.x,p.y,size*6,0,Math.PI*2); ctx.fill();
     }
-
-    ctx.fillStyle = App.mode === "op" ? "#00ff88" : b.color;
-    ctx.strokeStyle = App.mode === "op" ? "rgba(0,255,136,.9)" : "rgba(255,255,255,.8)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(p.x,p.y,size,0,Math.PI*2); ctx.fill(); ctx.stroke();
-
-    ctx.fillStyle = App.mode === "op" ? "rgba(0,255,136,.92)" : "rgba(255,255,255,.92)";
-    ctx.font = App.mode === "op" ? "12px monospace" : "bold 13px system-ui";
-    ctx.textAlign = "left";
-    ctx.fillText(App.mode === "op" ? `${b.name} RA ${b.ra.toFixed(2)} DEC ${b.dec.toFixed(1)}` : b.name, p.x+12, p.y+5);
-    ctx.restore();
-  });
-}
-
-function roundRect(ctx, x, y, w, h, r){
-  const rr = Math.min(r, w/2, h/2);
-  ctx.beginPath();
-  ctx.moveTo(x+rr,y);
-  ctx.lineTo(x+w-rr,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
-  ctx.lineTo(x+w,y+h-rr);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h);
-  ctx.lineTo(x+rr,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-rr);
-  ctx.lineTo(x,y+rr);
-  ctx.quadraticCurveTo(x,y,x+rr,y);
-  ctx.closePath();
-}
-
-function drawArtificialHorizon(ctx){
-  if(App.mode !== "op") return;
-  const w = 210, h = 132, x = App.W - w - 18, y = 18;
-  const pitch = clamp(Sensor.pitch, -45, 45);
-  const roll = clamp(Sensor.roll, -60, 60);
-
-  ctx.save();
-  ctx.translate(x+w/2, y+h/2);
-  ctx.fillStyle = "rgba(0,0,0,.68)";
-  ctx.strokeStyle = "rgba(0,255,136,.45)";
-  ctx.lineWidth = 1.5;
-  roundRect(ctx, -w/2, -h/2, w, h, 14);
-  ctx.fill(); ctx.stroke();
-
-  ctx.save();
-  roundRect(ctx, -w/2+9, -h/2+9, w-18, h-18, 10);
-  ctx.clip();
-  ctx.rotate(-deg(roll));
-  const po = pitch * 1.25;
-
-  ctx.fillStyle = "rgba(0,255,136,.10)";
-  ctx.fillRect(-w, -h*2 + po, w*2, h*2);
-  ctx.fillStyle = "rgba(0,0,0,.55)";
-  ctx.fillRect(-w, po, w*2, h*2);
-
-  ctx.strokeStyle = "rgba(0,255,136,.95)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(-w, po);
-  ctx.lineTo(w, po);
-  ctx.stroke();
-  ctx.restore();
-
-  ctx.strokeStyle = "rgba(216,255,231,.92)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(-24,0); ctx.lineTo(-7,0);
-  ctx.moveTo(7,0); ctx.lineTo(24,0);
-  ctx.moveTo(0,-9); ctx.lineTo(0,9);
-  ctx.stroke();
-
-  ctx.fillStyle = "rgba(0,255,136,.92)";
-  ctx.font = "11px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText("6-DoF ATTITUDE DISPLAY", 0, -h/2+20);
-  ctx.fillText(`P ${Sensor.pitch.toFixed(1)}°  R ${Sensor.roll.toFixed(1)}°  Y ${Sensor.yaw.toFixed(1)}°`, 0, h/2-12);
-  ctx.restore();
-}
-
-function drawOperationalRawOverlay(ctx){
-  if(App.mode !== "op") return;
-  const x = 18, y = 18, w = 284, h = 150;
-  ctx.save();
-  ctx.fillStyle = "rgba(0,0,0,.70)";
-  ctx.strokeStyle = "rgba(0,255,136,.45)";
-  ctx.lineWidth = 1.5;
-  roundRect(ctx,x,y,w,h,14);
-  ctx.fill(); ctx.stroke();
-
-  ctx.fillStyle = "rgba(0,255,136,.94)";
-  ctx.font = "bold 12px monospace";
-  ctx.fillText("AACYCLAB RAW TELEMETRY", x+12, y+24);
-
-  ctx.font = "11px monospace";
-  ctx.fillText(`ACIMUT/HDG : ${Sensor.yaw.toFixed(1)}°`, x+12, y+48);
-  ctx.fillText(`ALTITUD/EL : ${Sensor.pitch.toFixed(1)}°`, x+12, y+68);
-  ctx.fillText(`PITCH      : ${Sensor.pitch.toFixed(1)}°`, x+12, y+88);
-  ctx.fillText(`ROLL       : ${Sensor.roll.toFixed(1)}°`, x+12, y+108);
-  ctx.fillText(`ERR RMS    : ±${Sensor.errorRms.toFixed(1)}°`, x+12, y+128);
-  ctx.fillText(`SENSOR     : ${Sensor.mode}`, x+12, y+148);
-
-  // Error marker: red if the heading innovation is high.
-  if(Sensor.errorRms > 8){
-    ctx.fillStyle = "rgba(255,73,108,.95)";
-    ctx.fillText("ERR: MAGNETIC NOISE / CALIBRATION REQUIRED", x+122, y+128);
+    ctx.fillStyle=EVA.state==="B"?"#00ff88":b.color;
+    ctx.strokeStyle=EVA.state==="B"?"rgba(0,255,136,.95)":"rgba(255,255,255,.82)";
+    ctx.lineWidth=1.5; ctx.beginPath(); ctx.arc(p.x,p.y,size,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=EVA.state==="B"?"rgba(0,255,136,.9)":"rgba(255,255,255,.92)";
+    ctx.font=EVA.state==="B"?"11px monospace":"bold 13px system-ui"; ctx.textAlign="left";
+    ctx.fillText(EVA.state==="B"?`${b.name} RA ${b.ra.toFixed(2)} DEC ${b.dec.toFixed(1)}`:b.name,p.x+12,p.y+5);
   }
   ctx.restore();
 }
 
-function render(timestamp){
-  resizeCanvas();
-  const ctx = App.ctx;
-  const date = getDate();
-  App.lat = parseFloat(document.getElementById("lat").value) || 20.624;
-  App.lon = parseFloat(document.getElementById("lon").value) || -103.234;
-
-  if(Sensor.enabled){
-    Sensor.yaw = lowPassAngle(Sensor.yaw, Sensor.targetYaw, 0.10);
-  }
-
-  clearAndBackground(ctx, timestamp);
-  drawGrid(ctx);
-  drawEclipticAndEquator(ctx);
-
-  computeStars(date);
-  App.visibleBodies = computeSolarSystem(date, App.lat, App.lon);
-
-  drawStars(ctx);
-  drawBodies(ctx);
-  drawOperationalRawOverlay(ctx);
-  drawArtificialHorizon(ctx);
-
-  if(timestamp - App.lastDomUpdate > 160){
-    updateDOM(date);
-    App.lastDomUpdate = timestamp;
-  }
-
-  requestAnimationFrame(render);
+function roundRect(ctx,x,y,w,h,r){
+  const rr=Math.min(r,w/2,h/2);
+  ctx.beginPath(); ctx.moveTo(x+rr,y); ctx.lineTo(x+w-rr,y); ctx.quadraticCurveTo(x+w,y,x+w,y+rr);
+  ctx.lineTo(x+w,y+h-rr); ctx.quadraticCurveTo(x+w,y+h,x+w-rr,y+h); ctx.lineTo(x+rr,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-rr); ctx.lineTo(x,y+rr); ctx.quadraticCurveTo(x,y,x+rr,y); ctx.closePath();
 }
 
-function updateDOM(date){
-  const jd = julianDate(date);
-  const lst = lstDeg(date, App.lon);
+function render6DoF(ctx){
+  if(EVA.state!=="B") return;
+  const w=236,h=146,x=EVA.W-w-18,y=18;
+  ctx.save(); ctx.translate(x+w/2,y+h/2);
+  ctx.fillStyle="rgba(0,0,0,.72)"; ctx.strokeStyle="rgba(0,255,136,.45)"; ctx.lineWidth=1.5;
+  roundRect(ctx,-w/2,-h/2,w,h,14); ctx.fill(); ctx.stroke();
 
-  document.getElementById("rawHeading").textContent = `${Sensor.yaw.toFixed(1)}°`;
-  document.getElementById("rawYaw").textContent = `${Sensor.rawYaw.toFixed(1)}°`;
-  document.getElementById("rawPitch").textContent = `${Sensor.pitch.toFixed(1)}°`;
-  document.getElementById("rawRoll").textContent = `${Sensor.roll.toFixed(1)}°`;
-  document.getElementById("rawLST").textContent = `${lst.toFixed(3)}° / ${(lst/15).toFixed(3)}h`;
-  document.getElementById("rawJD").textContent = jd.toFixed(5);
-  document.getElementById("rawSensor").textContent = Sensor.mode;
-  document.getElementById("rawError").textContent = `±${Sensor.errorRms.toFixed(1)}°`;
+  ctx.save(); roundRect(ctx,-w/2+9,-h/2+9,w-18,h-18,10); ctx.clip();
+  ctx.rotate(-deg(Fusion.roll));
+  const po=Fusion.pitch*1.35;
+  ctx.fillStyle="rgba(0,255,136,.10)"; ctx.fillRect(-w,-h*2+po,w*2,h*2);
+  ctx.fillStyle="rgba(0,0,0,.55)"; ctx.fillRect(-w,po,w*2,h*2);
+  ctx.strokeStyle="rgba(0,255,136,.95)"; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(-w,po); ctx.lineTo(w,po); ctx.stroke();
+  ctx.restore();
 
-  document.getElementById("sensorBadge").textContent = Sensor.enabled ? `${Sensor.mode} · HDG ${Sensor.yaw.toFixed(0)}°` : "SENSOR OFF";
+  ctx.strokeStyle="rgba(216,255,231,.95)"; ctx.lineWidth=2; ctx.beginPath();
+  ctx.moveTo(-26,0); ctx.lineTo(-8,0); ctx.moveTo(8,0); ctx.lineTo(26,0); ctx.moveTo(0,-10); ctx.lineTo(0,10); ctx.stroke();
+  ctx.fillStyle="rgba(0,255,136,.95)"; ctx.font="11px monospace"; ctx.textAlign="center";
+  ctx.fillText("6-DoF DIGITAL LEVEL",0,-h/2+20);
+  ctx.fillText(`P ${Fusion.pitch.toFixed(2)}° R ${Fusion.roll.toFixed(2)}° Y ${Fusion.yawFiltered.toFixed(2)}°`,0,h/2-12);
+  ctx.restore();
+}
 
-  const civilList = document.getElementById("civilList");
-  civilList.innerHTML = App.visibleStars.slice(0,9).map(s=>`
-    <div class="item"><div><b>${s.name}</b><br><small>${s.cons}</small></div><small>Alt ${s.alt.toFixed(0)}° · Az ${s.az.toFixed(0)}°</small></div>
+function renderRawOverlay(ctx){
+  if(EVA.state!=="B") return;
+  const x=18,y=18,w=318,h=174;
+  ctx.save(); ctx.fillStyle="rgba(0,0,0,.72)"; ctx.strokeStyle="rgba(0,255,136,.45)"; ctx.lineWidth=1.5;
+  roundRect(ctx,x,y,w,h,14); ctx.fill(); ctx.stroke();
+  ctx.fillStyle="rgba(0,255,136,.95)"; ctx.font="bold 12px monospace"; ctx.fillText("E.V.A. RAW TELEMETRY BUS",x+12,y+24);
+  ctx.font="11px monospace";
+  const rows=[
+    `YAW/FILTER  : ${Fusion.yawFiltered.toFixed(2)}°`,
+    `YAW/RAW     : ${Fusion.yawRaw.toFixed(2)}°`,
+    `PITCH       : ${Fusion.pitch.toFixed(2)}°`,
+    `ROLL        : ${Fusion.roll.toFixed(2)}°`,
+    `GYRO αβγ    : ${Fusion.gyroAlpha.toFixed(1)}/${Fusion.gyroBeta.toFixed(1)}/${Fusion.gyroGamma.toFixed(1)}`,
+    `ERR RMS     : ±${Fusion.err.toFixed(2)}°`,
+    `SENSOR MODE : ${Fusion.sensorMode}`
+  ];
+  rows.forEach((r,i)=>ctx.fillText(r,x+12,y+48+i*18));
+  if(Fusion.err>8){ctx.fillStyle="rgba(255,73,108,.95)";ctx.fillText("MAGNETIC JITTER WARNING",x+176,y+156);}
+  ctx.restore();
+}
+
+function renderFrame(t){
+  resize();
+  const ctx=EVA.ctx;
+  const date=getTime();
+  const JD=getJulianDate(date);
+  EVA.lat=parseFloat(document.getElementById("lat").value)||20.624;
+  EVA.lon=parseFloat(document.getElementById("lon").value)||-103.234;
+
+  if(Fusion.enabled) Fusion.yawFiltered=lowPassAngle(Fusion.yawFiltered,Fusion.yawTarget,0.06);
+
+  renderBackground(ctx,t);
+  renderGrid(ctx);
+  EclipticPlot(ctx,date,getLST(JD,EVA.lon));
+  drawCelestialEquator(ctx,date);
+  computeVisibleStars(date);
+  EVA.visibleBodies=computeSolarSystem(date);
+  renderStars(ctx);
+  renderBodies(ctx);
+  renderRawOverlay(ctx);
+  render6DoF(ctx);
+
+  if(t-EVA.lastDom>160){updateDOM(date,JD);EVA.lastDom=t;}
+  requestAnimationFrame(renderFrame);
+}
+
+function updateDOM(date,JD){
+  const LST=getLST(JD,EVA.lon);
+  const solar=solarIncidenceModule(EVA.visibleBodies);
+  document.getElementById("sensorCorner").textContent=Fusion.enabled?`${Fusion.sensorMode} · HDG ${Fusion.yawFiltered.toFixed(1)}°`:"FUSION OFF";
+
+  document.getElementById("civilObjects").innerHTML=EVA.visibleStars.slice(0,10).map(s=>`
+    <div class="row"><div><b>${s.name}</b><br><small>${s.cons} · ${s.spec}</small></div><small>Alt ${s.alt.toFixed(0)}° · Az ${s.az.toFixed(0)}°</small></div>
   `).join("");
 
-  const civilPlanets = document.getElementById("civilPlanets");
-  civilPlanets.innerHTML = App.visibleBodies.filter(b=>b.alt>0).slice(0,8).map(b=>`
-    <div class="item"><div><b>${b.name}</b><br><small>${b.kind === "planet" ? "planeta" : "solar"}</small></div><small>Alt ${b.alt.toFixed(0)}° · Az ${b.az.toFixed(0)}°</small></div>
-  `).join("") || `<div class="item"><div><b>Sin cuerpos visibles</b><br><small>Revisa hora o ubicación</small></div></div>`;
+  document.getElementById("civilBodies").innerHTML=EVA.visibleBodies.filter(b=>b.alt>0).map(b=>`
+    <div class="row"><div><b>${b.name}</b><br><small>${b.type}</small></div><small>Alt ${b.alt.toFixed(0)}° · Az ${b.az.toFixed(0)}°</small></div>
+  `).join("") || "<div class='row'><div><b>Sin cuerpos sobre horizonte</b></div></div>";
 
-  const opObjects = document.getElementById("opObjects");
-  const opRows = [...App.visibleBodies.filter(b=>b.alt>0), ...App.visibleStars.slice(0,6)];
-  opObjects.innerHTML = opRows.slice(0,12).map(o=>`
-    <div class="row"><span>${o.name}</span><span>ALT ${o.alt.toFixed(1)}° / AZ ${o.az.toFixed(1)}°</span></div>
+  const ids = {
+    dYaw:`${Fusion.yawFiltered.toFixed(2)}°`,
+    dYawRaw:`${Fusion.yawRaw.toFixed(2)}°`,
+    dPitch:`${Fusion.pitch.toFixed(2)}°`,
+    dRoll:`${Fusion.roll.toFixed(2)}°`,
+    dGyro:`${Fusion.gyroAlpha.toFixed(1)}/${Fusion.gyroBeta.toFixed(1)}/${Fusion.gyroGamma.toFixed(1)} °/s`,
+    dAccel:`P ${Fusion.accelPitch.toFixed(2)}° / R ${Fusion.accelRoll.toFixed(2)}°`,
+    dJD:`JD ${JD.toFixed(5)} / J2000 ${(JD-2451545).toFixed(3)}`,
+    dLST:`${LST.toFixed(3)}° / ${(LST/15).toFixed(3)}h`,
+    dSolar:`ALT ${solar.alt.toFixed(1)} AZ ${solar.az.toFixed(1)} · ${solar.load} W/m² · ${solar.label}`,
+    dErr:`±${Fusion.err.toFixed(2)}°`
+  };
+  Object.entries(ids).forEach(([id,val])=>{const el=document.getElementById(id); if(el)el.textContent=val;});
+  document.getElementById("opObjects").innerHTML=[...EVA.visibleBodies.filter(b=>b.alt>0),...EVA.visibleStars.slice(0,8)].slice(0,16).map(o=>`
+    <div class="row"><span>${o.name}</span><span>ALT ${o.alt.toFixed(2)}° / AZ ${o.az.toFixed(2)}°</span></div>
   `).join("");
 }
 
-function initTimeInput(){
-  const d = new Date();
-  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-  document.getElementById("time").value = d.toISOString().slice(0,16);
-  document.getElementById("time").addEventListener("change",()=>{App.useCurrentTime=false;});
+function solarIncidenceModule(bodies){
+  const sun=bodies.find(b=>b.name==="Sol");
+  if(!sun) return {alt:0,az:0,load:0,label:"NO SOL"};
+  const f=Math.max(0,Math.sin(deg(sun.alt)));
+  const load=Math.round(1000*f);
+  return {alt:sun.alt,az:sun.az,load,label:load>750?"HIGH HVAC HEAT LOAD":load>350?"MODERATE SOLAR LOAD":"LOW SOLAR LOAD"};
+}
+
+function getTime(){
+  if(EVA.liveTime) return new Date();
+  const v=document.getElementById("time").value;
+  return v?new Date(v):new Date();
+}
+
+function syncNow(){
+  const d=new Date();
+  d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+  document.getElementById("time").value=d.toISOString().slice(0,16);
+  EVA.liveTime=true;
+}
+
+function useTonala(){
+  document.getElementById("lat").value="20.62400";
+  document.getElementById("lon").value="-103.23400";
+  EVA.lat=20.624; EVA.lon=-103.234;
+}
+
+function useGPS(){
+  if(!navigator.geolocation){alert("GPS no disponible.");return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    EVA.lat=pos.coords.latitude;EVA.lon=pos.coords.longitude;
+    document.getElementById("lat").value=EVA.lat.toFixed(5);
+    document.getElementById("lon").value=EVA.lon.toFixed(5);
+  },()=>alert("No se pudo obtener GPS. Se mantiene Tonalá/ZMG."),{enableHighAccuracy:true,timeout:9000});
+}
+
+function resize(){
+  const rect=EVA.canvas.getBoundingClientRect();
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  const W=Math.max(640,Math.floor(rect.width*dpr));
+  const H=Math.max(640,Math.floor(rect.height*dpr));
+  if(EVA.canvas.width!==W||EVA.canvas.height!==H){
+    EVA.canvas.width=W;EVA.canvas.height=H;EVA.W=W;EVA.H=H;EVA.cx=W/2;EVA.cy=H/2;EVA.rmax=Math.min(W,H)*.43;
+    buildBackBuffer();
+  }
+}
+
+function buildBackBuffer(){
+  if(typeof OffscreenCanvas!=="undefined") EVA.backCanvas=new OffscreenCanvas(EVA.W,EVA.H);
+  else {EVA.backCanvas=document.createElement("canvas");EVA.backCanvas.width=EVA.W;EVA.backCanvas.height=EVA.H;}
+  EVA.backCtx=EVA.backCanvas.getContext("2d");
+  const ctx=EVA.backCtx;
+  const g=ctx.createRadialGradient(EVA.cx,EVA.cy,20,EVA.cx,EVA.cy,Math.max(EVA.W,EVA.H)*.64);
+  if(EVA.state==="B"){g.addColorStop(0,"#00180c");g.addColorStop(.62,"#000704");g.addColorStop(1,"#000");}
+  else{g.addColorStop(0,"#0b2d5a");g.addColorStop(.62,"#041329");g.addColorStop(1,"#01040b");}
+  ctx.fillStyle=g;ctx.fillRect(0,0,EVA.W,EVA.H);
 }
 
 function init(){
-  App.canvas = document.getElementById("sky");
-  App.ctx = App.canvas.getContext("2d", {alpha:false});
-  generateWeakStars();
-  initTimeInput();
+  EVA.canvas=document.getElementById("sky");
+  EVA.ctx=EVA.canvas.getContext("2d",{alpha:false});
+  EVA.liveTime=true;
+  const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
+  document.getElementById("time").value=d.toISOString().slice(0,16);
+  document.getElementById("time").addEventListener("change",()=>EVA.liveTime=false);
+  generateWeakStarfield();
   bootSequence();
-  window.addEventListener("resize", resizeCanvas, {passive:true});
-  requestAnimationFrame(render);
-  track("app_loaded");
+  window.addEventListener("resize",resize,{passive:true});
+  requestAnimationFrame(renderFrame);
 }
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded",init);
 </script>
 </body>
 </html>

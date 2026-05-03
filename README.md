@@ -1,46 +1,38 @@
-# StarView HUD v15 - Modo Normal / Modo Ingeniería
+# STARVIEW-HUD-OMNI-OS · E.V.A. v8.0
 
-Esta versión divide la app en dos experiencias al iniciar.
+Single-file HTML/CSS/JS astronomical telemetry system.
 
-## Al abrir la app
+## Features
 
-Aparecen dos botones centrales:
+- Dual-State Machine:
+  - STATE_A CIVIL_EXPLORER
+  - STATE_B ENGINEERING_TACTICAL
+- ASCII BIOS pre-loader simulation.
+- Complementary sensor fusion core using:
+  - deviceorientationabsolute / deviceorientation
+  - devicemotion accelerometer and rotationRate
+- Formula:
+  `filteredAngle = α * (filteredAngle + gyroData * dt) + (1 - α) * accelData`
+- Native astronomy kernel:
+  - Julian Date
+  - J2000 epoch days
+  - Local Sidereal Time
+  - Equatorial to Alt-Azimuth projection
+  - Basic atmospheric refraction
+  - Ecliptic plot with 23.44° obliquity
+- HVAC field instrumentation:
+  - Digital level Pitch/Roll/Yaw
+  - Solar incidence / heat-load approximation
+- 100+ star catalog with magnitude and spectral color coding.
+- Zero-library dependency.
+- Single file for GitHub Pages.
 
-- **Modo Normal**
-- **Modo Ingeniería**
+## Deploy
 
-## Modo Normal
+Upload only:
 
-- Interfaz limpia.
-- Paleta azul.
-- Enfoque en belleza del cielo.
-- Muestra estrellas y constelaciones visibles.
-- Oculta telemetría técnica.
-- Oculta eclíptica, pitch/roll, acimut, altitud y paneles de ingeniería.
+`index.html`
 
-## Modo Ingeniería
+Then open:
 
-- Estética **Aire Acondicionado y Confort · Lab**.
-- Paleta monocromática tipo terminal Linux.
-- Muestra Pitch, Roll, Acimut y Altitud.
-- Muestra eclíptica.
-- Muestra horizonte artificial.
-- Muestra cuadrícula de coordenadas en el mapa estelar.
-- Mantiene radar orientado con sensores del celular.
-
-## Cambio de modo
-
-Hay un menú pequeño con engrane ⚙️ en la esquina superior derecha para cambiar de modo en cualquier momento.
-
-## Archivos a subir
-
-Sube y reemplaza en GitHub:
-
-- `index.html`
-- `manifest.webmanifest`
-- `README.md`
-- `qr-starview.png`
-
-## Probar
-
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=15`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=omni-os`
