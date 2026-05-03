@@ -1,25 +1,26 @@
-# StarView HUD v9 completa
+# StarView HUD v10 - Radar automático
 
-Versión completa con:
+Esta versión cambia la idea de brújula separada por algo más natural:
 
-- Modo brújula real con sensores del celular
-- Botón “¿Qué estrella estoy viendo?”
+## Nuevo comportamiento
+
+- El radar del cielo gira automáticamente usando sensores del celular.
+- La parte superior del mapa representa hacia dónde apunta la parte superior del teléfono.
+- Ya no necesitas mirar una brújula aparte.
+- Si el navegador bloquea sensores, el mapa sigue funcionando con Norte arriba.
+
+## Se conserva
+
+- Modo principiante
+- Qué estrella estoy viendo
 - Nivel de visibilidad
-- Explicación visual dentro del mapa
-- Modo “Noche de observación”
-- Eventos del cielo aproximados
-- Planetas visibles en módulo experimental
-- Captura/postal para compartir
-- Branding de Aire Acondicionado y Confort Lab
-- Botón de opinión por WhatsApp
-- Google Analytics 4 instalado en segundo plano
-- QR para compartir
-
-## Analytics
-
-ID instalado:
-
-`G-Y7W6O4KLRR`
+- Modo noche de observación
+- Eventos del cielo
+- Planetas visibles experimental
+- Postal para compartir
+- QR
+- Google Analytics 4 en segundo plano
+- Sin tarjeta visible de métricas privadas
 
 ## Archivos para subir a GitHub
 
@@ -34,8 +35,4 @@ Sube y reemplaza:
 
 Abre:
 
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=9`
-
-## Link para compartir
-
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v9`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=10`

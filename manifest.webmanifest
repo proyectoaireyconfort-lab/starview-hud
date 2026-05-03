@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v9",
+  "name": "StarView HUD v10",
   "short_name": "StarView",
-  "description": "Mapa estelar interactivo con brújula, visibilidad, modo observación, postal y feedback.",
+  "description": "Radar estelar con rotación automática usando sensores del celular.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",
