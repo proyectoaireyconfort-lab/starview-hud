@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v6 | Mapa del Cielo</title>
-<meta name="description" content="StarView HUD: mapa básico del cielo visible desde tu ubicación. App estática lista para GitHub Pages." />
+<title>StarView HUD v7 | Mapa del Cielo</title>
+<meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
+
 <style>
   *{box-sizing:border-box}
   :root{
@@ -14,39 +15,56 @@
     --card:rgba(8,18,32,.72);
     --line:rgba(100,220,255,.25);
     --text:#eaf7ff;
-    --muted:rgba(234,247,255,.75);
+    --muted:rgba(234,247,255,.76);
     --blue:#00b4ff;
     --red:#ff3157;
+    --gold:#fff2a8;
   }
   body{
     margin:0;
     background:
-      radial-gradient(circle at 20% 20%, rgba(0,180,255,.18), transparent 35%),
-      radial-gradient(circle at 80% 80%, rgba(255,50,80,.14), transparent 35%),
-      var(--bg);
+      radial-gradient(circle at 18% 18%, rgba(0,180,255,.18), transparent 35%),
+      radial-gradient(circle at 82% 78%, rgba(255,50,80,.14), transparent 35%),
+      linear-gradient(180deg,#030711,#02030a 62%,#050713);
     color:var(--text);
     font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     min-height:100vh;
     padding:14px;
   }
-  .app{max-width:980px;margin:auto}
+  body.night-red{
+    filter:sepia(.15) hue-rotate(310deg) saturate(1.25);
+  }
+  .app{max-width:1080px;margin:auto}
   .card{
     background:var(--card);
     border:1px solid var(--line);
-    border-radius:22px;
+    border-radius:24px;
     padding:16px;
-    box-shadow:0 0 30px rgba(0,180,255,.12);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
+    box-shadow:0 0 32px rgba(0,180,255,.12);
+    backdrop-filter:blur(13px);
+    -webkit-backdrop-filter:blur(13px);
     margin-bottom:14px;
+    position:relative;
+    overflow:hidden;
   }
-  h1{margin:0 0 4px;font-size:28px;letter-spacing:.5px}
-  .brand{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
+  .card:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:24px;
+    padding:1px;
+    background:linear-gradient(135deg,rgba(0,180,255,.45),rgba(255,49,87,.32),rgba(255,255,255,.08));
+    mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite:exclude;
+    -webkit-mask-composite:xor;
+    pointer-events:none;
   }
+  h1{margin:0 0 4px;font-size:30px;letter-spacing:.5px}
+  h2{margin:0 0 8px;font-size:22px}
+  h3{margin:0 0 8px;font-size:17px}
+  p{line-height:1.45}
+  .brand{display:flex;align-items:center;justify-content:space-between;gap:12px}
   .badge{
     border:1px solid rgba(120,220,255,.25);
     border-radius:999px;
@@ -57,7 +75,25 @@
     white-space:nowrap;
   }
   .sub{opacity:.78;margin-bottom:12px;line-height:1.4}
+  .intro-panel{
+    border:1px solid rgba(100,220,255,.26);
+    border-radius:20px;
+    padding:15px;
+    margin:12px 0 14px;
+    background:linear-gradient(135deg,rgba(0,180,255,.12),rgba(255,49,87,.10));
+    box-shadow:0 0 22px rgba(0,180,255,.08);
+  }
+  .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+  .quick-item{
+    border:1px solid rgba(120,220,255,.22);
+    border-radius:16px;
+    padding:10px;
+    background:rgba(0,0,0,.20);
+    font-size:13px;
+    line-height:1.35;
+  }
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   label{font-size:12px;opacity:.85}
   input,button{
     width:100%;
@@ -69,21 +105,17 @@
     font-size:15px;
     outline:none;
   }
-  input:focus{
-    border-color:rgba(0,180,255,.85);
-    box-shadow:0 0 0 3px rgba(0,180,255,.12);
-  }
+  input:focus{border-color:rgba(0,180,255,.85);box-shadow:0 0 0 3px rgba(0,180,255,.12)}
   button{
     cursor:pointer;
     font-weight:800;
-    background:linear-gradient(135deg,rgba(0,170,255,.35),rgba(255,45,80,.28));
+    background:linear-gradient(135deg,rgba(0,170,255,.36),rgba(255,45,80,.30));
     box-shadow:0 0 18px rgba(0,170,255,.15);
   }
   button:active{transform:scale(.98)}
-  .button-secondary{
-    background:rgba(255,255,255,.06);
-  }
-  canvas{
+  .button-secondary{background:rgba(255,255,255,.06)}
+  .button-gold{background:linear-gradient(135deg,rgba(255,242,168,.25),rgba(0,180,255,.18))}
+  canvas#sky{
     width:100%;
     max-height:78vh;
     background:radial-gradient(circle,#07172c,#02050b 70%);
@@ -96,15 +128,23 @@
   .hud:after{
     content:"";
     position:absolute;
-    left:0;
-    right:0;
-    top:-30%;
+    left:0;right:0;top:-30%;
     height:80px;
     background:linear-gradient(transparent,rgba(0,220,255,.16),transparent);
     animation:scan 4s infinite linear;
     pointer-events:none;
   }
+  .radar-ring{
+    position:absolute;
+    width:220px;height:220px;border-radius:50%;
+    border:1px solid rgba(0,220,255,.18);
+    right:-90px;top:-90px;
+    box-shadow:0 0 30px rgba(0,220,255,.12);
+    animation:pulse 3s infinite ease-in-out;
+    pointer-events:none;
+  }
   @keyframes scan{from{top:-20%}to{top:105%}}
+  @keyframes pulse{0%,100%{transform:scale(.9);opacity:.35}50%{transform:scale(1.08);opacity:.8}}
   .info{display:grid;grid-template-columns:1fr;gap:8px;font-size:14px}
   .pill{
     border:1px solid rgba(100,220,255,.22);
@@ -115,31 +155,13 @@
   }
   .list{display:grid;gap:6px;font-size:14px}
   .starrow{
-    display:flex;
-    justify-content:space-between;
-    gap:8px;
-    padding:8px 10px;
-    border-radius:14px;
-    background:rgba(255,255,255,.05);
+    display:flex;justify-content:space-between;gap:8px;
+    padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.05);
   }
   .small{font-size:12px;opacity:.75}
   .footer{font-size:12px;opacity:.65;text-align:center;margin:14px}
-  .warning{
-    color:#ffe8a3;
-  }
-  @media(max-width:700px){
-    .brand{align-items:flex-start;flex-direction:column}
-    .grid{grid-template-columns:1fr}
-    h1{font-size:24px}
-    body{padding:10px}
-  }
-
-  .instructions{
-    display:grid;
-    grid-template-columns:1.1fr .9fr;
-    gap:12px;
-    margin-top:12px;
-  }
+  .warning{color:#ffe8a3}
+  .instructions{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;margin-top:12px}
   .mini-card{
     border:1px solid rgba(100,220,255,.22);
     border-radius:18px;
@@ -147,115 +169,21 @@
     background:rgba(0,0,0,.22);
     line-height:1.45;
   }
-  .mini-card h3{
-    margin:0 0 8px;
-    font-size:16px;
-  }
-  .steps{
-    margin:0;
-    padding-left:20px;
-  }
-  .steps li{
-    margin:6px 0;
-  }
-  .legend{
-    display:grid;
-    gap:7px;
-  }
-  .legend-item{
-    display:flex;
-    align-items:center;
-    gap:9px;
-    font-size:14px;
-  }
-  .dot{
-    width:12px;
-    height:12px;
-    border-radius:50%;
-    background:#e7fbff;
-    box-shadow:0 0 10px rgba(174,239,255,.9);
-    flex:0 0 auto;
-  }
-  .dot.big{
-    width:17px;
-    height:17px;
-    background:#fff7d1;
-  }
-  .line-demo{
-    width:25px;
-    height:2px;
-    background:rgba(120,220,255,.6);
-    box-shadow:0 0 8px rgba(120,220,255,.5);
-    flex:0 0 auto;
-  }
-  .help-title{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .help-title button{
-    max-width:190px;
-    padding:9px 12px;
-    font-size:13px;
-  }
-  .notice{
-    border-left:3px solid rgba(255,80,110,.8);
-    padding-left:10px;
-    color:rgba(234,247,255,.86);
-  }
-  @media(max-width:700px){
-    .instructions{grid-template-columns:1fr}
-    .help-title{flex-direction:column;align-items:flex-start}
-    .help-title button{max-width:100%}
-  }
-
-
-  .intro-panel{
-    border:1px solid rgba(100,220,255,.26);
-    border-radius:20px;
-    padding:15px;
-    margin:12px 0 14px;
-    background:linear-gradient(135deg,rgba(0,180,255,.12),rgba(255,49,87,.10));
-    box-shadow:0 0 22px rgba(0,180,255,.08);
-  }
-  .intro-panel h2{
-    margin:0 0 8px;
-    font-size:20px;
-  }
-  .intro-panel p{
-    margin:6px 0;
-    color:rgba(234,247,255,.84);
-    line-height:1.45;
-  }
-  .quick-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:9px;
-    margin-top:12px;
-  }
-  .quick-item{
-    border:1px solid rgba(120,220,255,.22);
-    border-radius:16px;
-    padding:10px;
-    background:rgba(0,0,0,.20);
-    font-size:13px;
-    line-height:1.35;
-  }
+  .steps{margin:0;padding-left:20px}
+  .steps li{margin:6px 0}
+  .legend{display:grid;gap:7px}
+  .legend-item{display:flex;align-items:center;gap:9px;font-size:14px}
+  .dot{width:12px;height:12px;border-radius:50%;background:#e7fbff;box-shadow:0 0 10px rgba(174,239,255,.9);flex:0 0 auto}
+  .dot.big{width:17px;height:17px;background:#fff7d1}
+  .line-demo{width:25px;height:2px;background:rgba(120,220,255,.6);box-shadow:0 0 8px rgba(120,220,255,.5);flex:0 0 auto}
+  .notice{border-left:3px solid rgba(255,80,110,.8);padding-left:10px;color:rgba(234,247,255,.86)}
   .modal-backdrop{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.72);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:9999;
-    padding:18px;
+    position:fixed;inset:0;background:rgba(0,0,0,.72);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;padding:18px;
   }
   .modal{
-    max-width:760px;
-    width:100%;
-    border-radius:24px;
+    max-width:760px;width:100%;border-radius:24px;
     border:1px solid rgba(100,220,255,.35);
     background:
       radial-gradient(circle at 15% 15%, rgba(0,180,255,.22), transparent 35%),
@@ -264,27 +192,24 @@
     box-shadow:0 0 45px rgba(0,180,255,.22);
     padding:20px;
   }
-  .modal h2{
-    margin:0 0 8px;
-    font-size:25px;
-  }
-  .modal p{
-    color:rgba(234,247,255,.84);
-    line-height:1.45;
-  }
-  .modal-actions{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
-    margin-top:14px;
-  }
+  .modal h2{margin:0 0 8px;font-size:25px}
+  .modal p{color:rgba(234,247,255,.84);line-height:1.45}
+  .modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
   .hidden{display:none!important}
-  @media(max-width:700px){
-    .quick-grid{grid-template-columns:1fr}
+  .qr-wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .qr-wrap img{width:150px;height:150px;border-radius:16px;background:white;padding:8px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .chip{font-size:12px;border:1px solid rgba(120,220,255,.25);border-radius:999px;padding:6px 9px;background:rgba(0,0,0,.22);color:rgba(234,247,255,.82)}
+  .beginner-on{outline:2px solid rgba(255,242,168,.45)}
+  .install-box{display:none}
+  .install-box.show{display:block}
+  @media(max-width:760px){
+    .brand{align-items:flex-start;flex-direction:column}
+    .grid,.grid-3,.quick-grid,.instructions{grid-template-columns:1fr}
     .modal-actions{grid-template-columns:1fr}
-    .modal h2{font-size:22px}
+    h1{font-size:25px}
+    body{padding:10px}
   }
-
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -296,23 +221,18 @@
   gtag('config', 'G-Y7W6O4KLRR');
 </script>
 <!-- End Google Analytics 4 -->
-
 </head>
-<body>
 
+<body>
 <div id="introModal" class="modal-backdrop">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD</h2>
-    <p>
-      Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.
-    </p>
-    <p>
-      <b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.
-    </p>
+    <h2>🌌 Bienvenido a StarView HUD v7</h2>
+    <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
+    <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
       <div class="quick-item"><b>1. Ubicación</b><br>Usa el GPS o deja Tonalá/ZMG.</div>
-      <div class="quick-item"><b>2. Mapa</b><br>N, E, S y O marcan las direcciones.</div>
-      <div class="quick-item"><b>3. Estrellas</b><br>Los puntos más grandes son las más brillantes.</div>
+      <div class="quick-item"><b>2. Mapa</b><br>N, E, S y O marcan direcciones.</div>
+      <div class="quick-item"><b>3. Estrellas</b><br>Los puntos grandes son las más brillantes.</div>
     </div>
     <div class="modal-actions">
       <button onclick="closeIntro()">Entendido, usar app</button>
@@ -323,23 +243,19 @@
 
 <div class="app">
   <div class="card">
+    <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD</h1>
-        <div class="sub">App para consultar qué estrellas brillantes pueden verse sobre tu cielo según tu ubicación, fecha y hora.</div>
+        <h1>🌌 StarView HUD v7</h1>
+        <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
     </div>
 
     <div class="intro-panel">
       <h2>📌 ¿Qué es y cómo se utiliza?</h2>
-      <p>
-        <b>StarView HUD</b> es una guía visual para personas que quieren ver el cielo y reconocer estrellas desde su celular.
-      </p>
-      <p>
-        Primero usa tu ubicación, luego actualiza el cielo. El círculo representa el cielo sobre ti:
-        arriba es <b>Norte</b>, derecha <b>Este</b>, abajo <b>Sur</b> e izquierda <b>Oeste</b>.
-      </p>
+      <p><b>StarView HUD</b> convierte tu celular en una guía visual del cielo. Te muestra qué estrellas brillantes pueden estar arriba de ti según tu ubicación y la hora.</p>
+      <p>El círculo representa el cielo sobre ti: arriba es <b>Norte</b>, derecha <b>Este</b>, abajo <b>Sur</b> e izquierda <b>Oeste</b>.</p>
       <div class="quick-grid">
         <div class="quick-item">📍 <b>Ubicación</b><br>Calcula qué estrellas están sobre tu horizonte.</div>
         <div class="quick-item">🔭 <b>Actualizar cielo</b><br>Refresca el mapa con la hora actual.</div>
@@ -368,55 +284,56 @@
       <button onclick="drawSky()">🔭 Actualizar cielo</button>
       <button class="button-secondary" onclick="setTonala()">📌 Usar Tonalá/ZMG</button>
       <button class="button-secondary" onclick="toggleNight()">🌙 Modo rojo nocturno</button>
+      <button class="button-gold" onclick="toggleBeginner()">🧭 Modo principiante</button>
+      <button class="button-secondary" onclick="shareWhatsApp()">🟢 Compartir por WhatsApp</button>
+      <button class="button-secondary" onclick="showInstallHelp()">📲 Agregar a pantalla de inicio</button>
       <button class="button-secondary" onclick="openIntro()">ℹ️ Ver instrucciones</button>
     </div>
+  </div>
 
-    <div class="instructions">
-      <div class="mini-card">
-        <div class="help-title">
-          <h3>🛰️ ¿Para qué sirve?</h3>
-          <button onclick="scrollToSky()">Ver mapa del cielo</button>
-        </div>
-        <p>
-          <b>StarView HUD</b> te muestra una vista básica del cielo sobre tu ubicación:
-          estrellas destacadas, constelaciones principales y dirección aproximada.
-        </p>
-        <p class="notice">
-          No es un telescopio ni una app científica profesional; es una guía visual rápida para orientarte y saber qué estrellas buscar.
-        </p>
-      </div>
-
-      <div class="mini-card">
-        <h3>⚡ Cómo usarlo en 30 segundos</h3>
-        <ol class="steps">
-          <li>Presiona <b>Usar ubicación del celular</b>.</li>
-          <li>Presiona <b>Actualizar cielo</b>.</li>
-          <li>Apunta la parte de arriba del mapa hacia el <b>Norte</b>.</li>
-          <li>Busca las estrellas más brillantes que aparecen con nombre.</li>
-        </ol>
-      </div>
-
-      <div class="mini-card">
-        <h3>🧭 Cómo leer el mapa</h3>
-        <div class="legend">
-          <div class="legend-item"><span class="dot big"></span> Estrella muy brillante.</div>
-          <div class="legend-item"><span class="dot"></span> Estrella visible destacada.</div>
-          <div class="legend-item"><span class="line-demo"></span> Línea de constelación.</div>
-          <div class="legend-item"><b>N / E / S / O</b> Direcciones: Norte, Este, Sur y Oeste.</div>
-        </div>
-      </div>
-
-      <div class="mini-card">
-        <h3>🔒 Privacidad</h3>
-        <p>
-          La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app. La página registra visitas anónimas con Google Analytics para medir uso general de la app.
-        </p>
-      </div>
+  <div id="beginnerPanel" class="card hidden">
+    <h2>🧭 Modo principiante: cómo mirar el cielo</h2>
+    <ol class="steps">
+      <li>Párate en un lugar seguro y mira hacia el <b>Norte</b>.</li>
+      <li>Gira el celular hasta que la letra <b>N</b> quede hacia donde estás mirando.</li>
+      <li>Las estrellas cerca del <b>centro</b> están más arriba de tu cabeza.</li>
+      <li>Las estrellas cerca del <b>borde</b> están más cerca del horizonte.</li>
+      <li>Empieza por las estrellas con nombre y punto más grande: son más fáciles de ver.</li>
+    </ol>
+    <div class="chips">
+      <span class="chip">Centro = cielo arriba</span>
+      <span class="chip">Borde = horizonte</span>
+      <span class="chip">N/E/S/O = direcciones</span>
     </div>
   </div>
 
   <div class="card hud">
     <canvas id="sky" width="900" height="900"></canvas>
+  </div>
+
+  <div class="grid-3">
+    <div class="card">
+      <h2>⭐ Qué puedo ver hoy</h2>
+      <div id="tonightList" class="list"></div>
+      <p class="small">Consejo: busca primero las estrellas más brillantes y altas.</p>
+    </div>
+
+    <div class="card">
+      <h2>🌙 Luna actual</h2>
+      <div id="moonInfo" class="pill">Calculando fase lunar...</div>
+      <p class="small">Si hay mucha luna, algunas estrellas débiles se verán menos.</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Métricas privadas</h2>
+      <p class="small">Esta app registra visitas y botones usados con Google Analytics. El público no ve contador.</p>
+      <div class="chips">
+        <span class="chip">GPS</span>
+        <span class="chip">Actualizar cielo</span>
+        <span class="chip">Modo nocturno</span>
+        <span class="chip">Compartir</span>
+      </div>
+    </div>
   </div>
 
   <div class="card info">
@@ -427,67 +344,74 @@
     </div>
   </div>
 
-  <div class="footer">
-    Consejo: apunta la parte de arriba del mapa hacia el norte. N = Norte, E = Este, S = Sur, O = Oeste.
+  <div class="card">
+    <h2>📲 Compartir o imprimir QR</h2>
+    <div class="qr-wrap">
+      <img src='qr-starview.png' alt='QR StarView HUD' />
+      <div>
+        <p>Comparte este QR para que otras personas abran StarView HUD desde su celular.</p>
+        <button onclick="shareWhatsApp()">🟢 Compartir por WhatsApp</button>
+        <p class="small">Link de campaña: <br><span id="shareLink">https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7</span></p>
+      </div>
+    </div>
   </div>
+
+  <div id="installHelp" class="card install-box">
+    <h2>📲 Cómo agregarla como app</h2>
+    <p><b>Android / Chrome:</b> toca los tres puntos ⋮ y elige <b>Agregar a pantalla principal</b>.</p>
+    <p><b>iPhone / Safari:</b> toca compartir y luego <b>Agregar a pantalla de inicio</b>.</p>
+    <button onclick="hideInstallHelp()">Cerrar</button>
+  </div>
+
+  <div class="card">
+    <h2>🛰️ Sobre el proyecto</h2>
+    <p><b>StarView HUD</b> es un experimento de <b>Aire Acondicionado y Confort Lab</b>, creado para explorar tecnología, orientación y visualización desde el celular.</p>
+    <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
+  </div>
+
+  <div class="footer">StarView HUD v7 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>
+const SHARE_URL = "https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7";
+const SHARE_TEXT = "🌌 Mira StarView HUD: una app para ver estrellas brillantes desde tu ubicación. https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7";
+
+function track(eventName, params={}){
+  try {
+    if (typeof gtag === "function") {
+      gtag("event", eventName, Object.assign({app_name:"StarView HUD", app_version:"v7"}, params));
+    }
+  } catch(e) {}
+}
+
 const stars = [
-  ["Sirius",6.7525,-16.7161,-1.46,"Can Mayor"],
-  ["Canopus",6.3992,-52.6957,-0.74,"Carina"],
-  ["Arcturus",14.2610,19.1825,-0.05,"Boyero"],
-  ["Vega",18.6156,38.7837,0.03,"Lira"],
-  ["Capella",5.2782,45.9980,0.08,"Auriga"],
-  ["Rigel",5.2423,-8.2016,0.13,"Orión"],
-  ["Procyon",7.6550,5.2250,0.34,"Can Menor"],
-  ["Betelgeuse",5.9195,7.4071,0.42,"Orión"],
-  ["Achernar",1.6286,-57.2368,0.46,"Erídano"],
-  ["Hadar",14.0637,-60.3730,0.61,"Centauro"],
-  ["Altair",19.8464,8.8683,0.77,"Águila"],
-  ["Acrux",12.4433,-63.0991,0.76,"Cruz del Sur"],
-  ["Aldebaran",4.5987,16.5093,0.85,"Tauro"],
-  ["Spica",13.4199,-11.1614,0.98,"Virgo"],
-  ["Antares",16.4901,-26.4319,1.06,"Escorpio"],
-  ["Pollux",7.7553,28.0262,1.14,"Géminis"],
-  ["Fomalhaut",22.9608,-29.6222,1.16,"Pez Austral"],
-  ["Deneb",20.6905,45.2803,1.25,"Cisne"],
-  ["Mimosa",12.7953,-59.6888,1.25,"Cruz del Sur"],
-  ["Regulus",10.1395,11.9672,1.35,"Leo"],
-  ["Adhara",6.9771,-28.9721,1.50,"Can Mayor"],
-  ["Shaula",17.5601,-37.1038,1.62,"Escorpio"],
-  ["Castor",7.5767,31.8883,1.58,"Géminis"],
-  ["Gacrux",12.5194,-57.1132,1.63,"Cruz del Sur"],
-  ["Bellatrix",5.4189,6.3497,1.64,"Orión"],
-  ["Elnath",5.4382,28.6075,1.65,"Tauro"],
-  ["Miaplacidus",9.2200,-69.7172,1.67,"Carina"],
-  ["Alnilam",5.6036,-1.2019,1.69,"Orión"],
-  ["Alnitak",5.6793,-1.9426,1.74,"Orión"],
-  ["Dubhe",11.0621,61.7510,1.79,"Osa Mayor"],
-  ["Alioth",12.9005,55.9598,1.77,"Osa Mayor"],
-  ["Alkaid",13.7923,49.3133,1.85,"Osa Mayor"],
-  ["Mirfak",3.4054,49.8612,1.79,"Perseo"],
-  ["Wezen",7.1399,-26.3932,1.83,"Can Mayor"],
-  ["Kaus Australis",18.4029,-34.3846,1.85,"Sagitario"],
-  ["Sargas",17.6219,-42.9978,1.86,"Escorpio"],
-  ["Avior",8.3752,-59.5095,1.86,"Carina"],
-  ["Menkalinan",5.9921,44.9474,1.90,"Auriga"],
-  ["Atria",16.8111,-69.0277,1.91,"Triángulo Austral"],
-  ["Alhena",6.6285,16.3993,1.93,"Géminis"],
-  ["Peacock",20.4275,-56.7351,1.94,"Pavo"],
-  ["Polaris",2.5303,89.2641,1.98,"Osa Menor"],
-  ["Mirzam",6.3783,-17.9559,1.98,"Can Mayor"],
-  ["Alphard",9.4598,-8.6586,2.00,"Hidra"],
-  ["Hamal",2.1195,23.4624,2.00,"Aries"],
-  ["Diphda",0.7265,-17.9867,2.04,"Ballena"],
-  ["Nunki",18.9211,-26.2967,2.05,"Sagitario"],
-  ["Algol",3.1361,40.9556,2.12,"Perseo"],
-  ["Denebola",11.8177,14.5721,2.14,"Leo"],
-  ["Mizar",13.3987,54.9254,2.23,"Osa Mayor"],
-  ["Merak",11.0307,56.3824,2.37,"Osa Mayor"],
-  ["Phecda",11.8972,53.6948,2.44,"Osa Mayor"],
-  ["Megrez",12.2571,57.0326,3.30,"Osa Mayor"],
-  ["Delta Crucis",12.2524,-58.7489,2.79,"Cruz del Sur"],
+  ["Sirius",6.7525,-16.7161,-1.46,"Can Mayor"],["Canopus",6.3992,-52.6957,-0.74,"Carina"],
+  ["Arcturus",14.2610,19.1825,-0.05,"Boyero"],["Vega",18.6156,38.7837,0.03,"Lira"],
+  ["Capella",5.2782,45.9980,0.08,"Auriga"],["Rigel",5.2423,-8.2016,0.13,"Orión"],
+  ["Procyon",7.6550,5.2250,0.34,"Can Menor"],["Betelgeuse",5.9195,7.4071,0.42,"Orión"],
+  ["Achernar",1.6286,-57.2368,0.46,"Erídano"],["Hadar",14.0637,-60.3730,0.61,"Centauro"],
+  ["Altair",19.8464,8.8683,0.77,"Águila"],["Acrux",12.4433,-63.0991,0.76,"Cruz del Sur"],
+  ["Aldebaran",4.5987,16.5093,0.85,"Tauro"],["Spica",13.4199,-11.1614,0.98,"Virgo"],
+  ["Antares",16.4901,-26.4319,1.06,"Escorpio"],["Pollux",7.7553,28.0262,1.14,"Géminis"],
+  ["Fomalhaut",22.9608,-29.6222,1.16,"Pez Austral"],["Deneb",20.6905,45.2803,1.25,"Cisne"],
+  ["Mimosa",12.7953,-59.6888,1.25,"Cruz del Sur"],["Regulus",10.1395,11.9672,1.35,"Leo"],
+  ["Adhara",6.9771,-28.9721,1.50,"Can Mayor"],["Shaula",17.5601,-37.1038,1.62,"Escorpio"],
+  ["Castor",7.5767,31.8883,1.58,"Géminis"],["Gacrux",12.5194,-57.1132,1.63,"Cruz del Sur"],
+  ["Bellatrix",5.4189,6.3497,1.64,"Orión"],["Elnath",5.4382,28.6075,1.65,"Tauro"],
+  ["Miaplacidus",9.2200,-69.7172,1.67,"Carina"],["Alnilam",5.6036,-1.2019,1.69,"Orión"],
+  ["Alnitak",5.6793,-1.9426,1.74,"Orión"],["Dubhe",11.0621,61.7510,1.79,"Osa Mayor"],
+  ["Alioth",12.9005,55.9598,1.77,"Osa Mayor"],["Alkaid",13.7923,49.3133,1.85,"Osa Mayor"],
+  ["Mirfak",3.4054,49.8612,1.79,"Perseo"],["Wezen",7.1399,-26.3932,1.83,"Can Mayor"],
+  ["Kaus Australis",18.4029,-34.3846,1.85,"Sagitario"],["Sargas",17.6219,-42.9978,1.86,"Escorpio"],
+  ["Avior",8.3752,-59.5095,1.86,"Carina"],["Menkalinan",5.9921,44.9474,1.90,"Auriga"],
+  ["Atria",16.8111,-69.0277,1.91,"Triángulo Austral"],["Alhena",6.6285,16.3993,1.93,"Géminis"],
+  ["Peacock",20.4275,-56.7351,1.94,"Pavo"],["Polaris",2.5303,89.2641,1.98,"Osa Menor"],
+  ["Mirzam",6.3783,-17.9559,1.98,"Can Mayor"],["Alphard",9.4598,-8.6586,2.00,"Hidra"],
+  ["Hamal",2.1195,23.4624,2.00,"Aries"],["Diphda",0.7265,-17.9867,2.04,"Ballena"],
+  ["Nunki",18.9211,-26.2967,2.05,"Sagitario"],["Algol",3.1361,40.9556,2.12,"Perseo"],
+  ["Denebola",11.8177,14.5721,2.14,"Leo"],["Mizar",13.3987,54.9254,2.23,"Osa Mayor"],
+  ["Merak",11.0307,56.3824,2.37,"Osa Mayor"],["Phecda",11.8972,53.6948,2.44,"Osa Mayor"],
+  ["Megrez",12.2571,57.0326,3.30,"Osa Mayor"],["Delta Crucis",12.2524,-58.7489,2.79,"Cruz del Sur"],
   ["Pléyades",3.7900,24.1167,1.60,"Tauro"]
 ];
 
@@ -498,6 +422,7 @@ const lines = [
 ];
 
 let nightMode = false;
+let beginnerMode = false;
 let starDots = [];
 
 function deg(x){return x*Math.PI/180}
@@ -507,16 +432,14 @@ function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
 function buildBackgroundStars(){
   starDots = [];
-  for(let i=0;i<300;i++){
+  for(let i=0;i<330;i++){
     const a = Math.random()*Math.PI*2;
     const r = Math.sqrt(Math.random())*0.43;
     starDots.push({a,r,alpha:.08+Math.random()*.25,size:Math.random()<.88?1:2});
   }
 }
 
-function julian(date){
-  return date.getTime()/86400000 + 2440587.5;
-}
+function julian(date){return date.getTime()/86400000 + 2440587.5}
 
 function gmst(date){
   const JD = julian(date);
@@ -531,26 +454,16 @@ function altAz(raHours, decDeg, latDeg, lonDeg, date){
   const H = deg(mod(lst - raDeg + 180,360)-180);
   const dec = deg(decDeg);
   const lat = deg(latDeg);
-
   const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(H);
   const alt = Math.asin(sinAlt);
-
-  const az = Math.atan2(
-    -Math.sin(H),
-    Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H)
-  );
-
+  const az = Math.atan2(-Math.sin(H), Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H));
   return {alt:rad(alt), az:mod(rad(az),360)};
 }
 
 function project(az, alt, cx, cy, rmax){
   const r = ((90-alt)/90)*rmax;
   const t = deg(az);
-  return {
-    x: cx + r*Math.sin(t),
-    y: cy - r*Math.cos(t),
-    r
-  };
+  return {x: cx + r*Math.sin(t), y: cy - r*Math.cos(t), r};
 }
 
 function getDateFromInput(){
@@ -562,35 +475,68 @@ function useNow(){
   const d = new Date();
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
   document.getElementById("time").value = d.toISOString().slice(0,16);
+  track("use_current_time");
   drawSky();
 }
 
 function setTonala(){
   document.getElementById("lat").value = "20.624";
   document.getElementById("lon").value = "-103.234";
+  track("set_default_location", {location_name:"Tonala_ZMG"});
   drawSky();
 }
 
 function closeIntro(){
   document.getElementById("introModal").classList.add("hidden");
+  track("intro_closed");
 }
 
 function openIntro(){
   document.getElementById("introModal").classList.remove("hidden");
+  track("intro_opened");
 }
 
 function scrollToSky(){
   document.getElementById("sky").scrollIntoView({behavior:"smooth", block:"center"});
+  track("scroll_to_sky");
 }
 
 function toggleNight(){
   nightMode = !nightMode;
-  document.body.style.filter = nightMode ? "sepia(.2) hue-rotate(310deg) saturate(1.4)" : "";
+  document.body.classList.toggle("night-red", nightMode);
+  track("night_mode_toggle", {enabled:nightMode});
   drawSky();
+}
+
+function toggleBeginner(){
+  beginnerMode = !beginnerMode;
+  document.getElementById("beginnerPanel").classList.toggle("hidden", !beginnerMode);
+  document.querySelector(".hud").classList.toggle("beginner-on", beginnerMode);
+  track("beginner_mode_toggle", {enabled:beginnerMode});
+  if(beginnerMode) document.getElementById("beginnerPanel").scrollIntoView({behavior:"smooth", block:"center"});
+  drawSky();
+}
+
+function showInstallHelp(){
+  document.getElementById("installHelp").classList.add("show");
+  document.getElementById("installHelp").scrollIntoView({behavior:"smooth", block:"center"});
+  track("install_help_opened");
+}
+
+function hideInstallHelp(){
+  document.getElementById("installHelp").classList.remove("show");
+  track("install_help_closed");
+}
+
+function shareWhatsApp(){
+  track("share_whatsapp");
+  const url = "https://wa.me/?text=" + encodeURIComponent(SHARE_TEXT);
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 function useGPS(){
   const status = document.getElementById("status");
+  track("gps_click");
   if(!navigator.geolocation){
     status.textContent = "Tu navegador no dejó usar GPS. Mete latitud y longitud manual.";
     return;
@@ -600,13 +546,43 @@ function useGPS(){
     document.getElementById("lat").value = pos.coords.latitude.toFixed(5);
     document.getElementById("lon").value = pos.coords.longitude.toFixed(5);
     status.textContent = "Ubicación cargada. Actualizando cielo...";
+    track("gps_success");
     drawSky();
   },err=>{
-    status.innerHTML = "<span class='warning'>No se pudo usar GPS.</span> En GitHub Pages debe abrirse con HTTPS. También puedes dejar Tonalá/ZMG: lat 20.624, lon -103.234.";
+    status.innerHTML = "<span class='warning'>No se pudo usar GPS.</span> Puedes dejar Tonalá/ZMG: lat 20.624, lon -103.234.";
+    track("gps_error", {code:err.code});
   },{enableHighAccuracy:true,timeout:8000});
 }
 
+function moonPhase(date){
+  const knownNewMoon = new Date(Date.UTC(2000,0,6,18,14));
+  const synodic = 29.530588853;
+  const days = (date.getTime() - knownNewMoon.getTime()) / 86400000;
+  const age = ((days % synodic) + synodic) % synodic;
+  const pct = Math.round((1 - Math.cos(2*Math.PI*age/synodic))/2 * 100);
+  let name = "Luna nueva", emoji = "🌑";
+  if(age < 1.85) {name="Luna nueva"; emoji="🌑";}
+  else if(age < 5.54) {name="Creciente fina"; emoji="🌒";}
+  else if(age < 9.23) {name="Cuarto creciente"; emoji="🌓";}
+  else if(age < 12.92) {name="Gibosa creciente"; emoji="🌔";}
+  else if(age < 16.61) {name="Luna llena"; emoji="🌕";}
+  else if(age < 20.30) {name="Gibosa menguante"; emoji="🌖";}
+  else if(age < 23.99) {name="Cuarto menguante"; emoji="🌗";}
+  else if(age < 27.68) {name="Menguante fina"; emoji="🌘";}
+  return {age, pct, name, emoji};
+}
+
+function updateMoon(){
+  const m = moonPhase(getDateFromInput());
+  document.getElementById("moonInfo").innerHTML = `
+    <div style="font-size:34px">${m.emoji}</div>
+    <b>${m.name}</b><br>
+    <span class="small">Edad lunar aprox: ${m.age.toFixed(1)} días · Iluminación aprox: ${m.pct}%</span>
+  `;
+}
+
 function drawSky(){
+  track("update_sky");
   const canvas = document.getElementById("sky");
   const ctx = canvas.getContext("2d");
   const W = canvas.width, H = canvas.height;
@@ -621,7 +597,6 @@ function drawSky(){
   }
 
   ctx.clearRect(0,0,W,H);
-
   const grad = ctx.createRadialGradient(cx,cy,30,cx,cy,rmax);
   grad.addColorStop(0, nightMode ? "#22090a" : "#0c2d52");
   grad.addColorStop(.7, nightMode ? "#100406" : "#061121");
@@ -633,28 +608,22 @@ function drawSky(){
   ctx.beginPath();
   ctx.arc(cx,cy,rmax,0,Math.PI*2);
   ctx.clip();
-
   starDots.forEach(s=>{
     const x = cx + Math.cos(s.a)*s.r*W;
     const y = cy + Math.sin(s.a)*s.r*H;
     ctx.fillStyle = nightMode ? `rgba(255,90,90,${s.alpha})` : `rgba(255,255,255,${s.alpha})`;
     ctx.fillRect(x,y,s.size,s.size);
   });
-
   ctx.restore();
 
   ctx.strokeStyle = nightMode ? "rgba(255,80,80,.28)" : "rgba(90,220,255,.25)";
   ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.arc(cx,cy,rmax,0,Math.PI*2);
-  ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx,cy,rmax,0,Math.PI*2); ctx.stroke();
 
   [30,60].forEach(a=>{
     const rr = ((90-a)/90)*rmax;
     ctx.strokeStyle = nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)";
-    ctx.beginPath();
-    ctx.arc(cx,cy,rr,0,Math.PI*2);
-    ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx,cy,rr,0,Math.PI*2); ctx.stroke();
     ctx.fillStyle = nightMode ? "rgba(255,170,170,.6)" : "rgba(220,250,255,.5)";
     ctx.font = "18px monospace";
     ctx.fillText(a+"°",cx+8,cy-rr+22);
@@ -662,17 +631,11 @@ function drawSky(){
 
   for(let az=0; az<360; az+=30){
     const p = project(az,0,cx,cy,rmax);
-    ctx.strokeStyle = az%90===0
-      ? (nightMode ? "rgba(255,80,80,.35)" : "rgba(255,80,110,.35)")
-      : (nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)");
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.lineTo(p.x,p.y);
-    ctx.stroke();
+    ctx.strokeStyle = az%90===0 ? (nightMode ? "rgba(255,80,80,.35)" : "rgba(255,80,110,.35)") : (nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)");
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(p.x,p.y); ctx.stroke();
   }
 
-  const dirs = [["N",0],["E",90],["S",180],["O",270]];
-  dirs.forEach(([txt,az])=>{
+  [["N",0],["E",90],["S",180],["O",270]].forEach(([txt,az])=>{
     const p = project(az,-5,cx,cy,rmax);
     ctx.fillStyle = nightMode ? "#ff8888" : "#9eeaff";
     ctx.font = "bold 30px monospace";
@@ -682,13 +645,10 @@ function drawSky(){
 
   let calculated = {};
   let visible = [];
-
   stars.forEach(s=>{
     const aa = altAz(s[1],s[2],lat,lon,date);
     calculated[s[0]] = aa;
-    if(aa.alt > 0){
-      visible.push({name:s[0], mag:s[3], cons:s[4], alt:aa.alt, az:aa.az});
-    }
+    if(aa.alt > 0) visible.push({name:s[0], mag:s[3], cons:s[4], alt:aa.alt, az:aa.az});
   });
 
   ctx.strokeStyle = nightMode ? "rgba(255,120,120,.22)" : "rgba(120,220,255,.22)";
@@ -698,17 +658,13 @@ function drawSky(){
     if(A && B && A.alt>0 && B.alt>0){
       const p1 = project(A.az,A.alt,cx,cy,rmax);
       const p2 = project(B.az,B.alt,cx,cy,rmax);
-      ctx.beginPath();
-      ctx.moveTo(p1.x,p1.y);
-      ctx.lineTo(p2.x,p2.y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
     }
   });
 
   visible.forEach(v=>{
     const p = project(v.az,v.alt,cx,cy,rmax);
     const size = clamp((6-v.mag)*1.2,2,11);
-
     ctx.beginPath();
     ctx.fillStyle = nightMode ? "#ff9999" : (v.mag < 0.5 ? "#fff7d1" : "#e7fbff");
     ctx.shadowColor = nightMode ? "#ff5555" : (v.mag < 1 ? "#aeefff" : "#ffffff");
@@ -716,7 +672,6 @@ function drawSky(){
     ctx.arc(p.x,p.y,size,0,Math.PI*2);
     ctx.fill();
     ctx.shadowBlur = 0;
-
     if(v.mag < 1.9 || v.name==="Polaris" || v.name==="Pléyades"){
       ctx.fillStyle = nightMode ? "rgba(255,180,180,.9)" : "rgba(235,250,255,.88)";
       ctx.font = "16px monospace";
@@ -726,9 +681,16 @@ function drawSky(){
   });
 
   ctx.fillStyle = nightMode ? "rgba(255,190,190,.86)" : "rgba(255,255,255,.86)";
-  ctx.font = "18px monospace";
-  ctx.textAlign = "center";
+  ctx.font = "18px monospace"; ctx.textAlign = "center";
   ctx.fillText("Cénit / cielo arriba",cx,cy-8);
+
+  if(beginnerMode){
+    ctx.fillStyle = "rgba(255,242,168,.9)";
+    ctx.font = "bold 22px monospace";
+    ctx.fillText("CENTRO = ARRIBA DE TU CABEZA", cx, cy+28);
+    ctx.font = "16px monospace";
+    ctx.fillText("BORDE = HORIZONTE", cx, cy+54);
+  }
 
   visible.sort((a,b)=>a.mag-b.mag);
   const list = document.getElementById("visibleList");
@@ -739,15 +701,23 @@ function drawSky(){
     </div>
   `).join("");
 
-  const status = document.getElementById("status");
-  status.innerHTML = `
+  document.getElementById("tonightList").innerHTML = visible.slice(0,5).map(v=>`
+    <div class="starrow">
+      <div><b>⭐ ${v.name}</b><br><span class="small">${v.cons}</span></div>
+      <div class="small">Alt ${v.alt.toFixed(0)}°</div>
+    </div>
+  `).join("") || "<div class='pill'>No hay estrellas destacadas calculadas sobre el horizonte en este momento.</div>";
+
+  document.getElementById("status").innerHTML = `
     <b>Lectura:</b> ${visible.length} objetos brillantes sobre el horizonte. 
     <br><span class="small">Hora usada: ${date.toLocaleString()} | Lat ${lat.toFixed(3)} Lon ${lon.toFixed(3)}</span>
   `;
+  updateMoon();
 }
 
 buildBackgroundStars();
 useNow();
+track("app_loaded");
 </script>
 </body>
 </html>
