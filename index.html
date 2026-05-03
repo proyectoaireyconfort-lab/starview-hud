@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>StarView HUD | Mapa del Cielo</title>
+<meta name="description" content="StarView HUD: mapa básico del cielo visible desde tu ubicación. App estática lista para GitHub Pages." />
+<meta name="theme-color" content="#030711" />
+<link rel="manifest" href="manifest.webmanifest" />
+<style>
+  *{box-sizing:border-box}
+  :root{
+    --bg:#030711;
+    --card:rgba(8,18,32,.72);
+    --line:rgba(100,220,255,.25);
+    --text:#eaf7ff;
+    --muted:rgba(234,247,255,.75);
+    --blue:#00b4ff;
+    --red:#ff3157;
+  }
+  body{
+    margin:0;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(0,180,255,.18), transparent 35%),
+      radial-gradient(circle at 80% 80%, rgba(255,50,80,.14), transparent 35%),
+      var(--bg);
+    color:var(--text);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    min-height:100vh;
+    padding:14px;
+  }
+  .app{max-width:980px;margin:auto}
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:22px;
+    padding:16px;
+    box-shadow:0 0 30px rgba(0,180,255,.12);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    margin-bottom:14px;
+  }
+  h1{margin:0 0 4px;font-size:28px;letter-spacing:.5px}
+  .brand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  .badge{
+    border:1px solid rgba(120,220,255,.25);
+    border-radius:999px;
+    padding:7px 10px;
+    font-size:12px;
+    color:var(--muted);
+    background:rgba(0,0,0,.22);
+    white-space:nowrap;
+  }
+  .sub{opacity:.78;margin-bottom:12px;line-height:1.4}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  label{font-size:12px;opacity:.85}
+  input,button{
+    width:100%;
+    border-radius:14px;
+    border:1px solid rgba(120,220,255,.28);
+    background:rgba(0,0,0,.3);
+    color:#fff;
+    padding:12px;
+    font-size:15px;
+    outline:none;
+  }
+  input:focus{
+    border-color:rgba(0,180,255,.85);
+    box-shadow:0 0 0 3px rgba(0,180,255,.12);
+  }
+  button{
+    cursor:pointer;
+    font-weight:800;
+    background:linear-gradient(135deg,rgba(0,170,255,.35),rgba(255,45,80,.28));
+    box-shadow:0 0 18px rgba(0,170,255,.15);
+  }
+  button:active{transform:scale(.98)}
+  .button-secondary{
+    background:rgba(255,255,255,.06);
+  }
+  canvas{
+    width:100%;
+    max-height:78vh;
+    background:radial-gradient(circle,#07172c,#02050b 70%);
+    border-radius:22px;
+    border:1px solid rgba(100,220,255,.22);
+    display:block;
+    touch-action:none;
+  }
+  .hud{position:relative;overflow:hidden}
+  .hud:after{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:-30%;
+    height:80px;
+    background:linear-gradient(transparent,rgba(0,220,255,.16),transparent);
+    animation:scan 4s infinite linear;
+    pointer-events:none;
+  }
+  @keyframes scan{from{top:-20%}to{top:105%}}
+  .info{display:grid;grid-template-columns:1fr;gap:8px;font-size:14px}
+  .pill{
+    border:1px solid rgba(100,220,255,.22);
+    border-radius:16px;
+    padding:10px;
+    background:rgba(0,0,0,.25);
+    line-height:1.45;
+  }
+  .list{display:grid;gap:6px;font-size:14px}
+  .starrow{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    padding:8px 10px;
+    border-radius:14px;
+    background:rgba(255,255,255,.05);
+  }
+  .small{font-size:12px;opacity:.75}
+  .footer{font-size:12px;opacity:.65;text-align:center;margin:14px}
+  .warning{
+    color:#ffe8a3;
+  }
+  @media(max-width:700px){
+    .brand{align-items:flex-start;flex-direction:column}
+    .grid{grid-template-columns:1fr}
+    h1{font-size:24px}
+    body{padding:10px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="card">
+    <div class="brand">
+      <div>
+        <h1>🌌 StarView HUD</h1>
+        <div class="sub">Mapa básico del cielo visible desde tu ubicación. App 100% estática para GitHub Pages.</div>
+      </div>
+      <div class="badge">Aire Acondicionado y Confort · Lab</div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label for="lat">Latitud</label>
+        <input id="lat" type="number" step="0.0001" value="20.624" />
+      </div>
+      <div>
+        <label for="lon">Longitud</label>
+        <input id="lon" type="number" step="0.0001" value="-103.234" />
+      </div>
+      <div>
+        <label for="time">Fecha y hora</label>
+        <input id="time" type="datetime-local" />
+      </div>
+      <div>
+        <label>Acciones</label>
+        <button onclick="useNow()">Usar hora actual</button>
+      </div>
+      <button onclick="useGPS()">📍 Usar ubicación del celular</button>
+      <button onclick="drawSky()">🔭 Actualizar cielo</button>
+      <button class="button-secondary" onclick="setTonala()">📌 Usar Tonalá/ZMG</button>
+      <button class="button-secondary" onclick="toggleNight()">🌙 Modo rojo nocturno</button>
+    </div>
+  </div>
+
+  <div class="card hud">
+    <canvas id="sky" width="900" height="900"></canvas>
+  </div>
+
+  <div class="card info">
+    <div class="pill" id="status">Listo.</div>
+    <div>
+      <b>Estrellas visibles destacadas</b>
+      <div class="list" id="visibleList"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Consejo: apunta la parte de arriba del mapa hacia el norte. N = Norte, E = Este, S = Sur, O = Oeste.
+  </div>
+</div>
+
+<script>
+const stars = [
+  ["Sirius",6.7525,-16.7161,-1.46,"Can Mayor"],
+  ["Canopus",6.3992,-52.6957,-0.74,"Carina"],
+  ["Arcturus",14.2610,19.1825,-0.05,"Boyero"],
+  ["Vega",18.6156,38.7837,0.03,"Lira"],
+  ["Capella",5.2782,45.9980,0.08,"Auriga"],
+  ["Rigel",5.2423,-8.2016,0.13,"Orión"],
+  ["Procyon",7.6550,5.2250,0.34,"Can Menor"],
+  ["Betelgeuse",5.9195,7.4071,0.42,"Orión"],
+  ["Achernar",1.6286,-57.2368,0.46,"Erídano"],
+  ["Hadar",14.0637,-60.3730,0.61,"Centauro"],
+  ["Altair",19.8464,8.8683,0.77,"Águila"],
+  ["Acrux",12.4433,-63.0991,0.76,"Cruz del Sur"],
+  ["Aldebaran",4.5987,16.5093,0.85,"Tauro"],
+  ["Spica",13.4199,-11.1614,0.98,"Virgo"],
+  ["Antares",16.4901,-26.4319,1.06,"Escorpio"],
+  ["Pollux",7.7553,28.0262,1.14,"Géminis"],
+  ["Fomalhaut",22.9608,-29.6222,1.16,"Pez Austral"],
+  ["Deneb",20.6905,45.2803,1.25,"Cisne"],
+  ["Mimosa",12.7953,-59.6888,1.25,"Cruz del Sur"],
+  ["Regulus",10.1395,11.9672,1.35,"Leo"],
+  ["Adhara",6.9771,-28.9721,1.50,"Can Mayor"],
+  ["Shaula",17.5601,-37.1038,1.62,"Escorpio"],
+  ["Castor",7.5767,31.8883,1.58,"Géminis"],
+  ["Gacrux",12.5194,-57.1132,1.63,"Cruz del Sur"],
+  ["Bellatrix",5.4189,6.3497,1.64,"Orión"],
+  ["Elnath",5.4382,28.6075,1.65,"Tauro"],
+  ["Miaplacidus",9.2200,-69.7172,1.67,"Carina"],
+  ["Alnilam",5.6036,-1.2019,1.69,"Orión"],
+  ["Alnitak",5.6793,-1.9426,1.74,"Orión"],
+  ["Dubhe",11.0621,61.7510,1.79,"Osa Mayor"],
+  ["Alioth",12.9005,55.9598,1.77,"Osa Mayor"],
+  ["Alkaid",13.7923,49.3133,1.85,"Osa Mayor"],
+  ["Mirfak",3.4054,49.8612,1.79,"Perseo"],
+  ["Wezen",7.1399,-26.3932,1.83,"Can Mayor"],
+  ["Kaus Australis",18.4029,-34.3846,1.85,"Sagitario"],
+  ["Sargas",17.6219,-42.9978,1.86,"Escorpio"],
+  ["Avior",8.3752,-59.5095,1.86,"Carina"],
+  ["Menkalinan",5.9921,44.9474,1.90,"Auriga"],
+  ["Atria",16.8111,-69.0277,1.91,"Triángulo Austral"],
+  ["Alhena",6.6285,16.3993,1.93,"Géminis"],
+  ["Peacock",20.4275,-56.7351,1.94,"Pavo"],
+  ["Polaris",2.5303,89.2641,1.98,"Osa Menor"],
+  ["Mirzam",6.3783,-17.9559,1.98,"Can Mayor"],
+  ["Alphard",9.4598,-8.6586,2.00,"Hidra"],
+  ["Hamal",2.1195,23.4624,2.00,"Aries"],
+  ["Diphda",0.7265,-17.9867,2.04,"Ballena"],
+  ["Nunki",18.9211,-26.2967,2.05,"Sagitario"],
+  ["Algol",3.1361,40.9556,2.12,"Perseo"],
+  ["Denebola",11.8177,14.5721,2.14,"Leo"],
+  ["Mizar",13.3987,54.9254,2.23,"Osa Mayor"],
+  ["Merak",11.0307,56.3824,2.37,"Osa Mayor"],
+  ["Phecda",11.8972,53.6948,2.44,"Osa Mayor"],
+  ["Megrez",12.2571,57.0326,3.30,"Osa Mayor"],
+  ["Delta Crucis",12.2524,-58.7489,2.79,"Cruz del Sur"],
+  ["Pléyades",3.7900,24.1167,1.60,"Tauro"]
+];
+
+const lines = [
+  ["Betelgeuse","Bellatrix"],["Betelgeuse","Alnilam"],["Bellatrix","Alnilam"],["Alnilam","Alnitak"],["Alnilam","Rigel"],
+  ["Dubhe","Merak"],["Merak","Phecda"],["Phecda","Megrez"],["Megrez","Alioth"],["Alioth","Mizar"],["Mizar","Alkaid"],
+  ["Acrux","Mimosa"],["Gacrux","Delta Crucis"],["Mimosa","Delta Crucis"]
+];
+
+let nightMode = false;
+let starDots = [];
+
+function deg(x){return x*Math.PI/180}
+function rad(x){return x*180/Math.PI}
+function mod(n,m){return ((n%m)+m)%m}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+
+function buildBackgroundStars(){
+  starDots = [];
+  for(let i=0;i<300;i++){
+    const a = Math.random()*Math.PI*2;
+    const r = Math.sqrt(Math.random())*0.43;
+    starDots.push({a,r,alpha:.08+Math.random()*.25,size:Math.random()<.88?1:2});
+  }
+}
+
+function julian(date){
+  return date.getTime()/86400000 + 2440587.5;
+}
+
+function gmst(date){
+  const JD = julian(date);
+  const T = (JD - 2451545.0)/36525;
+  let theta = 280.46061837 + 360.98564736629*(JD-2451545) + 0.000387933*T*T - T*T*T/38710000;
+  return mod(theta,360);
+}
+
+function altAz(raHours, decDeg, latDeg, lonDeg, date){
+  const lst = mod(gmst(date) + lonDeg, 360);
+  const raDeg = raHours * 15;
+  const H = deg(mod(lst - raDeg + 180,360)-180);
+  const dec = deg(decDeg);
+  const lat = deg(latDeg);
+
+  const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(H);
+  const alt = Math.asin(sinAlt);
+
+  const az = Math.atan2(
+    -Math.sin(H),
+    Math.tan(dec)*Math.cos(lat) - Math.sin(lat)*Math.cos(H)
+  );
+
+  return {alt:rad(alt), az:mod(rad(az),360)};
+}
+
+function project(az, alt, cx, cy, rmax){
+  const r = ((90-alt)/90)*rmax;
+  const t = deg(az);
+  return {
+    x: cx + r*Math.sin(t),
+    y: cy - r*Math.cos(t),
+    r
+  };
+}
+
+function getDateFromInput(){
+  const v = document.getElementById("time").value;
+  return v ? new Date(v) : new Date();
+}
+
+function useNow(){
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  document.getElementById("time").value = d.toISOString().slice(0,16);
+  drawSky();
+}
+
+function setTonala(){
+  document.getElementById("lat").value = "20.624";
+  document.getElementById("lon").value = "-103.234";
+  drawSky();
+}
+
+function toggleNight(){
+  nightMode = !nightMode;
+  document.body.style.filter = nightMode ? "sepia(.2) hue-rotate(310deg) saturate(1.4)" : "";
+  drawSky();
+}
+
+function useGPS(){
+  const status = document.getElementById("status");
+  if(!navigator.geolocation){
+    status.textContent = "Tu navegador no dejó usar GPS. Mete latitud y longitud manual.";
+    return;
+  }
+  status.textContent = "Buscando GPS...";
+  navigator.geolocation.getCurrentPosition(pos=>{
+    document.getElementById("lat").value = pos.coords.latitude.toFixed(5);
+    document.getElementById("lon").value = pos.coords.longitude.toFixed(5);
+    status.textContent = "Ubicación cargada. Actualizando cielo...";
+    drawSky();
+  },err=>{
+    status.innerHTML = "<span class='warning'>No se pudo usar GPS.</span> En GitHub Pages debe abrirse con HTTPS. También puedes dejar Tonalá/ZMG: lat 20.624, lon -103.234.";
+  },{enableHighAccuracy:true,timeout:8000});
+}
+
+function drawSky(){
+  const canvas = document.getElementById("sky");
+  const ctx = canvas.getContext("2d");
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, rmax = W*0.43;
+  const lat = parseFloat(document.getElementById("lat").value);
+  const lon = parseFloat(document.getElementById("lon").value);
+  const date = getDateFromInput();
+
+  if(Number.isNaN(lat) || Number.isNaN(lon)){
+    document.getElementById("status").innerHTML = "<span class='warning'>Revisa latitud y longitud.</span>";
+    return;
+  }
+
+  ctx.clearRect(0,0,W,H);
+
+  const grad = ctx.createRadialGradient(cx,cy,30,cx,cy,rmax);
+  grad.addColorStop(0, nightMode ? "#22090a" : "#0c2d52");
+  grad.addColorStop(.7, nightMode ? "#100406" : "#061121");
+  grad.addColorStop(1, "#01040a");
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx,cy,rmax,0,Math.PI*2);
+  ctx.clip();
+
+  starDots.forEach(s=>{
+    const x = cx + Math.cos(s.a)*s.r*W;
+    const y = cy + Math.sin(s.a)*s.r*H;
+    ctx.fillStyle = nightMode ? `rgba(255,90,90,${s.alpha})` : `rgba(255,255,255,${s.alpha})`;
+    ctx.fillRect(x,y,s.size,s.size);
+  });
+
+  ctx.restore();
+
+  ctx.strokeStyle = nightMode ? "rgba(255,80,80,.28)" : "rgba(90,220,255,.25)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(cx,cy,rmax,0,Math.PI*2);
+  ctx.stroke();
+
+  [30,60].forEach(a=>{
+    const rr = ((90-a)/90)*rmax;
+    ctx.strokeStyle = nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)";
+    ctx.beginPath();
+    ctx.arc(cx,cy,rr,0,Math.PI*2);
+    ctx.stroke();
+    ctx.fillStyle = nightMode ? "rgba(255,170,170,.6)" : "rgba(220,250,255,.5)";
+    ctx.font = "18px monospace";
+    ctx.fillText(a+"°",cx+8,cy-rr+22);
+  });
+
+  for(let az=0; az<360; az+=30){
+    const p = project(az,0,cx,cy,rmax);
+    ctx.strokeStyle = az%90===0
+      ? (nightMode ? "rgba(255,80,80,.35)" : "rgba(255,80,110,.35)")
+      : (nightMode ? "rgba(255,80,80,.12)" : "rgba(90,220,255,.12)");
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.lineTo(p.x,p.y);
+    ctx.stroke();
+  }
+
+  const dirs = [["N",0],["E",90],["S",180],["O",270]];
+  dirs.forEach(([txt,az])=>{
+    const p = project(az,-5,cx,cy,rmax);
+    ctx.fillStyle = nightMode ? "#ff8888" : "#9eeaff";
+    ctx.font = "bold 30px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(txt,p.x,p.y);
+  });
+
+  let calculated = {};
+  let visible = [];
+
+  stars.forEach(s=>{
+    const aa = altAz(s[1],s[2],lat,lon,date);
+    calculated[s[0]] = aa;
+    if(aa.alt > 0){
+      visible.push({name:s[0], mag:s[3], cons:s[4], alt:aa.alt, az:aa.az});
+    }
+  });
+
+  ctx.strokeStyle = nightMode ? "rgba(255,120,120,.22)" : "rgba(120,220,255,.22)";
+  ctx.lineWidth = 2;
+  lines.forEach(([a,b])=>{
+    const A = calculated[a], B = calculated[b];
+    if(A && B && A.alt>0 && B.alt>0){
+      const p1 = project(A.az,A.alt,cx,cy,rmax);
+      const p2 = project(B.az,B.alt,cx,cy,rmax);
+      ctx.beginPath();
+      ctx.moveTo(p1.x,p1.y);
+      ctx.lineTo(p2.x,p2.y);
+      ctx.stroke();
+    }
+  });
+
+  visible.forEach(v=>{
+    const p = project(v.az,v.alt,cx,cy,rmax);
+    const size = clamp((6-v.mag)*1.2,2,11);
+
+    ctx.beginPath();
+    ctx.fillStyle = nightMode ? "#ff9999" : (v.mag < 0.5 ? "#fff7d1" : "#e7fbff");
+    ctx.shadowColor = nightMode ? "#ff5555" : (v.mag < 1 ? "#aeefff" : "#ffffff");
+    ctx.shadowBlur = v.mag < 1 ? 18 : 7;
+    ctx.arc(p.x,p.y,size,0,Math.PI*2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    if(v.mag < 1.9 || v.name==="Polaris" || v.name==="Pléyades"){
+      ctx.fillStyle = nightMode ? "rgba(255,180,180,.9)" : "rgba(235,250,255,.88)";
+      ctx.font = "16px monospace";
+      ctx.textAlign = "left";
+      ctx.fillText(v.name,p.x+10,p.y-8);
+    }
+  });
+
+  ctx.fillStyle = nightMode ? "rgba(255,190,190,.86)" : "rgba(255,255,255,.86)";
+  ctx.font = "18px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("Cénit / cielo arriba",cx,cy-8);
+
+  visible.sort((a,b)=>a.mag-b.mag);
+  const list = document.getElementById("visibleList");
+  list.innerHTML = visible.slice(0,12).map(v=>`
+    <div class="starrow">
+      <div><b>${v.name}</b> <span class="small">${v.cons}</span></div>
+      <div class="small">Alt ${v.alt.toFixed(0)}° / Az ${v.az.toFixed(0)}°</div>
+    </div>
+  `).join("");
+
+  const status = document.getElementById("status");
+  status.innerHTML = `
+    <b>Lectura:</b> ${visible.length} objetos brillantes sobre el horizonte. 
+    <br><span class="small">Hora usada: ${date.toLocaleString()} | Lat ${lat.toFixed(3)} Lon ${lon.toFixed(3)}</span>
+  `;
+}
+
+buildBackgroundStars();
+useNow();
+</script>
+</body>
+</html>

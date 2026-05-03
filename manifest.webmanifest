@@ -1,0 +1,11 @@
+{
+  "name": "StarView HUD",
+  "short_name": "StarView",
+  "description": "Mapa básico del cielo visible desde tu ubicación.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#030711",
+  "theme_color": "#030711",
+  "lang": "es",
+  "icons": []
+}
