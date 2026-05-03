@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>STARVIEW-HUD-OMNI-OS | E.V.A. v8.0</title>
-<meta name="description" content="STARVIEW-HUD-OMNI-OS · E.V.A. Engineering Visual Assistant v8.0 · Aire Acondicionado y Confort · Lab" />
+<title>STARVIEW-HUD-OMNI-OS | E.V.A. v8.2 Bilingüe</title>
+<meta name="description" content="STARVIEW-HUD-OMNI-OS · E.V.A. v8.2 Bilingüe · Aire Acondicionado y Confort · Lab" />
 <meta name="theme-color" content="#000b06" />
 <style>
   :root{
@@ -206,6 +206,26 @@
     .hero h1{font-size:24px}
     #sky{height:64vh;min-height:390px}
   }
+
+  .lang-bar{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin:12px 0 14px;
+  }
+  .lang-btn{
+    min-width:128px;
+    padding:9px 12px;
+    border-radius:999px;
+    font-size:13px;
+  }
+  .lang-btn.active{
+    box-shadow:0 0 18px rgba(255,242,168,.22);
+    border-color:rgba(255,242,168,.55);
+    color:#fff2a8;
+  }
+
 </style>
 </head>
 <body class="state-a">
@@ -219,17 +239,21 @@
  ██╔══╝  ╚██╗ ██╔╝██╔══██║    ██║   ██║██║╚██╔╝██║██║╚██╗██║██║     ██║   ██║╚════██║
  ███████╗ ╚████╔╝ ██║  ██║    ╚██████╔╝██║ ╚═╝ ██║██║ ╚████║███████╗╚██████╔╝███████║
  ╚══════╝  ╚═══╝  ╚═╝  ╚═╝     ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═══╝╚══════╝ ╚═════╝ ╚══════╝
-        AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. ENGINEERING VISUAL ASSISTANT v8.0
+        AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. ASISTENTE VISUAL DE INGENIERÍA v8.1
 </pre>
     <div class="boot-log" id="bootLog"></div>
+    <div class="lang-bar">
+      <button class="lang-btn" id="langES" onclick="setLanguage('es', true)">🇲🇽 Español</button>
+      <button class="lang-btn" id="langEN" onclick="setLanguage('en', true)">🇺🇸 English</button>
+    </div>
     <div class="mode-grid">
       <button class="pick" onclick="setSystemState('A')">
-        <b>STATE_A · CIVIL_EXPLORER</b>
-        <span>Neuromorphic cinematic sky. Bloom, spectral star colors, intuitive navigation and civil exploration UX.</span>
+        <b>ESTADO_A · EXPLORACIÓN CIVIL</b>
+        <span>Cielo cinematográfico neuromórfico. Bloom, colores espectrales, navegación intuitiva y experiencia visual civil.</span>
       </button>
       <button class="pick op" onclick="setSystemState('B')">
-        <b>STATE_B · ENGINEERING_TACTICAL</b>
-        <span>Phosphor-green terminal, raw data, 10° altaz grid, sensor fusion diagnostics, HVAC solar incidence telemetry.</span>
+        <b>ESTADO_B · INGENIERÍA TÁCTICA</b>
+        <span>Terminal verde fósforo, datos crudos, cuadrícula altazimutal de 10°, diagnóstico de fusión de sensores y telemetría solar HVAC.</span>
       </button>
     </div>
   </div>
@@ -237,19 +261,21 @@
 
 <div class="topbar">
   <div class="brand">
-    <strong>AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. v8.0</strong>
-    <span>Engineering Visual Assistant · High-Precision Telemetry Unit</span>
+    <strong>AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. v8.1</strong>
+    <span>Asistente Visual de Ingeniería · Unidad de Telemetría de Alta Precisión</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <div class="chip" id="stateChip">STATE_A</div>
     <div class="gear-wrap">
       <button class="gear" onclick="toggleMenu()">⚙️</button>
       <div class="menu" id="modeMenu">
-        <button onclick="setSystemState('A', true)">STATE_A · Civil Explorer</button>
-        <button onclick="setSystemState('B', true)">STATE_B · Engineering Tactical</button>
-        <button onclick="enableFusionCore()">🧭 Enable Sensor Fusion Core</button>
-        <button onclick="zeroYaw()">🎯 Zero Yaw Reference</button>
-        <button onclick="showBoot()">BIOS Mode Selector</button>
+        <button onclick="setSystemState('A', true)">ESTADO_A · Exploración Civil</button>
+        <button onclick="setSystemState('B', true)">ESTADO_B · Ingeniería Táctica</button>
+        <button onclick="enableFusionCore()">🧭 Activar Núcleo de Fusión de Sensores</button>
+        <button onclick="zeroYaw()">🎯 Calibrar Referencia de Rumbo</button>
+        <button onclick="showBoot()" id="menuBootBtn">Selector BIOS de Modo</button>
+        <button onclick="setLanguage('es', true)">🇲🇽 Español</button>
+        <button onclick="setLanguage('en', true)">🇺🇸 English</button>
       </div>
     </div>
   </div>
@@ -259,68 +285,68 @@
   <section class="panel hero">
     <h1>STARVIEW-HUD-OMNI-OS</h1>
     <p class="civil-only">Modo exploración: una bóveda celeste cinematográfica con estrellas en bloom, planetas, Sol, eclíptica y navegación limpia.</p>
-    <p class="op-only">ENGINEERING_TACTICAL ONLINE · RAW SENSOR FUSION · LST/JD KERNEL · ALTAZ 10° GRID · SOLAR INCIDENCE HVAC MODULE</p>
+    <p class="op-only">INGENIERÍA_TÁCTICA EN LÍNEA · FUSIÓN DE SENSORES · NÚCLEO LST/JD · REJILLA ALTAZ 10° · INCIDENCIA SOLAR HVAC</p>
 
     <div class="controls">
       <div>
-        <label>LATITUDE</label>
+        <label>LATITUD</label>
         <input id="lat" type="number" step="0.00001" value="20.62400">
       </div>
       <div>
-        <label>LONGITUDE</label>
+        <label>LONGITUD</label>
         <input id="lon" type="number" step="0.00001" value="-103.23400">
       </div>
       <div>
-        <label>UTC/LOCAL DATE-TIME</label>
+        <label>FECHA/HORA LOCAL</label>
         <input id="time" type="datetime-local">
       </div>
-      <button onclick="syncNow()">SYNC NOW</button>
-      <button onclick="useGPS()">USE GPS</button>
-      <button onclick="useTonala()">TONALÁ/ZMG REF</button>
-      <button onclick="enableFusionCore()">SENSOR FUSION CORE</button>
-      <button onclick="zeroYaw()">ZERO YAW</button>
+      <button onclick="syncNow()">SINCRONIZAR AHORA</button>
+      <button onclick="useGPS()">USAR GPS</button>
+      <button onclick="useTonala()">REFERENCIA TONALÁ/ZMG</button>
+      <button onclick="enableFusionCore()">NÚCLEO DE FUSIÓN DE SENSORES</button>
+      <button onclick="zeroYaw()">CALIBRAR RUMBO</button>
     </div>
-    <div class="note">Zero-library dependency · single-file HTML/CSS/JS · requestAnimationFrame loop · OffscreenCanvas-compatible background buffer pattern.</div>
+    <div class="note">Sin dependencias externas · archivo único HTML/CSS/JS · bucle requestAnimationFrame · patrón de búfer compatible con OffscreenCanvas.</div>
   </section>
 
   <div class="grid">
     <section class="panel canvas-panel">
       <div class="canvas-shell">
-        <div class="hud-corner" id="hudCorner">CIVIL_EXPLORER · SKY DOME</div>
-        <div class="sensor-corner" id="sensorCorner">FUSION OFF</div>
+        <div class="hud-corner" id="hudCorner">EXPLORACIÓN CIVIL · CÚPULA CELESTE</div>
+        <div class="sensor-corner" id="sensorCorner">FUSIÓN OFF</div>
         <canvas id="sky"></canvas>
       </div>
     </section>
 
     <aside>
       <section class="panel civil-only">
-        <h2>Sky Objects</h2>
+        <h2>Objetos del cielo</h2>
         <div class="list" id="civilObjects"></div>
       </section>
 
       <section class="panel civil-only">
-        <h2>Solar / Planetary</h2>
+        <h2>Solar / Planetario</h2>
         <div class="list" id="civilBodies"></div>
       </section>
 
       <section class="panel op-only">
-        <h2>RAW DATA BUS</h2>
+        <h2>BUS DE DATOS CRUDOS</h2>
         <div class="raw">
-          <div class="cell"><b>YAW FILTER</b><span id="dYaw">--</span></div>
-          <div class="cell"><b>YAW RAW</b><span id="dYawRaw">--</span></div>
-          <div class="cell"><b>PITCH FUSION</b><span id="dPitch">--</span></div>
-          <div class="cell"><b>ROLL FUSION</b><span id="dRoll">--</span></div>
-          <div class="cell"><b>GYRO α/β/γ</b><span id="dGyro">--</span></div>
-          <div class="cell"><b>ACCEL P/R</b><span id="dAccel">--</span></div>
+          <div class="cell"><b>RUMBO FILTRADO</b><span id="dYaw">--</span></div>
+          <div class="cell"><b>RUMBO CRUDO</b><span id="dYawRaw">--</span></div>
+          <div class="cell"><b>PITCH FUSIONADO</b><span id="dPitch">--</span></div>
+          <div class="cell"><b>ROLL FUSIONADO</b><span id="dRoll">--</span></div>
+          <div class="cell"><b>GIRO α/β/γ</b><span id="dGyro">--</span></div>
+          <div class="cell"><b>ACEL P/R</b><span id="dAccel">--</span></div>
           <div class="cell"><b>JD / J2000</b><span id="dJD">--</span></div>
           <div class="cell"><b>LST TONALÁ</b><span id="dLST">--</span></div>
-          <div class="cell"><b>SOLAR INCIDENCE</b><span id="dSolar">--</span></div>
-          <div class="cell"><b>FUSION ERR</b><span id="dErr">--</span></div>
+          <div class="cell"><b>INCIDENCIA SOLAR</b><span id="dSolar">--</span></div>
+          <div class="cell"><b>ERROR DE FUSIÓN</b><span id="dErr">--</span></div>
         </div>
       </section>
 
       <section class="panel op-only">
-        <h2>TACTICAL OBJECTS</h2>
+        <h2>OBJETOS TÁCTICOS</h2>
         <div class="list" id="opObjects"></div>
       </section>
     </aside>
@@ -384,23 +410,251 @@ function norm360(x){return ((x % 360) + 360) % 360}
 function signedDelta(from,to){let d=norm360(to-from); if(d>180)d-=360; return d}
 function lowPassAngle(current,target,k){return norm360(current + signedDelta(current,target)*k)}
 
+
+/* ============================================================
+   LANGUAGE SYSTEM · ES / EN
+   ============================================================ */
+let EVA_LANG = localStorage.getItem("eva_lang") || "es";
+
+const I18N = {
+  es: {
+    asciiFooter: "AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. ASISTENTE VISUAL DE INGENIERÍA v8.2",
+    brandTitle: "AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. v8.2",
+    brandSub: "Asistente Visual de Ingeniería · Unidad de Telemetría de Alta Precisión",
+    stateAFull: "ESTADO_A · EXPLORACIÓN CIVIL",
+    stateBFull: "ESTADO_B · INGENIERÍA TÁCTICA",
+    stateABtn: "ESTADO_A · Exploración Civil",
+    stateBBtn: "ESTADO_B · Ingeniería Táctica",
+    stateAChip: "ESTADO_A",
+    stateBChip: "ESTADO_B",
+    stateADesc: "Cielo cinematográfico neuromórfico. Bloom, colores espectrales, navegación intuitiva y experiencia visual civil.",
+    stateBDesc: "Terminal verde fósforo, datos crudos, cuadrícula altazimutal de 10°, diagnóstico de fusión de sensores y telemetría solar HVAC.",
+    fusionBtn: "🧭 Activar Núcleo de Fusión de Sensores",
+    zeroBtn: "🎯 Calibrar Referencia de Rumbo",
+    bootBtn: "Selector BIOS de Modo",
+    heroCivil: "Modo exploración: una bóveda celeste cinematográfica con estrellas en bloom, planetas, Sol, eclíptica y navegación limpia.",
+    heroOp: "INGENIERÍA_TÁCTICA EN LÍNEA · FUSIÓN DE SENSORES · NÚCLEO LST/JD · REJILLA ALTAZ 10° · INCIDENCIA SOLAR HVAC",
+    lat: "LATITUD",
+    lon: "LONGITUD",
+    time: "FECHA/HORA LOCAL",
+    sync: "SINCRONIZAR AHORA",
+    gps: "USAR GPS",
+    tonal: "REFERENCIA TONALÁ/ZMG",
+    fusionCore: "NÚCLEO DE FUSIÓN DE SENSORES",
+    zeroYaw: "CALIBRAR RUMBO",
+    note: "Sin dependencias externas · archivo único HTML/CSS/JS · bucle requestAnimationFrame · patrón de búfer compatible con OffscreenCanvas.",
+    skyObjects: "Objetos del cielo",
+    solarPlanetary: "Solar / Planetario",
+    rawBus: "BUS DE DATOS CRUDOS",
+    tacticalObjects: "OBJETOS TÁCTICOS",
+    yawFilter: "RUMBO FILTRADO",
+    yawRaw: "RUMBO CRUDO",
+    pitchFusion: "PITCH FUSIONADO",
+    rollFusion: "ROLL FUSIONADO",
+    gyro: "GIRO α/β/γ",
+    accel: "ACEL P/R",
+    incidence: "INCIDENCIA SOLAR",
+    fusionErr: "ERROR DE FUSIÓN",
+    hudA: "EXPLORACIÓN CIVIL · CÚPULA CELESTE",
+    hudB: "INGENIERÍA TÁCTICA · REJILLA ALTAZ",
+    fusionOff: T("fusionOff"),
+    fusionArmed: "FUSIÓN ARMADA",
+    fusionError: "ERROR DE FUSIÓN",
+    deniedOrientation: "ORIENTACIÓN_DENEGADA",
+    deniedMotion: "MOVIMIENTO_DENEGADO",
+    noBodies: T("noBodies"),
+    ecliptic: "ECLÍPTICA",
+    equator: "ECUADOR CELESTE",
+    telemetryBus: "E.V.A. BUS DE TELEMETRÍA CRUDA",
+    yawFilterShort: "RUMBO/FILTRO",
+    yawRawShort: "RUMBO/CRUDO",
+    sensorMode: "MODO SENSOR",
+    magneticWarning: "ALERTA: RUIDO MAGNÉTICO",
+    levelTitle: "NIVEL DIGITAL 6-DoF",
+    highLoad: "ALTA CARGA TÉRMICA HVAC",
+    moderateLoad: "CARGA SOLAR MODERADA",
+    lowLoad: "BAJA CARGA SOLAR",
+    noSol: "SIN SOL",
+    gpsUnavailable: "GPS no disponible.",
+    gpsFail: "No se pudo obtener GPS. Se mantiene Tonalá/ZMG.",
+    bootLines: [
+      "KERNEL_OVERRIDE_PROMPT::STARVIEW_EVA_ES aceptado",
+      "ROL: Ingeniero Aeroespacial GNC Principal y Arquitecto de Sistemas",
+      "Compilando STARVIEW-HUD-OMNI-OS ............... OK",
+      "Inicializando máquina de doble estado .......... OK",
+      "ESTADO_A EXPLORACIÓN CIVIL .................... LISTO",
+      "ESTADO_B INGENIERÍA TÁCTICA ................... LISTO",
+      "Núcleo de fusión de sensores ................... LISTO",
+      "Motor Astro: JD/LST/AltAz/Eclíptica ........... LISTO",
+      "Módulo HVAC de incidencia solar ................ LISTO",
+      "E.V.A. v8.2 esperando selección de modo"
+    ]
+  },
+  en: {
+    asciiFooter: "AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. ENGINEERING VISUAL ASSISTANT v8.2",
+    brandTitle: "AIRE ACONDICIONADO Y CONFORT · LAB | E.V.A. v8.2",
+    brandSub: "Engineering Visual Assistant · High-Precision Telemetry Unit",
+    stateAFull: "STATE_A · CIVIL_EXPLORER",
+    stateBFull: "STATE_B · ENGINEERING_TACTICAL",
+    stateABtn: "STATE_A · Civil Explorer",
+    stateBBtn: "STATE_B · Engineering Tactical",
+    stateAChip: "STATE_A",
+    stateBChip: "STATE_B",
+    stateADesc: "Neuromorphic cinematic sky. Bloom, spectral star colors, intuitive navigation and civil exploration UX.",
+    stateBDesc: "Phosphor-green terminal, raw data, 10° altaz grid, sensor fusion diagnostics, HVAC solar incidence telemetry.",
+    fusionBtn: "🧭 Enable Sensor Fusion Core",
+    zeroBtn: "🎯 Zero Yaw Reference",
+    bootBtn: "BIOS Mode Selector",
+    heroCivil: "Exploration mode: a cinematic sky dome with bloom stars, planets, Sun, ecliptic and clean navigation.",
+    heroOp: "ENGINEERING_TACTICAL ONLINE · RAW SENSOR FUSION · LST/JD KERNEL · ALTAZ 10° GRID · HVAC SOLAR INCIDENCE",
+    lat: "LATITUDE",
+    lon: "LONGITUDE",
+    time: "LOCAL DATE-TIME",
+    sync: "SYNC NOW",
+    gps: "USE GPS",
+    tonal: "TONALÁ/ZMG REF",
+    fusionCore: "SENSOR FUSION CORE",
+    zeroYaw: "ZERO YAW",
+    note: "Zero-library dependency · single-file HTML/CSS/JS · requestAnimationFrame loop · OffscreenCanvas-compatible buffer pattern.",
+    skyObjects: "Sky Objects",
+    solarPlanetary: "Solar / Planetary",
+    rawBus: "RAW DATA BUS",
+    tacticalObjects: "TACTICAL OBJECTS",
+    yawFilter: "YAW FILTER",
+    yawRaw: "YAW RAW",
+    pitchFusion: "PITCH FUSION",
+    rollFusion: "ROLL FUSION",
+    gyro: "GYRO α/β/γ",
+    accel: "ACCEL P/R",
+    incidence: "SOLAR INCIDENCE",
+    fusionErr: "FUSION ERR",
+    hudA: "CIVIL_EXPLORER · SKY DOME",
+    hudB: "ENGINEERING_TACTICAL · ALTAZ GRID",
+    fusionOff: "FUSION OFF",
+    fusionArmed: "FUSION ARMED",
+    fusionError: "FUSION ERROR",
+    deniedOrientation: "ORIENTATION_DENIED",
+    deniedMotion: "MOTION_DENIED",
+    noBodies: "No bodies above horizon",
+    ecliptic: "ECLIPTIC",
+    equator: "CELESTIAL EQUATOR",
+    telemetryBus: "E.V.A. RAW TELEMETRY BUS",
+    yawFilterShort: "YAW/FILTER",
+    yawRawShort: "YAW/RAW",
+    sensorMode: "SENSOR MODE",
+    magneticWarning: "MAGNETIC JITTER WARNING",
+    levelTitle: "6-DoF DIGITAL LEVEL",
+    highLoad: "HIGH HVAC HEAT LOAD",
+    moderateLoad: "MODERATE SOLAR LOAD",
+    lowLoad: "LOW SOLAR LOAD",
+    noSol: "NO SOL",
+    gpsUnavailable: "GPS unavailable.",
+    gpsFail: "Could not obtain GPS. Tonalá/ZMG remains active.",
+    bootLines: [
+      "KERNEL_OVERRIDE_PROMPT::TARGET_GPT4_PRO_VERSION accepted",
+      "ROLE: Lead Aerospace GNC Engineer & Systems Architect",
+      "Compiling STARVIEW-HUD-OMNI-OS ............... OK",
+      "Initializing Dual-State Machine .............. OK",
+      "STATE_A CIVIL_EXPLORER ....................... READY",
+      "STATE_B ENGINEERING_TACTICAL ................. READY",
+      "Sensor Fusion Core complementary filter ...... READY",
+      "Astro Engine: JD/LST/AltAz/Ecliptic .......... READY",
+      "HVAC Solar Incidence Module .................. READY",
+      "E.V.A. v8.2 awaiting operator mode selection"
+    ]
+  }
+};
+
+function T(key){
+  return (I18N[EVA_LANG] && I18N[EVA_LANG][key]) || I18N.es[key] || key;
+}
+
+function setText(selector, value){
+  const el = document.querySelector(selector);
+  if(el) el.textContent = value;
+}
+
+function setLanguage(lang, userAction = false){
+  EVA_LANG = lang === "en" ? "en" : "es";
+  localStorage.setItem("eva_lang", EVA_LANG);
+  document.documentElement.lang = EVA_LANG;
+
+  const ascii = document.getElementById("asciiLogo");
+  if(ascii){
+    ascii.textContent = ascii.textContent.replace(
+      /AIRE ACONDICIONADO Y CONFORT · LAB \| E\.V\.A\..*/,
+      T("asciiFooter")
+    );
+  }
+
+  setText(".brand strong", T("brandTitle"));
+  setText(".brand span", T("brandSub"));
+
+  const picks = document.querySelectorAll(".mode-grid .pick");
+  if(picks[0]){
+    const b = picks[0].querySelector("b");
+    const s = picks[0].querySelector("span");
+    if(b) b.textContent = T("stateAFull");
+    if(s) s.textContent = T("stateADesc");
+  }
+  if(picks[1]){
+    const b = picks[1].querySelector("b");
+    const s = picks[1].querySelector("span");
+    if(b) b.textContent = T("stateBFull");
+    if(s) s.textContent = T("stateBDesc");
+  }
+
+  const menuButtons = document.querySelectorAll("#modeMenu button");
+  if(menuButtons[0]) menuButtons[0].textContent = T("stateABtn");
+  if(menuButtons[1]) menuButtons[1].textContent = T("stateBBtn");
+  if(menuButtons[2]) menuButtons[2].textContent = T("fusionBtn");
+  if(menuButtons[3]) menuButtons[3].textContent = T("zeroBtn");
+  if(menuButtons[4]) menuButtons[4].textContent = T("bootBtn");
+
+  setText(".hero .civil-only", T("heroCivil"));
+  setText(".hero .op-only", T("heroOp"));
+
+  const labels = document.querySelectorAll(".controls label");
+  [T("lat"), T("lon"), T("time")].forEach((txt,i)=>{ if(labels[i]) labels[i].textContent = txt; });
+
+  const controlBtns = document.querySelectorAll(".controls button");
+  [T("sync"), T("gps"), T("tonal"), T("fusionCore"), T("zeroYaw")].forEach((txt,i)=>{ if(controlBtns[i]) controlBtns[i].textContent = txt; });
+
+  setText(".note", T("note"));
+
+  const panelTitles = document.querySelectorAll("aside .panel h2");
+  if(panelTitles[0]) panelTitles[0].textContent = T("skyObjects");
+  if(panelTitles[1]) panelTitles[1].textContent = T("solarPlanetary");
+  if(panelTitles[2]) panelTitles[2].textContent = T("rawBus");
+  if(panelTitles[3]) panelTitles[3].textContent = T("tacticalObjects");
+
+  const rawLabels = document.querySelectorAll(".cell b");
+  [T("yawFilter"), T("yawRaw"), T("pitchFusion"), T("rollFusion"), T("gyro"), T("accel"), "JD / J2000", "LST TONALÁ", T("incidence"), T("fusionErr")]
+    .forEach((txt,i)=>{ if(rawLabels[i]) rawLabels[i].textContent = txt; });
+
+  const es = document.getElementById("langES");
+  const en = document.getElementById("langEN");
+  if(es) es.classList.toggle("active", EVA_LANG === "es");
+  if(en) en.classList.toggle("active", EVA_LANG === "en");
+
+  const chip = document.getElementById("stateChip");
+  if(chip) chip.textContent = EVA.state === "B" ? T("stateBChip") : T("stateAChip");
+
+  const hud = document.getElementById("hudCorner");
+  if(hud) hud.textContent = EVA.state === "B" ? T("hudB") : T("hudA");
+
+  if(userAction){
+    bootSequence();
+    gtagSafe("language_selected", {language:EVA_LANG});
+  }
+}
+
 /* ============================================================
    MODULE_1: BOOT_SEQUENCE / DUAL STATE MACHINE
    ============================================================ */
 function bootSequence(){
   const log = document.getElementById("bootLog");
-  const lines = [
-    "KERNEL_OVERRIDE_PROMPT::TARGET_GPT4_PRO_VERSION accepted",
-    "ROLE: Lead Aerospace GNC Engineer & Systems Architect",
-    "Compiling STARVIEW-HUD-OMNI-OS ............... OK",
-    "Initializing Dual-State Machine .............. OK",
-    "STATE_A CIVIL_EXPLORER ....................... READY",
-    "STATE_B ENGINEERING_TACTICAL ................. READY",
-    "Sensor Fusion Core complementary filter ...... READY",
-    "Astro Engine: JD/LST/AltAz/Ecliptic .......... READY",
-    "HVAC Solar Incidence Module .................. READY",
-    "E.V.A. v8.0 awaiting operator mode selection"
-  ];
+  const lines = T("bootLines");
   log.innerHTML = "";
   let i=0;
   const timer = setInterval(()=>{
@@ -415,8 +669,8 @@ function setSystemState(state, fromMenu=false){
   EVA.state = state === "B" ? "B" : "A";
   document.body.classList.toggle("state-b", EVA.state === "B");
   document.body.classList.toggle("state-a", EVA.state === "A");
-  document.getElementById("stateChip").textContent = EVA.state === "B" ? "STATE_B" : "STATE_A";
-  document.getElementById("hudCorner").textContent = EVA.state === "B" ? "ENGINEERING_TACTICAL · ALTAZ GRID" : "CIVIL_EXPLORER · SKY DOME";
+  document.getElementById("stateChip").textContent = EVA.state === "B" ? T("stateBChip") : T("stateAChip");
+  document.getElementById("hudCorner").textContent = EVA.state === "B" ? T("hudB") : T("hudA");
   document.getElementById("boot").classList.add("hidden");
   document.getElementById("modeMenu").classList.remove("open");
   renderStaticBackground();
@@ -437,22 +691,22 @@ async function enableFusionCore(){
   try{
     if(typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function"){
       const p = await DeviceOrientationEvent.requestPermission();
-      if(p !== "granted"){Fusion.sensorMode="ORIENTATION_DENIED";return;}
+      if(p !== "granted"){Fusion.sensorMode=T("deniedOrientation");return;}
     }
     if(typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function"){
       const p2 = await DeviceMotionEvent.requestPermission();
-      if(p2 !== "granted"){Fusion.sensorMode="MOTION_DENIED";}
+      if(p2 !== "granted"){Fusion.sensorMode=T("deniedMotion");}
     }
     window.addEventListener("deviceorientationabsolute", onOrientation, true);
     window.addEventListener("deviceorientation", onOrientation, true);
     window.addEventListener("devicemotion", onMotion, true);
     Fusion.enabled = true;
     Fusion.sensorMode = "FUSION_ARMED";
-    document.getElementById("sensorCorner").textContent = "FUSION ARMED";
+    document.getElementById("sensorCorner").textContent = T("fusionArmed");
     gtagSafe("fusion_enabled");
   }catch(err){
     Fusion.sensorMode = "FUSION_ERROR";
-    document.getElementById("sensorCorner").textContent = "FUSION ERROR";
+    document.getElementById("sensorCorner").textContent = "ERROR DE FUSIÓNOR";
   }
 }
 
@@ -460,13 +714,13 @@ function onOrientation(ev){
   let hdg = null;
   if(typeof ev.webkitCompassHeading === "number"){
     hdg = ev.webkitCompassHeading;
-    Fusion.sensorMode = "WEBKIT_COMPASS";
+    Fusion.sensorMode = "BRÚJULA_WEBKIT";
   }else if(ev.type === "deviceorientationabsolute" && typeof ev.alpha === "number"){
     hdg = 360 - ev.alpha;
-    Fusion.sensorMode = "ABS_ALPHA";
+    Fusion.sensorMode = "ALPHA_ABSOLUTO";
   }else if(typeof ev.alpha === "number"){
     hdg = 360 - ev.alpha;
-    Fusion.sensorMode = ev.absolute ? "ABS_FLAG_ALPHA" : "REL_ALPHA";
+    Fusion.sensorMode = ev.absolute ? "ALPHA_ABS_FLAG" : "ALPHA_RELATIVO";
   }
 
   if(hdg !== null){
@@ -654,10 +908,10 @@ function planetColor(name){
    ============================================================ */
 function solarIncidenceModule(bodies){
   const sun = bodies.find(b=>b.name==="Sol");
-  if(!sun) return {alt:0,az:0,load:0,label:"NO SOL"};
+  if(!sun) return {alt:0,az:0,load:0,label:T("noSol")};
   const altFactor = Math.max(0, Math.sin(deg(sun.alt)));
   const load = Math.round(1000 * altFactor);
-  return {alt:sun.alt, az:sun.az, load, label: load>750?"HIGH SOLAR LOAD":load>350?"MODERATE LOAD":"LOW SOLAR LOAD"};
+  return {alt:sun.alt, az:sun.az, load, label: load>750?"HIGH SOLAR LOAD":load>350?"MODERATE LOAD":"BAJA CARGA SOLAR"};
 }
 
 /* ============================================================
@@ -773,13 +1027,13 @@ function renderGrid(ctx){
 function EclipticPlot(ctx,date,LST){
   const samples=[];
   for(let lam=0;lam<=360;lam+=2) samples.push(eclipticToEquatorial(lam,0,date));
-  drawEquatorialCurve(ctx,samples,EVA.state==="B"?"rgba(0,255,136,.78)":"rgba(255,242,168,.72)","ECLIPTIC");
+  drawEquatorialCurve(ctx,samples,EVA.state==="B"?"rgba(0,255,136,.78)":"rgba(255,242,168,.72)",T("ecliptic"));
 }
 
 function drawCelestialEquator(ctx,date){
   const samples=[];
   for(let ra=0;ra<=24;ra+=.15) samples.push({raHours:ra,decDeg:0});
-  drawEquatorialCurve(ctx,samples,EVA.state==="B"?"rgba(0,190,255,.55)":"rgba(112,211,255,.38)","CELESTIAL EQUATOR");
+  drawEquatorialCurve(ctx,samples,EVA.state==="B"?"rgba(0,190,255,.55)":"rgba(112,211,255,.38)",T("equator"));
 }
 
 function drawEquatorialCurve(ctx,samples,color,label){
@@ -799,7 +1053,7 @@ function drawEquatorialCurve(ctx,samples,color,label){
   ctx.restore();
   ctx.save();
   ctx.fillStyle=color; ctx.font="12px monospace"; ctx.textAlign="left";
-  ctx.fillText(label,EVA.cx-EVA.rmax+16,EVA.cy+EVA.rmax-(label==="ECLIPTIC"?28:46));
+  ctx.fillText(label,EVA.cx-EVA.rmax+16,EVA.cy+EVA.rmax-(label==="ECLÍPTICA"?28:46));
   ctx.restore();
 }
 
@@ -901,7 +1155,7 @@ function render6DoF(ctx){
   ctx.strokeStyle="rgba(216,255,231,.95)"; ctx.lineWidth=2; ctx.beginPath();
   ctx.moveTo(-26,0); ctx.lineTo(-8,0); ctx.moveTo(8,0); ctx.lineTo(26,0); ctx.moveTo(0,-10); ctx.lineTo(0,10); ctx.stroke();
   ctx.fillStyle="rgba(0,255,136,.95)"; ctx.font="11px monospace"; ctx.textAlign="center";
-  ctx.fillText("6-DoF DIGITAL LEVEL",0,-h/2+20);
+  ctx.fillText(T("levelTitle"),0,-h/2+20);
   ctx.fillText(`P ${Fusion.pitch.toFixed(2)}° R ${Fusion.roll.toFixed(2)}° Y ${Fusion.yawFiltered.toFixed(2)}°`,0,h/2-12);
   ctx.restore();
 }
@@ -911,19 +1165,19 @@ function renderRawOverlay(ctx){
   const x=18,y=18,w=318,h=174;
   ctx.save(); ctx.fillStyle="rgba(0,0,0,.72)"; ctx.strokeStyle="rgba(0,255,136,.45)"; ctx.lineWidth=1.5;
   roundRect(ctx,x,y,w,h,14); ctx.fill(); ctx.stroke();
-  ctx.fillStyle="rgba(0,255,136,.95)"; ctx.font="bold 12px monospace"; ctx.fillText("E.V.A. RAW TELEMETRY BUS",x+12,y+24);
+  ctx.fillStyle="rgba(0,255,136,.95)"; ctx.font="bold 12px monospace"; ctx.fillText(T("telemetryBus"),x+12,y+24);
   ctx.font="11px monospace";
   const rows=[
-    `YAW/FILTER  : ${Fusion.yawFiltered.toFixed(2)}°`,
-    `YAW/RAW     : ${Fusion.yawRaw.toFixed(2)}°`,
+    `RUMBO/FILTRO  : ${Fusion.yawFiltered.toFixed(2)}°`,
+    `RUMBO/CRUDO     : ${Fusion.yawRaw.toFixed(2)}°`,
     `PITCH       : ${Fusion.pitch.toFixed(2)}°`,
     `ROLL        : ${Fusion.roll.toFixed(2)}°`,
-    `GYRO αβγ    : ${Fusion.gyroAlpha.toFixed(1)}/${Fusion.gyroBeta.toFixed(1)}/${Fusion.gyroGamma.toFixed(1)}`,
+    `GIRO αβγ    : ${Fusion.gyroAlpha.toFixed(1)}/${Fusion.gyroBeta.toFixed(1)}/${Fusion.gyroGamma.toFixed(1)}`,
     `ERR RMS     : ±${Fusion.err.toFixed(2)}°`,
-    `SENSOR MODE : ${Fusion.sensorMode}`
+    `${T("sensorMode")} : ${Fusion.sensorMode}`
   ];
   rows.forEach((r,i)=>ctx.fillText(r,x+12,y+48+i*18));
-  if(Fusion.err>8){ctx.fillStyle="rgba(255,73,108,.95)";ctx.fillText("MAGNETIC JITTER WARNING",x+176,y+156);}
+  if(Fusion.err>8){ctx.fillStyle="rgba(255,73,108,.95)";ctx.fillText(T("magneticWarning"),x+176,y+156);}
   ctx.restore();
 }
 
@@ -955,7 +1209,7 @@ function renderFrame(t){
 function updateDOM(date,JD){
   const LST=getLST(JD,EVA.lon);
   const solar=solarIncidenceModule(EVA.visibleBodies);
-  document.getElementById("sensorCorner").textContent=Fusion.enabled?`${Fusion.sensorMode} · HDG ${Fusion.yawFiltered.toFixed(1)}°`:"FUSION OFF";
+  document.getElementById("sensorCorner").textContent=Fusion.enabled?`${Fusion.sensorMode} · HDG ${Fusion.yawFiltered.toFixed(1)}°`:T("fusionOff");
 
   document.getElementById("civilObjects").innerHTML=EVA.visibleStars.slice(0,10).map(s=>`
     <div class="row"><div><b>${s.name}</b><br><small>${s.cons} · ${s.spec}</small></div><small>Alt ${s.alt.toFixed(0)}° · Az ${s.az.toFixed(0)}°</small></div>
@@ -963,7 +1217,7 @@ function updateDOM(date,JD){
 
   document.getElementById("civilBodies").innerHTML=EVA.visibleBodies.filter(b=>b.alt>0).map(b=>`
     <div class="row"><div><b>${b.name}</b><br><small>${b.type}</small></div><small>Alt ${b.alt.toFixed(0)}° · Az ${b.az.toFixed(0)}°</small></div>
-  `).join("") || "<div class='row'><div><b>Sin cuerpos sobre horizonte</b></div></div>";
+  `).join("") || "<div class='row'><div><b>Sin cuerpos sobre el horizonte</b></div></div>";
 
   const ids = {
     dYaw:`${Fusion.yawFiltered.toFixed(2)}°`,
@@ -985,10 +1239,10 @@ function updateDOM(date,JD){
 
 function solarIncidenceModule(bodies){
   const sun=bodies.find(b=>b.name==="Sol");
-  if(!sun) return {alt:0,az:0,load:0,label:"NO SOL"};
+  if(!sun) return {alt:0,az:0,load:0,label:T("noSol")};
   const f=Math.max(0,Math.sin(deg(sun.alt)));
   const load=Math.round(1000*f);
-  return {alt:sun.alt,az:sun.az,load,label:load>750?"HIGH HVAC HEAT LOAD":load>350?"MODERATE SOLAR LOAD":"LOW SOLAR LOAD"};
+  return {alt:sun.alt,az:sun.az,load,label:load>750?T("highLoad"):load>350?T("moderateLoad"):T("lowLoad")};
 }
 
 function getTime(){
@@ -1011,12 +1265,12 @@ function useTonala(){
 }
 
 function useGPS(){
-  if(!navigator.geolocation){alert("GPS no disponible.");return;}
+  if(!navigator.geolocation){alert(T("gpsUnavailable"));return;}
   navigator.geolocation.getCurrentPosition(pos=>{
     EVA.lat=pos.coords.latitude;EVA.lon=pos.coords.longitude;
     document.getElementById("lat").value=EVA.lat.toFixed(5);
     document.getElementById("lon").value=EVA.lon.toFixed(5);
-  },()=>alert("No se pudo obtener GPS. Se mantiene Tonalá/ZMG."),{enableHighAccuracy:true,timeout:9000});
+  },()=>alert(T("gpsFail")),{enableHighAccuracy:true,timeout:9000});
 }
 
 function resize(){
@@ -1049,6 +1303,7 @@ function init(){
   document.getElementById("time").value=d.toISOString().slice(0,16);
   document.getElementById("time").addEventListener("change",()=>EVA.liveTime=false);
   generateWeakStarfield();
+  setLanguage(EVA_LANG, false);
   bootSequence();
   window.addEventListener("resize",resize,{passive:true});
   requestAnimationFrame(renderFrame);

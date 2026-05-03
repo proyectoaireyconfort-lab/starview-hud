@@ -1,38 +1,36 @@
-# STARVIEW-HUD-OMNI-OS · E.V.A. v8.0
+# STARVIEW-HUD-OMNI-OS · E.V.A. v8.2 Bilingüe
 
-Single-file HTML/CSS/JS astronomical telemetry system.
+Esta versión permite que el usuario elija idioma:
 
-## Features
+- 🇲🇽 Español
+- 🇺🇸 English
 
-- Dual-State Machine:
-  - STATE_A CIVIL_EXPLORER
-  - STATE_B ENGINEERING_TACTICAL
-- ASCII BIOS pre-loader simulation.
-- Complementary sensor fusion core using:
-  - deviceorientationabsolute / deviceorientation
-  - devicemotion accelerometer and rotationRate
-- Formula:
-  `filteredAngle = α * (filteredAngle + gyroData * dt) + (1 - α) * accelData`
-- Native astronomy kernel:
-  - Julian Date
-  - J2000 epoch days
-  - Local Sidereal Time
-  - Equatorial to Alt-Azimuth projection
-  - Basic atmospheric refraction
-  - Ecliptic plot with 23.44° obliquity
-- HVAC field instrumentation:
-  - Digital level Pitch/Roll/Yaw
-  - Solar incidence / heat-load approximation
-- 100+ star catalog with magnitude and spectral color coding.
-- Zero-library dependency.
-- Single file for GitHub Pages.
+## Cómo funciona
 
-## Deploy
+- En la pantalla BIOS aparecen botones de idioma.
+- En el menú ⚙️ también se puede cambiar el idioma en cualquier momento.
+- Guarda la preferencia en `localStorage`.
+- Mantiene la app en un solo archivo HTML.
+- No usa librerías externas.
 
-Upload only:
+## Conserva
+
+- ESTADO_A / STATE_A
+- ESTADO_B / STATE_B
+- Núcleo de fusión de sensores
+- JD / J2000 / LST
+- Proyección RA/Dec → Alt/Az
+- Eclíptica y ecuador celeste
+- Módulo HVAC de incidencia solar
+- 125 estrellas
+- OffscreenCanvas-compatible buffer
+
+## GitHub Pages
+
+Sube y reemplaza:
 
 `index.html`
 
-Then open:
+Prueba con:
 
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=omni-os`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=eva-bilingual`
