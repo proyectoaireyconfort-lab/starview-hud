@@ -210,9 +210,106 @@
     .help-title button{max-width:100%}
   }
 
+
+  .intro-panel{
+    border:1px solid rgba(100,220,255,.26);
+    border-radius:20px;
+    padding:15px;
+    margin:12px 0 14px;
+    background:linear-gradient(135deg,rgba(0,180,255,.12),rgba(255,49,87,.10));
+    box-shadow:0 0 22px rgba(0,180,255,.08);
+  }
+  .intro-panel h2{
+    margin:0 0 8px;
+    font-size:20px;
+  }
+  .intro-panel p{
+    margin:6px 0;
+    color:rgba(234,247,255,.84);
+    line-height:1.45;
+  }
+  .quick-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:9px;
+    margin-top:12px;
+  }
+  .quick-item{
+    border:1px solid rgba(120,220,255,.22);
+    border-radius:16px;
+    padding:10px;
+    background:rgba(0,0,0,.20);
+    font-size:13px;
+    line-height:1.35;
+  }
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:18px;
+  }
+  .modal{
+    max-width:760px;
+    width:100%;
+    border-radius:24px;
+    border:1px solid rgba(100,220,255,.35);
+    background:
+      radial-gradient(circle at 15% 15%, rgba(0,180,255,.22), transparent 35%),
+      radial-gradient(circle at 85% 80%, rgba(255,49,87,.18), transparent 35%),
+      rgba(5,12,24,.96);
+    box-shadow:0 0 45px rgba(0,180,255,.22);
+    padding:20px;
+  }
+  .modal h2{
+    margin:0 0 8px;
+    font-size:25px;
+  }
+  .modal p{
+    color:rgba(234,247,255,.84);
+    line-height:1.45;
+  }
+  .modal-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:14px;
+  }
+  .hidden{display:none!important}
+  @media(max-width:700px){
+    .quick-grid{grid-template-columns:1fr}
+    .modal-actions{grid-template-columns:1fr}
+    .modal h2{font-size:22px}
+  }
+
 </style>
 </head>
 <body>
+
+<div id="introModal" class="modal-backdrop">
+  <div class="modal">
+    <h2>🌌 Bienvenido a StarView HUD</h2>
+    <p>
+      Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.
+    </p>
+    <p>
+      <b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.
+    </p>
+    <div class="quick-grid">
+      <div class="quick-item"><b>1. Ubicación</b><br>Usa el GPS o deja Tonalá/ZMG.</div>
+      <div class="quick-item"><b>2. Mapa</b><br>N, E, S y O marcan las direcciones.</div>
+      <div class="quick-item"><b>3. Estrellas</b><br>Los puntos más grandes son las más brillantes.</div>
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeIntro()">Entendido, usar app</button>
+      <button class="button-secondary" onclick="closeIntro(); scrollToSky();">Ir directo al mapa</button>
+    </div>
+  </div>
+</div>
+
 <div class="app">
   <div class="card">
     <div class="brand">
@@ -221,6 +318,22 @@
         <div class="sub">App para consultar qué estrellas brillantes pueden verse sobre tu cielo según tu ubicación, fecha y hora.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
+    </div>
+
+    <div class="intro-panel">
+      <h2>📌 ¿Qué es y cómo se utiliza?</h2>
+      <p>
+        <b>StarView HUD</b> es una guía visual para personas que quieren ver el cielo y reconocer estrellas desde su celular.
+      </p>
+      <p>
+        Primero usa tu ubicación, luego actualiza el cielo. El círculo representa el cielo sobre ti:
+        arriba es <b>Norte</b>, derecha <b>Este</b>, abajo <b>Sur</b> e izquierda <b>Oeste</b>.
+      </p>
+      <div class="quick-grid">
+        <div class="quick-item">📍 <b>Ubicación</b><br>Calcula qué estrellas están sobre tu horizonte.</div>
+        <div class="quick-item">🔭 <b>Actualizar cielo</b><br>Refresca el mapa con la hora actual.</div>
+        <div class="quick-item">🌙 <b>Modo nocturno</b><br>Reduce brillo para usarlo de noche.</div>
+      </div>
     </div>
 
     <div class="grid">
@@ -244,6 +357,7 @@
       <button onclick="drawSky()">🔭 Actualizar cielo</button>
       <button class="button-secondary" onclick="setTonala()">📌 Usar Tonalá/ZMG</button>
       <button class="button-secondary" onclick="toggleNight()">🌙 Modo rojo nocturno</button>
+      <button class="button-secondary" onclick="openIntro()">ℹ️ Ver instrucciones</button>
     </div>
 
     <div class="instructions">
@@ -444,6 +558,14 @@ function setTonala(){
   document.getElementById("lat").value = "20.624";
   document.getElementById("lon").value = "-103.234";
   drawSky();
+}
+
+function closeIntro(){
+  document.getElementById("introModal").classList.add("hidden");
+}
+
+function openIntro(){
+  document.getElementById("introModal").classList.remove("hidden");
 }
 
 function scrollToSky(){

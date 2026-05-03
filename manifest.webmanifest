@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD",
+  "name": "StarView HUD v3",
   "short_name": "StarView",
-  "description": "Mapa estelar interactivo con instrucciones para ver estrellas visibles desde tu ubicación.",
+  "description": "Mapa estelar interactivo con pantalla de bienvenida e instrucciones integradas.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",
