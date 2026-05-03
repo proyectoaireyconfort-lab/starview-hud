@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v14",
+  "name": "StarView HUD v15",
   "short_name": "StarView",
-  "description": "Instrumento de campo con radar orientado, eclíptica y horizonte artificial.",
+  "description": "Modo Normal limpio y Modo Ingeniería con telemetría de campo.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",

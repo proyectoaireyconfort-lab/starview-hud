@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v14 | Mapa del Cielo</title>
+<title>StarView HUD v15 | Mapa del Cielo</title>
 <meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -405,6 +405,187 @@
     pointer-events:none;
   }
 
+
+  /* === STARVIEW V15: MODE SYSTEM === */
+  body.mode-normal{
+    background:
+      radial-gradient(circle at 20% 15%, rgba(0,150,255,.22), transparent 34%),
+      radial-gradient(circle at 80% 80%, rgba(20,80,180,.16), transparent 38%),
+      linear-gradient(180deg,#020816,#04142b 65%,#020814);
+  }
+  body.mode-normal .card{
+    background:rgba(7,20,42,.72);
+    border-color:rgba(100,200,255,.24);
+    box-shadow:0 0 26px rgba(0,150,255,.11);
+  }
+  body.mode-normal .engineering-only{
+    display:none!important;
+  }
+  body.mode-normal .ecliptic-badge,
+  body.mode-normal .heading-hud,
+  body.mode-normal .lock-pill,
+  body.mode-normal .field-readout{
+    display:none!important;
+  }
+
+  body.mode-engineering{
+    background:
+      radial-gradient(circle at 18% 18%, rgba(0,255,120,.10), transparent 35%),
+      linear-gradient(180deg,#000804,#010f08 65%,#000000);
+    color:#ccffdd;
+  }
+  body.mode-engineering .card{
+    background:rgba(0,12,6,.82);
+    border-color:rgba(0,255,120,.28);
+    box-shadow:0 0 24px rgba(0,255,120,.10);
+  }
+  body.mode-engineering .card:before{
+    background:linear-gradient(135deg,rgba(0,255,120,.55),rgba(120,255,180,.18),rgba(0,255,120,.08));
+  }
+  body.mode-engineering button{
+    background:linear-gradient(135deg,rgba(0,255,120,.20),rgba(0,80,40,.34));
+    border-color:rgba(0,255,120,.36);
+    color:#ddffea;
+  }
+  body.mode-engineering input,
+  body.mode-engineering select{
+    background:rgba(0,0,0,.48);
+    border-color:rgba(0,255,120,.28);
+    color:#ddffea;
+  }
+  body.mode-engineering .chip,
+  body.mode-engineering .field-pill,
+  body.mode-engineering .pill,
+  body.mode-engineering .quick-item,
+  body.mode-engineering .mini-card{
+    border-color:rgba(0,255,120,.24);
+    background:rgba(0,0,0,.34);
+    color:#ccffdd;
+  }
+  body.mode-engineering .sub,
+  body.mode-engineering .small{
+    color:rgba(204,255,221,.72);
+  }
+  body.mode-engineering .normal-only{
+    display:none!important;
+  }
+  body.mode-engineering .ecliptic-badge,
+  body.mode-engineering .heading-hud,
+  body.mode-engineering .lock-pill{
+    border-color:rgba(0,255,120,.32);
+    color:#b8ffd0;
+  }
+
+  .mode-launch{
+    position:fixed;
+    inset:0;
+    z-index:10000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background:
+      radial-gradient(circle at 25% 18%, rgba(0,180,255,.22), transparent 35%),
+      radial-gradient(circle at 80% 80%, rgba(0,255,120,.14), transparent 35%),
+      rgba(0,0,0,.82);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  }
+  .mode-launch.hidden{
+    display:none!important;
+  }
+  .mode-box{
+    width:min(760px,100%);
+    border:1px solid rgba(120,220,255,.30);
+    border-radius:28px;
+    background:rgba(5,14,28,.94);
+    box-shadow:0 0 45px rgba(0,180,255,.18);
+    padding:24px;
+    text-align:center;
+  }
+  .mode-box h2{
+    font-size:30px;
+    margin:0 0 8px;
+  }
+  .mode-box p{
+    color:rgba(234,247,255,.78);
+    margin:0 auto 18px;
+    max-width:620px;
+  }
+  .mode-choice-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+  }
+  .mode-choice{
+    min-height:145px;
+    border-radius:22px;
+    padding:18px;
+    border:1px solid rgba(120,220,255,.28);
+    background:linear-gradient(135deg,rgba(0,150,255,.20),rgba(255,255,255,.05));
+    color:#fff;
+    cursor:pointer;
+    text-align:left;
+  }
+  .mode-choice.engineering{
+    border-color:rgba(0,255,120,.28);
+    background:linear-gradient(135deg,rgba(0,255,120,.14),rgba(0,0,0,.18));
+  }
+  .mode-choice b{
+    display:block;
+    font-size:22px;
+    margin-bottom:8px;
+  }
+  .mode-choice span{
+    display:block;
+    color:rgba(234,247,255,.72);
+    line-height:1.38;
+    font-size:14px;
+  }
+
+  .mode-settings{
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:9998;
+  }
+  .mode-gear{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    padding:0;
+    font-size:20px;
+    background:rgba(0,0,0,.48);
+  }
+  .mode-menu{
+    display:none;
+    position:absolute;
+    right:0;
+    top:50px;
+    width:220px;
+    border:1px solid rgba(120,220,255,.28);
+    border-radius:18px;
+    padding:10px;
+    background:rgba(0,10,18,.94);
+    box-shadow:0 0 26px rgba(0,180,255,.14);
+  }
+  .mode-menu.open{display:block}
+  .mode-menu button{
+    margin:6px 0;
+  }
+
+  .normal-constellation-card{
+    border:1px solid rgba(100,200,255,.22);
+    background:linear-gradient(135deg,rgba(0,150,255,.10),rgba(0,0,0,.20));
+  }
+
+  @media(max-width:760px){
+    .mode-choice-grid{grid-template-columns:1fr}
+    .mode-box h2{font-size:24px}
+  }
+
 </style>
 
 <!-- Google Analytics 4 - StarView HUD -->
@@ -418,10 +599,37 @@
 <!-- End Google Analytics 4 -->
 </head>
 
-<body>
-<div id="introModal" class="modal-backdrop">
+<body class="mode-normal">
+
+<div id="modeLaunch" class="mode-launch">
+  <div class="mode-box">
+    <h2>🌌 StarView HUD</h2>
+    <p>Selecciona cómo quieres usar la app. Puedes cambiar de modo después desde el engrane.</p>
+    <div class="mode-choice-grid">
+      <button class="mode-choice" onclick="selectAppMode('normal')">
+        <b>Modo Normal</b>
+        <span>Vista limpia, azul y visual. Pensada para disfrutar el cielo, estrellas y constelaciones sin telemetría técnica.</span>
+      </button>
+      <button class="mode-choice engineering" onclick="selectAppMode('engineering')">
+        <b>Modo Ingeniería</b>
+        <span>Instrumento de campo: Pitch, Roll, Acimut, Altitud, eclíptica, horizonte artificial y cuadrícula de coordenadas.</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="mode-settings">
+  <button class="mode-gear" onclick="toggleModeMenu()" title="Configuración">⚙️</button>
+  <div id="modeMenu" class="mode-menu">
+    <button onclick="selectAppMode('normal', true)">🌌 Modo Normal</button>
+    <button onclick="selectAppMode('engineering', true)">🧪 Modo Ingeniería</button>
+    <button class="button-secondary" onclick="showModeLaunch()">Cambiar al inicio</button>
+  </div>
+</div>
+
+<div id="introModal" class="modal-backdrop hidden">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v14</h2>
+    <h2>🌌 Bienvenido a StarView HUD v15</h2>
     <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
     <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
@@ -441,7 +649,7 @@
     <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD v14</h1>
+        <h1>🌌 StarView HUD v15</h1>
         <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
@@ -558,6 +766,7 @@
         <span class="field-pill" id="fieldHeadingPill">HDG --°</span>
         <span class="field-pill" id="fieldPitchPill">PITCH --°</span>
         <span class="field-pill" id="fieldRollPill">ROLL --°</span>
+        <span class="field-pill" id="fieldAltitudePill">ALT --°</span>
         <span class="field-pill warn" id="fieldModePill">SENSOR OFF</span>
       </div>
     </div>
@@ -583,6 +792,12 @@
       <p class="small">Clasificación práctica según altura y brillo aparente.</p>
       <div id="visibilityList" class="list"></div>
     </div>
+  </div>
+
+  <div class="card normal-only normal-constellation-card">
+    <h2>✨ Constelaciones visibles</h2>
+    <p class="small">Modo Normal: una lectura limpia del cielo con nombres de constelaciones destacadas.</p>
+    <div id="normalConstellations" class="list"></div>
   </div>
 
   <div class="grid-3">
@@ -740,7 +955,7 @@
     <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
   </div>
 
-  <div class="footer">StarView HUD v14 · Guía visual básica, no sustituye software astronómico profesional.</div>
+  <div class="footer">StarView HUD v15 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>
@@ -992,9 +1207,11 @@ function drawSky(sendTrack = true){
   });
   ctx.restore();
 
-  ctx.strokeStyle = nightMode ? "rgba(255,80,80,.28)" : "rgba(90,220,255,.25)";
+  ctx.strokeStyle = appMode === "engineering" ? "rgba(0,255,120,.30)" : (nightMode ? "rgba(255,80,80,.28)" : "rgba(90,220,255,.25)");
   ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(cx,cy,rmax,0,Math.PI*2); ctx.stroke();
+
+  if(appMode === "engineering") drawEngineeringCoordinateGrid(ctx, cx, cy, rmax);
 
   [30,60].forEach(a=>{
     const rr = ((90-a)/90)*rmax;
@@ -1020,7 +1237,7 @@ function drawSky(sendTrack = true){
   });
 
   // Capa de eclíptica: ruta aparente del Sol, Luna y planetas
-  drawEcliptic(ctx, cx, cy, rmax, lat, lon, date);
+  if(appMode === "engineering") drawEcliptic(ctx, cx, cy, rmax, lat, lon, date);
 
   let calculated = {};
   let visible = [];
@@ -1087,9 +1304,12 @@ function drawSky(sendTrack = true){
     </div>
   `).join("") || "<div class='pill'>No hay estrellas destacadas calculadas sobre el horizonte en este momento.</div>";
 
-  // Horizonte artificial de campo: nivel pitch/roll del celular
-  drawArtificialHorizon(ctx, W - 225, 22, 205, 128);
-  updateFieldInstrumentReadout();
+  // Instrumentos técnicos solo en Modo Ingeniería
+  if(appMode === "engineering"){
+    drawEngineeringTelemetry(ctx, 22, 22, 245, 132);
+    drawArtificialHorizon(ctx, W - 225, 22, 205, 128);
+    updateFieldInstrumentReadout();
+  }
 
   document.getElementById("status").innerHTML = `
     <b>Lectura:</b> ${visible.length} objetos brillantes sobre el horizonte. 
@@ -1103,6 +1323,7 @@ function drawSky(sendTrack = true){
   createPoster();
   lastVisibleStars = visible;
   updateAllAdvancedModules();
+  updateNormalConstellations();
 }
 
 
@@ -1837,6 +2058,174 @@ function updateAllAdvancedModules(){
 }
 
 
+
+/* ============================================================
+   STARVIEW V15 MODE SYSTEM
+   Normal: limpio / Ingeniería: terminal técnico
+   ============================================================ */
+
+let appMode = "normal";
+
+function selectAppMode(mode, fromMenu = false){
+  appMode = mode === "engineering" ? "engineering" : "normal";
+  document.body.classList.toggle("mode-engineering", appMode === "engineering");
+  document.body.classList.toggle("mode-normal", appMode === "normal");
+
+  const launch = document.getElementById("modeLaunch");
+  if(launch) launch.classList.add("hidden");
+
+  const menu = document.getElementById("modeMenu");
+  if(menu) menu.classList.remove("open");
+
+  tagModeElements();
+
+  if(appMode === "normal"){
+    nightMode = false;
+    document.body.classList.remove("night-red");
+  }
+
+  if(typeof drawSky === "function"){
+    try{ drawSky(false); }catch(e){ drawSky(); }
+  }
+
+  track("app_mode_selected", {mode:appMode, from_menu:fromMenu});
+}
+
+function showModeLaunch(){
+  const launch = document.getElementById("modeLaunch");
+  if(launch) launch.classList.remove("hidden");
+  const menu = document.getElementById("modeMenu");
+  if(menu) menu.classList.remove("open");
+}
+
+function toggleModeMenu(){
+  const menu = document.getElementById("modeMenu");
+  if(menu) menu.classList.toggle("open");
+}
+
+function tagModeElements(){
+  const engineeringTitles = [
+    "Radar automático",
+    "¿Qué estrella estoy viendo?",
+    "Nivel de visibilidad",
+    "Eventos del cielo",
+    "Planetas visibles",
+    "Postal para compartir",
+    "Star Hunter",
+    "Índice StarView",
+    "Próximos 60 minutos",
+    "Cielo en movimiento",
+    "Cielo de mi fecha especial",
+    "Sky Report Premium",
+    "Reto nocturno",
+    "Mensaje bajo las estrellas",
+    "Ranking fácil de encontrar"
+  ];
+
+  document.querySelectorAll(".card").forEach(card=>{
+    const title = card.querySelector("h2")?.textContent || "";
+    if(engineeringTitles.some(t => title.includes(t))){
+      card.classList.add("engineering-only");
+    }
+  });
+}
+
+function estimateDeviceAltitude(){
+  // Aproximación visual para instrumento de campo:
+  // beta/pitch se usa como elevación estimada del teléfono.
+  return clamp(sensorPitch || 0, -90, 90);
+}
+
+function updateNormalConstellations(){
+  const box = document.getElementById("normalConstellations");
+  if(!box || !lastVisibleStars || !lastVisibleStars.length) return;
+
+  const groups = {};
+  lastVisibleStars.slice(0,18).forEach(s=>{
+    if(!groups[s.cons]) groups[s.cons] = [];
+    groups[s.cons].push(s.name);
+  });
+
+  const rows = Object.entries(groups).slice(0,8).map(([cons,names])=>`
+    <div class="starrow">
+      <div><b>${cons}</b><br><span class="small">${names.slice(0,4).join(", ")}</span></div>
+      <div class="small">visible</div>
+    </div>
+  `).join("");
+
+  box.innerHTML = rows || "<div class='pill'>Actualiza el cielo para ver constelaciones.</div>";
+}
+
+function drawEngineeringCoordinateGrid(ctx, cx, cy, rmax){
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, rmax, 0, Math.PI * 2);
+  ctx.clip();
+
+  ctx.strokeStyle = "rgba(0,255,120,.18)";
+  ctx.fillStyle = "rgba(0,255,120,.55)";
+  ctx.lineWidth = 1;
+  ctx.font = "10px monospace";
+  ctx.textAlign = "center";
+
+  // Radios de acimut cada 10°
+  for(let az=0; az<360; az+=10){
+    const p = project(displayAz(az), 0, cx, cy, rmax);
+    ctx.strokeStyle = az % 30 === 0 ? "rgba(0,255,120,.25)" : "rgba(0,255,120,.10)";
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+
+    if(az % 30 === 0){
+      const labelP = project(displayAz(az), -6, cx, cy, rmax);
+      ctx.fillText(`${az}°`, labelP.x, labelP.y);
+    }
+  }
+
+  // Círculos de altitud cada 15°
+  for(let alt=15; alt<=75; alt+=15){
+    const rr = ((90-alt)/90)*rmax;
+    ctx.strokeStyle = "rgba(0,255,120,.16)";
+    ctx.beginPath();
+    ctx.arc(cx, cy, rr, 0, Math.PI*2);
+    ctx.stroke();
+    ctx.fillText(`ALT ${alt}°`, cx + rr + 24, cy - 4);
+  }
+
+  ctx.restore();
+}
+
+function drawEngineeringTelemetry(ctx, x, y, w, h){
+  const az = currentRotation || 0;
+  const alt = estimateDeviceAltitude();
+  ctx.save();
+
+  ctx.fillStyle = "rgba(0,0,0,.62)";
+  ctx.strokeStyle = "rgba(0,255,120,.42)";
+  ctx.lineWidth = 1.5;
+  roundRect(ctx, x, y, w, h, 14);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(0,255,120,.92)";
+  ctx.font = "bold 13px monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("AIRE ACONDICIONADO Y CONFORT · LAB", x+12, y+23);
+
+  ctx.font = "12px monospace";
+  ctx.fillText(`ACIMUT  : ${az.toFixed(1)}°`, x+12, y+49);
+  ctx.fillText(`ALTITUD : ${alt.toFixed(1)}°`, x+12, y+70);
+  ctx.fillText(`PITCH   : ${(sensorPitch || 0).toFixed(1)}°`, x+12, y+91);
+  ctx.fillText(`ROLL    : ${(sensorRoll || 0).toFixed(1)}°`, x+12, y+112);
+
+  ctx.textAlign = "right";
+  ctx.fillStyle = "rgba(0,255,120,.68)";
+  ctx.fillText(sensorMode || "SENSOR OFF", x+w-12, y+112);
+
+  ctx.restore();
+}
+
 /* ============================================================
    STARVIEW FIELD INSTRUMENT MODULE
    Eclíptica + Horizonte artificial + Pitch/Roll HUD
@@ -1846,11 +2235,13 @@ function updateFieldInstrumentReadout(){
   const headingPill = document.getElementById("fieldHeadingPill");
   const pitchPill = document.getElementById("fieldPitchPill");
   const rollPill = document.getElementById("fieldRollPill");
+  const altitudePill = document.getElementById("fieldAltitudePill");
   const modePill = document.getElementById("fieldModePill");
 
   if(headingPill) headingPill.textContent = `HDG ${currentRotation.toFixed(0)}°`;
   if(pitchPill) pitchPill.textContent = `PITCH ${sensorPitch.toFixed(0)}°`;
   if(rollPill) rollPill.textContent = `ROLL ${sensorRoll.toFixed(0)}°`;
+  if(altitudePill) altitudePill.textContent = `ALT ${estimateDeviceAltitude().toFixed(0)}°`;
   if(modePill) modePill.textContent = sensorMode || "SENSOR OFF";
 }
 
@@ -1999,6 +2390,9 @@ function drawArtificialHorizon(ctx, x, y, w, h){
   ctx.restore();
 }
 
+tagModeElements();
+selectAppMode('normal');
+showModeLaunch();
 buildBackgroundStars();
 useNow();
 track("app_loaded");
