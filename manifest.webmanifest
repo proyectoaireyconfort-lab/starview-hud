@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v6",
+  "name": "StarView HUD v7",
   "short_name": "StarView",
-  "description": "Mapa estelar interactivo con Google Analytics 4 instalado directamente.",
+  "description": "Mapa estelar interactivo con modo principiante, fase lunar, QR, WhatsApp y métricas privadas.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",
