@@ -1,33 +1,41 @@
-# StarView HUD v3
+# StarView HUD v4
 
-Mapa estelar interactivo tipo HUD con pantalla de bienvenida e instrucciones integradas.
+Mapa estelar interactivo tipo HUD con pantalla de bienvenida, instrucciones integradas y Google Tag Manager instalado.
 
-## ¿Para qué sirve?
+## Google Tag Manager
 
-StarView HUD ayuda a una persona a orientarse en el cielo nocturno desde el celular. Muestra estrellas brillantes visibles según ubicación, fecha y hora.
+Este paquete ya trae instalado el contenedor:
 
-## Cómo usar
+`GTM-5KX5WPLM`
 
-1. Abre la página.
-2. Lee la pantalla de bienvenida.
-3. Presiona **Usar ubicación del celular** o deja Tonalá/ZMG.
-4. Presiona **Actualizar cielo**.
-5. Apunta la parte superior del mapa hacia el **Norte**.
-6. Compara las estrellas brillantes del mapa con las del cielo.
+## Para ver cuánta gente la usa
 
-## Cómo leer el mapa
+GitHub Pages no guarda estadísticas privadas por sí solo. Para ver usuarios activos, conecta este contenedor con Google Analytics 4 desde Google Tag Manager.
 
-- **N** = Norte
-- **E** = Este
-- **S** = Sur
-- **O** = Oeste
-- Los puntos más grandes representan estrellas más brillantes.
-- Las líneas suaves conectan constelaciones principales.
+### Pasos rápidos
+
+1. Crea una propiedad en Google Analytics 4.
+2. Crea un flujo web con esta URL:
+   `https://proyectoaireyconfort-lab.github.io/starview-hud/`
+3. Copia el Measurement ID, algo como:
+   `G-XXXXXXXXXX`
+4. En Google Tag Manager crea una etiqueta:
+   - Tipo: Google Analytics / Google tag
+   - Tag ID: tu `G-XXXXXXXXXX`
+   - Activador: All Pages
+5. Guarda.
+6. Toca **Enviar** en Tag Manager.
+7. Publica la versión.
+
+Después podrás ver usuarios activos en Google Analytics, en el reporte de tiempo real.
 
 ## Privacidad
 
-La ubicación se usa solo dentro del navegador. No hay servidor ni base de datos.
+La app no muestra contador público. Solo el dueño de la cuenta de Google Analytics / Tag Manager puede ver el uso.
+La ubicación de la app se usa en el navegador para calcular el mapa; no se guarda en una base de datos propia.
 
-## GitHub Pages
+## Archivos
 
-Sube `index.html`, `manifest.webmanifest` y `README.md` al repositorio y publica desde `Settings > Pages`.
+- `index.html`
+- `manifest.webmanifest`
+- `README.md`

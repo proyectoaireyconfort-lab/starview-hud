@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v3",
+  "name": "StarView HUD v4",
   "short_name": "StarView",
-  "description": "Mapa estelar interactivo con pantalla de bienvenida e instrucciones integradas.",
+  "description": "Mapa estelar interactivo con instrucciones y Google Tag Manager instalado.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",
