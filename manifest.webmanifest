@@ -1,7 +1,7 @@
 {
-  "name": "StarView HUD v7",
+  "name": "StarView HUD v8",
   "short_name": "StarView",
-  "description": "Mapa estelar interactivo con modo principiante, fase lunar, QR, WhatsApp y métricas privadas.",
+  "description": "Mapa estelar interactivo con modo principiante, fase lunar, QR y WhatsApp.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#030711",

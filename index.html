@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>StarView HUD v7 | Mapa del Cielo</title>
+<title>StarView HUD v8 | Mapa del Cielo</title>
 <meta name="description" content="StarView HUD: mapa estelar interactivo con modo principiante, fase lunar, QR, compartir por WhatsApp y métricas privadas." />
 <meta name="theme-color" content="#030711" />
 <link rel="manifest" href="manifest.webmanifest" />
@@ -203,6 +203,7 @@
   .beginner-on{outline:2px solid rgba(255,242,168,.45)}
   .install-box{display:none}
   .install-box.show{display:block}
+  .grid-2-clean{grid-template-columns:repeat(2,1fr)}
   @media(max-width:760px){
     .brand{align-items:flex-start;flex-direction:column}
     .grid,.grid-3,.quick-grid,.instructions{grid-template-columns:1fr}
@@ -226,7 +227,7 @@
 <body>
 <div id="introModal" class="modal-backdrop">
   <div class="modal">
-    <h2>🌌 Bienvenido a StarView HUD v7</h2>
+    <h2>🌌 Bienvenido a StarView HUD v8</h2>
     <p>Esta app te ayuda a ubicar estrellas brillantes visibles desde tu zona usando tu ubicación, fecha y hora.</p>
     <p><b>Uso rápido:</b> permite la ubicación, actualiza el cielo y apunta la parte superior del mapa hacia el norte.</p>
     <div class="quick-grid">
@@ -246,7 +247,7 @@
     <div class="radar-ring"></div>
     <div class="brand">
       <div>
-        <h1>🌌 StarView HUD v7</h1>
+        <h1>🌌 StarView HUD v8</h1>
         <div class="sub">Guía estelar rápida para ver estrellas brillantes desde tu ubicación.</div>
       </div>
       <div class="badge">Aire Acondicionado y Confort · Lab</div>
@@ -311,7 +312,7 @@
     <canvas id="sky" width="900" height="900"></canvas>
   </div>
 
-  <div class="grid-3">
+  <div class="grid-3 grid-2-clean">
     <div class="card">
       <h2>⭐ Qué puedo ver hoy</h2>
       <div id="tonightList" class="list"></div>
@@ -324,16 +325,7 @@
       <p class="small">Si hay mucha luna, algunas estrellas débiles se verán menos.</p>
     </div>
 
-    <div class="card">
-      <h2>📊 Métricas privadas</h2>
-      <p class="small">Esta app registra visitas y botones usados con Google Analytics. El público no ve contador.</p>
-      <div class="chips">
-        <span class="chip">GPS</span>
-        <span class="chip">Actualizar cielo</span>
-        <span class="chip">Modo nocturno</span>
-        <span class="chip">Compartir</span>
-      </div>
-    </div>
+    
   </div>
 
   <div class="card info">
@@ -369,7 +361,7 @@
     <p class="notice">La ubicación se usa solo en tu navegador para calcular el mapa. No se guarda en servidores ni se manda a una base de datos. La página registra visitas anónimas con Google Analytics para medir uso general de la app.</p>
   </div>
 
-  <div class="footer">StarView HUD v7 · Guía visual básica, no sustituye software astronómico profesional.</div>
+  <div class="footer">StarView HUD v8 · Guía visual básica, no sustituye software astronómico profesional.</div>
 </div>
 
 <script>

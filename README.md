@@ -1,37 +1,20 @@
-# StarView HUD v7
+# StarView HUD v8
 
-Versión completa con:
+Versión igual a la v7, pero sin la tarjeta visible de “Métricas privadas”.
 
-- Pantalla de bienvenida
-- Instrucciones visibles
-- Modo principiante
-- Botón de compartir por WhatsApp
-- Guía para agregar a pantalla de inicio
-- Métricas privadas con Google Analytics 4
-- Eventos de botones en Analytics
-- Sección “Qué puedo ver hoy”
-- Fase lunar aproximada
-- QR para compartir
-- Diseño HUD futurista
+## Cambios
 
-## Google Analytics instalado
-
-ID usado:
-
-`G-Y7W6O4KLRR`
-
-Eventos registrados:
-
-- `app_loaded`
-- `gps_click`
-- `gps_success`
-- `gps_error`
-- `update_sky`
-- `night_mode_toggle`
-- `beginner_mode_toggle`
-- `share_whatsapp`
-- `install_help_opened`
-- `intro_opened`
+- Se quitó la sección visible “Métricas privadas”.
+- Google Analytics sigue instalado en segundo plano para que el dueño pueda ver visitas.
+- El público no ve contador ni mensajes sobre métricas.
+- Se conserva:
+  - Pantalla de bienvenida
+  - Instrucciones
+  - Modo principiante
+  - Compartir por WhatsApp
+  - Fase lunar aproximada
+  - Qué puedo ver hoy
+  - QR para compartir
 
 ## Archivos a subir a GitHub
 
@@ -42,25 +25,8 @@ Sube y reemplaza:
 - `README.md`
 - `qr-starview.png`
 
-## Link público recomendado
+## Probar
 
-Comparte:
+Abre:
 
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?utm_source=whatsapp&utm_medium=share&utm_campaign=starview_v7`
-
-## Link limpio
-
-`https://proyectoaireyconfort-lab.github.io/starview-hud/`
-
-## Cómo probar Analytics
-
-1. Sube archivos.
-2. Espera 1 a 5 minutos.
-3. Abre:
-
-`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=7`
-
-4. Déjala abierta 1 minuto.
-5. En Analytics revisa:
-
-`Informes > En tiempo real`
+`https://proyectoaireyconfort-lab.github.io/starview-hud/?v=8`
